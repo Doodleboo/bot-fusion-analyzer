@@ -165,7 +165,7 @@ async def handle_test_sprite_gallery(message:Message):
 async def handle_reply_message(message:Message):
     utils.log_event("R>", message)
     for specific_attachment in message.attachments:
-        analysis = generate_analysis(message, specific_attachment, True)
+        analysis = generate_analysis(message, specific_attachment)
         try:
             await message.channel.send(embed=analysis.embed)
             if analysis.transparency_issue:
@@ -198,7 +198,6 @@ async def on_ready():
     permission_id = "17179929600"
 
     global bot_avatar_url
-    # owner = app_info.owner
 
     bot_user = bot.user
     if bot_user is not None:

@@ -6,10 +6,9 @@ from discord.message import Message, Attachment
 
 def generate_analysis(
         message: Message,
-        specific_attachment: Attachment|None = None,
-        is_reply: bool = False):
+        specific_attachment: Attachment|None = None,):
     analysis = Analysis(message, specific_attachment)
     analysis_content.main(analysis)
-    analysis_sprite.main(analysis, is_reply)
+    analysis_sprite.main(analysis)
     analysis.generate_embed()
     return analysis

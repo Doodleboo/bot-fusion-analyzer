@@ -17,7 +17,7 @@ PATTERN_CUSTOM = r'[cC]ustom'
 PATTERN_BASE = r'[bB]ase'
 PATTERN_EGG = r'[eE]gg'
 
-LAZY_PATTERN_FUSION_ID = r'([1-9]+[0-9]*)\.([1-9]+[0-9]*)'
+LAZY_PATTERN_FUSION_ID = r'([1-9]+\d*)\.([1-9]+\d*)'
 STRICT_PATTERN_FUSION_ID = LAZY_PATTERN_FUSION_ID + r'[a-z]{0,1}\.png$'
 
 REGULAR_PATTERN_FUSION_ID = rf'^{STRICT_PATTERN_FUSION_ID}'
@@ -50,7 +50,7 @@ def get_channel_name(message:Message):
         channel_name = message.channel.name  # type: ignore
         if not isinstance(channel_name, str):
             channel_name = "INVALID"
-    except:
+    except BaseException:
         channel_name = "INVALID"
     return channel_name
 
@@ -114,7 +114,6 @@ def is_missing_autogen(fusion_id:str):
     return head_id > MISSING_DEX_ID or body_id > MISSING_DEX_ID
 
 
-# TODO : find a working link
 def get_autogen_url(fusion_id:str):
     if is_missing_autogen(fusion_id):
         return QUESTION_URL
