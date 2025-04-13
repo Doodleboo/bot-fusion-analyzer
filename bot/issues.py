@@ -170,3 +170,11 @@ class HalfPixelsAmount(Issue):
         self.amount = amount
     def __str__(self) -> str:
         return f"{self.description.value} : {self.amount}"
+
+class PokemonNames(Issue):
+    severity = Severity.accepted
+    def __init__(self, head_id:str, body_id:str) -> None:
+        self.head_name = head_id
+        self.body_name = body_id
+    def __str__(self) -> str:
+        return f"{self.head_name}/{self.body_name}"

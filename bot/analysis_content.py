@@ -3,7 +3,7 @@ from analysis import Analysis
 from enums import Severity
 from issues import (CustomSprite, DifferentSprite, EggSprite, IconSprite,
                     IncomprehensibleSprite, MissingFilename, MissingSprite,
-                    OutOfDex, FileName)
+                    OutOfDex, FileName, PokemonNames)
 
 
 def exists(value):
@@ -73,6 +73,15 @@ class ContentContext():
         if utils.is_invalid_fusion_id(fusion_id):
             analysis.severity = Severity.refused
             analysis.issues.add(OutOfDex(fusion_id))
+        else:
+            self.handle_pokemon_names(analysis, fusion_id)
+
+    def handle_pokemon_names(self, analysis:Analysis, fusion_id:str):
+        head, body = fusion_id.split(".")
+        name_map = utils.id_to_name_map()
+        head_name = name_map.get(head)
+        body_name = name_map.get(body)
+        analysis.issues.add(PokemonNames(head_name, body_name))
 
 
 def main(analysis:Analysis):

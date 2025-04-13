@@ -1,3 +1,5 @@
+import json
+import os
 import re
 
 from discord.message import Message
@@ -33,6 +35,8 @@ YAGPDB_ID = 204255221017214977
 
 LCB = "{"
 RCB = "}"
+
+NAMES_JSON_FILE =  os.path.join(os.getcwd(), "data", "PokemonNames.json" ) # FIXME: Point to the right place
 
 
 def log_event(decorator:str, event:Message|Thread):
@@ -160,3 +164,9 @@ def get_fusion_id_from_text(text:str):
     if result:
         fusion_id = result[0]
     return fusion_id
+
+def id_to_name_map():   # Thanks Greystorm for the util and file
+    """Returns dictionary mapping id numbers to display names"""
+    with open(NAMES_JSON_FILE) as f:
+        data = json.loads(f.read())
+        return {element["id"]:element["display_name"] for element in data["pokemon"]}
