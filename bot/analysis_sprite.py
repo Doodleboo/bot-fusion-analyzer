@@ -142,11 +142,14 @@ class SpriteContext():
         except TransparencyException:
             pass
 
-    # FIXME : add support for indexed sprites
     def get_similarity_amount(self):
         similarity_amount = 0
         try:
-            rgb_color_list = get_rgb_color_list(self.useful_colors)
+            if "P" == self.image.mode:  # Indexed mode
+                self.useful_indexed_palette = get_useful_indexed_palette(self.image)
+                rgb_color_list = get_indexed_to_rgb_color_list(self.useful_indexed_palette)
+            else:
+                rgb_color_list = get_rgb_color_list(self.useful_colors)
             self.similar_color_dict = get_similar_color_dict(rgb_color_list)
             self.similar_color_dict = sort_color_dict(self.similar_color_dict)
             similarity_amount = len(self.similar_color_dict)
@@ -235,6 +238,23 @@ def get_rgb_color_list(color_data_list:list) -> list[tuple[int, int, int]]:
         rgb_color_list.append(rgb_color)
     return rgb_color_list
 
+def get_indexed_to_rgb_color_list(color_data_list:list) -> list[tuple[int, int, int]]:
+    rgb_color_list = []
+    i = 0
+    while i < len(color_data_list):
+        rgb_color = (color_data_list[i], color_data_list[i+1], color_data_list[i+2])
+        rgb_color_list.append(rgb_color)
+        i = i+3
+    return rgb_color_list
+
+def get_useful_indexed_palette(image:Image) -> list:
+    # The transparent color index is usually 0 but just in case we grab it from info
+    transparent_color_index = image.info.get("transparency") * 3    # Each color is 3 elements of the list
+    useful_indexed_palette = image.getpalette("RGB")
+    useful_indexed_palette.remove(transparent_color_index)  # Red
+    useful_indexed_palette.remove(transparent_color_index)  # Green
+    useful_indexed_palette.remove(transparent_color_index)  # Blue
+    return useful_indexed_palette
 
 # Maximum number of colors. If this number is exceeded, this method returns None.
 def is_color_excess(color_list:list|None):
