@@ -27,7 +27,7 @@ RAW_GITHUB = "https://raw.githubusercontent.com"
 RAW_GITLAB = "https://gitlab.com"
 
 AUTOGEN_FUSION_URL = f"{RAW_GITLAB}/pokemoninfinitefusion/autogen-fusion-sprites/-/raw/master/Battlers/"
-QUESTION_URL = f"{RAW_GITHUB}/Aegide/bot-fusion-analyzer/main/bot/question.png"
+QUESTION_URL = f"{RAW_GITHUB}/Doodleboo/bot-fusion-analyzer/main/bot/question.png"
 
 YAGPDB_ID = 204255221017214977
 

@@ -20,11 +20,11 @@ class ServerContext():
 
 
 class GlobalContext():
-    aegide: ServerContext
+    doodledoo: ServerContext
     pif: ServerContext
     def __init__(self,
-            aegide: ServerContext,
-            pif: ServerContext
-            ) -> None:
-        self.aegide = aegide
+                 doodledoo: ServerContext,
+                 pif: ServerContext
+                 ) -> None:
+        self.doodledoo = doodledoo
         self.pif = pif
