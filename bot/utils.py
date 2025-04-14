@@ -54,6 +54,8 @@ def get_channel_name(message:Message):
         channel_name = message.channel.name  # type: ignore
         if not isinstance(channel_name, str):
             channel_name = "INVALID"
+    except SystemExit:
+        raise
     except BaseException:
         channel_name = "INVALID"
     return channel_name
