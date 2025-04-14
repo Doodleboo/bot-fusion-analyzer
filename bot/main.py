@@ -6,7 +6,7 @@ import discord
 import utils
 from analysis import generate_bonus_file
 from analyzer import Analysis, generate_analysis
-from discord import Client, PartialEmoji, app_commands
+from discord import Client, PartialEmoji, app_commands, HTTPException
 from discord.channel import TextChannel
 from discord.guild import Guild
 from discord.message import Message
@@ -142,7 +142,10 @@ async def handle_sprite_gallery(message:Message):
     utils.log_event("SG>", message)
     analysis = generate_analysis(message)
     if analysis.severity in MAX_SEVERITY:
-        await message.add_reaction(ERROR_EMOJI)
+        try:
+            await message.add_reaction(ERROR_EMOJI)
+        except HTTPException:
+            await message.add_reaction("😡")     # Nani failsafe
     await send_bot_logs(analysis, message.author.id)
 
 
