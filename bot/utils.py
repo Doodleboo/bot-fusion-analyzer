@@ -154,8 +154,8 @@ def get_fusion_id_from_filename(filename:str):
     return fusion_id
 
 
-def extract_fusion_id_from_content(analysis:Analysis):
-    return get_fusion_id_from_text(analysis.message.content)
+def extract_fusion_ids_from_content(message:Message):
+    return get_multiple_fusion_id_from_text(message.content)
 
 
 def get_fusion_id_from_text(text:str):
@@ -164,6 +164,15 @@ def get_fusion_id_from_text(text:str):
     if result:
         fusion_id = result[0]
     return fusion_id
+
+
+def get_multiple_fusion_id_from_text(text:str):
+    id_list = []
+    iterator = re.finditer(LAZY_PATTERN_FUSION_ID, text)
+    for id in iterator:
+        id_list.append(id[0])
+    return id_list
+
 
 def id_to_name_map():   # Thanks Greystorm for the util and file
     """Returns dictionary mapping id numbers to display names"""
