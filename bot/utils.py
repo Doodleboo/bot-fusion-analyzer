@@ -36,7 +36,7 @@ YAGPDB_ID = 204255221017214977
 LCB = "{"
 RCB = "}"
 
-NAMES_JSON_FILE =  os.path.join(os.getcwd(), "data", "PokemonNames.json" ) # FIXME: Point to the right place
+NAMES_JSON_FILE =  os.path.join(os.getcwd(), "..", "data", "PokemonNames.json" )
 
 
 def log_event(decorator:str, event:Message|Thread):
