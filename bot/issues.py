@@ -9,19 +9,21 @@ class Issue():
 
 
 class Issues():
-    issues: list[Issue]
+    issue_list: list[Issue]
     def __init__(self):
-        self.issues = []
+        self.issue_list = []
     def __str__(self) -> str:
-        if len(self.issues) == 1:
-            result = str(self.issues[0])
+        if len(self.issue_list) == 1:
+            result = str(self.issue_list[0])
         else:
             result = ""
-            for issue in self.issues:
+            for issue in self.issue_list:
                 result += f"- {issue}\n"
         return result
     def add(self, issue:Issue):
-        self.issues.append(issue)
+        self.issue_list.append(issue)
+    def has_issue(self, issue_type) -> bool:
+        return any(isinstance(issue, issue_type) for issue in self.issue_list)
 
 
 class DifferentSprite(Issue):

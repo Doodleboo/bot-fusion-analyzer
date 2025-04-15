@@ -84,7 +84,8 @@ class SpriteContext():
         else:
             self.handle_color_count(analysis, all_colors)
             self.handle_color_limit(analysis)
-            self.handle_color_similarity(analysis)
+            if not analysis.issues.has_issue(MissingTransparency):
+                self.handle_color_similarity(analysis)  # It would return 0 sim if the colors don't have alpha channel anyway
             self.handle_aseprite(analysis)
             self.handle_graphics_gale(analysis)
 
@@ -146,14 +147,14 @@ class SpriteContext():
         similarity_amount = 0
         try:
             if "P" == self.image.mode:  # Indexed mode
-                self.useful_indexed_palette = get_useful_indexed_palette(self.image)
-                rgb_color_list = get_indexed_to_rgb_color_list(self.useful_indexed_palette)
+                useful_indexed_palette = get_useful_indexed_palette(self.image)
+                rgb_color_list = get_indexed_to_rgb_color_list(useful_indexed_palette)
             else:
                 rgb_color_list = get_rgb_color_list(self.useful_colors)
             self.similar_color_dict = get_similar_color_dict(rgb_color_list)
             self.similar_color_dict = sort_color_dict(self.similar_color_dict)
             similarity_amount = len(self.similar_color_dict)
-        except Exception:
+        except ValueError:
             pass
         return similarity_amount
 
@@ -172,8 +173,9 @@ class SpriteContext():
         local_pixels = get_pixels(local_image)
         first_pixel = self.pixels[0, 0]
         transparency_amount = 0
+        is_there_transparency = False
         if is_indexed(first_pixel):
-            return (transparency_amount, local_image)
+            return transparency_amount, local_image
         for i in range(0, 288):
             for j in range(0, 288):
                 color = self.pixels[i, j]
@@ -185,7 +187,10 @@ class SpriteContext():
                     local_pixels[i, j] = BLACK
                 else:
                     local_pixels[i, j] = WHITE
-        return (transparency_amount, local_image)
+                    is_there_transparency = True
+        if not is_there_transparency:
+            raise TransparencyException
+        return transparency_amount, local_image
 
     def highlight_half_pixels(self) -> tuple[int, Image]:
         local_image = new("RGBA", (MAX_SIZE, MAX_SIZE))
