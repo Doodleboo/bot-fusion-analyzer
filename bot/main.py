@@ -185,9 +185,18 @@ async def handle_reply_message(message:Message):
             print(f"R>> Missing permissions in {message.channel}")
 
 
-@tree.command(name="help", description="Get some help")
+@tree.command(name="help", description="Fusion bot help")
 async def help_command(interaction: discord.Interaction):
-    text = "You can contact Doodledoo if you need help with anything related to the fusion bot. Let me know if you've got suggestions or ideas too!"
+    text = ("Do you need help using the Fusion Bot to analyze sprites?\n"
+            "You can use it by **mentioning the bot** (using @) **while replying to a sprite**!\n"
+            "You can contact Doodledoo if you need help with anything related to the fusion bot. "
+            "Let me know if you've got suggestions or ideas too!")
+    await interaction.response.send_message(text)
+
+
+@tree.command(name="similar", description="Get the list of similar colors")
+async def similar_command(interaction: discord.Interaction):
+    text = "This **work in progress** command will show a list of color pairs causing the similarity score."
     await interaction.response.send_message(text)
 
 
@@ -301,7 +310,7 @@ def get_discord_token():
     try:
         # Heroku
         token = os.environ["DISCORD_KEY"]
-    except:
+    except KeyError:
         # Local
         token = open("../token/discord.txt").read().rstrip()
     return token
