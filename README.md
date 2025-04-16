@@ -10,6 +10,7 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 
 # Changelog
 ## Version 2.0
-- Similarity score now works with indexed mode sprites (previously it was always 0)
-- Pokemon names are now displayed when the dex IDs are valid
+- **Similarity score** now works with **indexed mode** sprites (previously it was always 0)
+- **Pokemon names** are now displayed when the dex IDs are valid
+- **Similar command**: it will return a text list with at most 20 pairs of similar colors that could be merged into a single shade.
 - Fix: the bot won't flip out when a single message has multiple different fusion with their IDs in the message
