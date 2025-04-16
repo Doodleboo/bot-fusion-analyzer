@@ -11,6 +11,11 @@ HELP_RESPONSE = ("Do you need help using the Fusion Bot to analyze sprites?\n"
             "You can use it by **mentioning the bot** (using @) **while replying to a sprite**!\n"
             "You can contact Doodledoo if you need help with anything related to the fusion bot. "
             "Let me know if you've got suggestions or ideas too!")
+ERROR_RESPONSE = "**An error has occurred processing your command:**\n"
+ERROR_ADDENUM = ("If you believe this is incorrect, notify the error either to Doodledoo or here:\n"
+                 "https://github.com/Doodleboo/bot-fusion-analyzer/issues")
+NO_ATTACHMENT = "No suitable attachment was found.\n"
+NO_COLOR_DICT = "Couldn't extract the list of colors from this image.\n"
 TIMEOUT = 10
 ALL_COLOR_LIMIT = 256
 
@@ -21,12 +26,18 @@ async def help_action(interaction: discord.Interaction):
 
 async def similar_action(interaction: discord.Interaction, attachment: discord.Attachment):
     if attachment is None:
+        await error_embed(interaction, NO_ATTACHMENT)
         return
 
     raw_data = requests.get(attachment.url, stream = True, timeout = TIMEOUT).raw
     image = image_open(raw_data)
 
     sorted_color_dict = get_sorted_color_dict(image)
+
+    if not sorted_color_dict:
+        await error_embed(interaction, NO_COLOR_DICT)
+        return
+
     pair_list = []
     for color_pair in sorted_color_dict:
         rgb_pair = get_rgb_pair(color_pair)
@@ -48,6 +59,8 @@ def get_sorted_color_dict(image) -> frozenset[frozenset[tuple]]:
             rgb_color_list = analysis_sprite.get_indexed_to_rgb_color_list(useful_indexed_palette)
         else:
             all_colors = image.getcolors(ALL_COLOR_LIMIT)
+            if not all_colors:  # Color count higher than 256
+                raise ValueError
             useful_colors = analysis_sprite.remove_useless_colors(all_colors)
             rgb_color_list = analysis_sprite.get_rgb_color_list(useful_colors)
 
@@ -71,3 +84,8 @@ def format_list(pair_list: [[str, str]]):
         temp_str = "- **" + pair[0] + "** and **" + pair[1] + "**\n"
         formatted_list = formatted_list + temp_str
     return  formatted_list
+
+async def error_embed(interaction: discord.Interaction, message: str):
+    error_message =  ERROR_RESPONSE + message + ERROR_ADDENUM
+    new_error_embed = Embed(description = error_message)
+    await interaction.response.send_message(embed = new_error_embed)
