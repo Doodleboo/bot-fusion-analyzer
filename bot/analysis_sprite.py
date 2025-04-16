@@ -84,7 +84,8 @@ class SpriteContext():
         else:
             self.handle_color_count(analysis, all_colors)
             self.handle_color_limit(analysis)
-            self.handle_color_similarity(analysis)
+            if not analysis.issues.has_issue(MissingTransparency):
+                self.handle_color_similarity(analysis)  # It would return 0 sim if the colors don't have alpha channel anyway
             self.handle_aseprite(analysis)
             self.handle_graphics_gale(analysis)
 
@@ -142,15 +143,18 @@ class SpriteContext():
         except TransparencyException:
             pass
 
-    # FIXME : add support for indexed sprites
     def get_similarity_amount(self):
         similarity_amount = 0
         try:
-            rgb_color_list = get_rgb_color_list(self.useful_colors)
+            if "P" == self.image.mode:  # Indexed mode
+                useful_indexed_palette = get_useful_indexed_palette(self.image)
+                rgb_color_list = get_indexed_to_rgb_color_list(useful_indexed_palette)
+            else:
+                rgb_color_list = get_rgb_color_list(self.useful_colors)
             self.similar_color_dict = get_similar_color_dict(rgb_color_list)
             self.similar_color_dict = sort_color_dict(self.similar_color_dict)
             similarity_amount = len(self.similar_color_dict)
-        except Exception:
+        except ValueError:
             pass
         return similarity_amount
 
@@ -169,8 +173,9 @@ class SpriteContext():
         local_pixels = get_pixels(local_image)
         first_pixel = self.pixels[0, 0]
         transparency_amount = 0
+        is_there_transparency = False
         if is_indexed(first_pixel):
-            return (transparency_amount, local_image)
+            return transparency_amount, local_image
         for i in range(0, 288):
             for j in range(0, 288):
                 color = self.pixels[i, j]
@@ -182,7 +187,10 @@ class SpriteContext():
                     local_pixels[i, j] = BLACK
                 else:
                     local_pixels[i, j] = WHITE
-        return (transparency_amount, local_image)
+                    is_there_transparency = True
+        if not is_there_transparency:
+            raise TransparencyException
+        return transparency_amount, local_image
 
     def highlight_half_pixels(self) -> tuple[int, Image]:
         local_image = new("RGBA", (MAX_SIZE, MAX_SIZE))
@@ -235,6 +243,23 @@ def get_rgb_color_list(color_data_list:list) -> list[tuple[int, int, int]]:
         rgb_color_list.append(rgb_color)
     return rgb_color_list
 
+def get_indexed_to_rgb_color_list(color_data_list:list) -> list[tuple[int, int, int]]:
+    rgb_color_list = []
+    i = 0
+    while i < len(color_data_list):
+        rgb_color = (color_data_list[i], color_data_list[i+1], color_data_list[i+2])
+        rgb_color_list.append(rgb_color)
+        i = i+3
+    return rgb_color_list
+
+def get_useful_indexed_palette(image:Image) -> list:
+    # The transparent color index is usually 0 but just in case we grab it from info
+    transparent_color_index = image.info.get("transparency") * 3    # Each color is 3 elements of the list
+    useful_indexed_palette = image.getpalette("RGB")
+    useful_indexed_palette.remove(transparent_color_index)  # Red
+    useful_indexed_palette.remove(transparent_color_index)  # Green
+    useful_indexed_palette.remove(transparent_color_index)  # Blue
+    return useful_indexed_palette
 
 # Maximum number of colors. If this number is exceeded, this method returns None.
 def is_color_excess(color_list:list|None):
@@ -344,12 +369,8 @@ def get_color_delta(rgb_a:tuple, rgb_b:tuple):
     return [int(cie2000), int(cmc), max_difference]
 
 
-def main(analysis:Analysis, is_reply: bool):
-
-    if is_reply:
-        handle_valid_sprite(analysis)
-    elif analysis.severity == Severity.accepted:
-        handle_valid_sprite(analysis)
+def main(analysis:Analysis):
+    handle_valid_sprite(analysis)
 
 
 def handle_valid_sprite(analysis:Analysis):

@@ -1,3 +1,5 @@
+import json
+import os
 import re
 
 from discord.message import Message
@@ -17,7 +19,7 @@ PATTERN_CUSTOM = r'[cC]ustom'
 PATTERN_BASE = r'[bB]ase'
 PATTERN_EGG = r'[eE]gg'
 
-LAZY_PATTERN_FUSION_ID = r'([1-9]+[0-9]*)\.([1-9]+[0-9]*)'
+LAZY_PATTERN_FUSION_ID = r'([1-9]+\d*)\.([1-9]+\d*)'
 STRICT_PATTERN_FUSION_ID = LAZY_PATTERN_FUSION_ID + r'[a-z]{0,1}\.png$'
 
 REGULAR_PATTERN_FUSION_ID = rf'^{STRICT_PATTERN_FUSION_ID}'
@@ -27,12 +29,14 @@ RAW_GITHUB = "https://raw.githubusercontent.com"
 RAW_GITLAB = "https://gitlab.com"
 
 AUTOGEN_FUSION_URL = f"{RAW_GITLAB}/pokemoninfinitefusion/autogen-fusion-sprites/-/raw/master/Battlers/"
-QUESTION_URL = f"{RAW_GITHUB}/Aegide/bot-fusion-analyzer/main/bot/question.png"
+QUESTION_URL = f"{RAW_GITHUB}/Doodleboo/bot-fusion-analyzer/main/bot/question.png"
 
 YAGPDB_ID = 204255221017214977
 
 LCB = "{"
 RCB = "}"
+
+NAMES_JSON_FILE =  os.path.join(os.getcwd(), "..", "data", "PokemonNames.json" )
 
 
 def log_event(decorator:str, event:Message|Thread):
@@ -50,7 +54,9 @@ def get_channel_name(message:Message):
         channel_name = message.channel.name  # type: ignore
         if not isinstance(channel_name, str):
             channel_name = "INVALID"
-    except:
+    except SystemExit:
+        raise
+    except BaseException:
         channel_name = "INVALID"
     return channel_name
 
@@ -114,7 +120,6 @@ def is_missing_autogen(fusion_id:str):
     return head_id > MISSING_DEX_ID or body_id > MISSING_DEX_ID
 
 
-# TODO : find a working link
 def get_autogen_url(fusion_id:str):
     if is_missing_autogen(fusion_id):
         return QUESTION_URL
@@ -151,8 +156,8 @@ def get_fusion_id_from_filename(filename:str):
     return fusion_id
 
 
-def extract_fusion_id_from_content(analysis:Analysis):
-    return get_fusion_id_from_text(analysis.message.content)
+def extract_fusion_ids_from_content(message:Message):
+    return get_multiple_fusion_id_from_text(message.content)
 
 
 def get_fusion_id_from_text(text:str):
@@ -161,3 +166,20 @@ def get_fusion_id_from_text(text:str):
     if result:
         fusion_id = result[0]
     return fusion_id
+
+
+def get_multiple_fusion_id_from_text(text:str):
+    id_list = []
+    iterator = re.finditer(LAZY_PATTERN_FUSION_ID, text)
+    for id in iterator:
+        id_list.append(id[0])
+    return id_list
+
+
+def id_to_name_map():   # Thanks Greystorm for the util and file
+    """Returns dictionary mapping id numbers to display names"""
+    with open(NAMES_JSON_FILE) as f:
+        data = json.loads(f.read())
+        return {element["id"]:element["display_name"] for element in data["pokemon"]}
+
+

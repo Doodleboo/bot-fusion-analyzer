@@ -1,0 +1,111 @@
+import discord
+import requests
+from PIL import UnidentifiedImageError
+from colormath.color_objects import sRGBColor
+from discord.embeds import Embed
+
+import analysis_sprite
+
+from PIL.Image import open as image_open
+
+HELP_RESPONSE = ("Do you need help using the Fusion Bot to analyze sprites?\n"
+            "You can use it by **mentioning the bot** (using @) **while replying to a sprite**!\n"
+            "You can contact Doodledoo if you need help with anything related to the fusion bot. "
+            "Let me know if you've got suggestions or ideas too!")
+SIMILAR_TITLE = "**Similar pairs of colors:**"
+ERROR_TITLE = "**An error has occurred processing your command:**"
+ERROR_ADDENUM = ("\n\nIf you believe this is incorrect, notify the error either to Doodledoo or here:\n"
+                 "https://github.com/Doodleboo/bot-fusion-analyzer/issues")
+NO_ATTACHMENT = "No suitable attachment was found."
+WRONG_ATTACHMENT = "Couldn't parse the attachment as an image."
+NO_SIM_PAIRS = "No similar pairs have been found."
+COLOR_COUNT_ERROR = "The image had too many colors."
+CULLED_PAIRS_FOOTER = "This list does not include all pairs, as there were too many."
+TIMEOUT = 10
+ALL_COLOR_LIMIT = 256
+PAIR_LIST_LIMIT = 20
+
+
+async def help_action(interaction: discord.Interaction):
+    await interaction.response.send_message(HELP_RESPONSE)
+
+
+async def similar_action(interaction: discord.Interaction, attachment: discord.Attachment):
+    if attachment is None:
+        await error_embed(interaction, NO_ATTACHMENT)
+        return
+
+    raw_data = requests.get(attachment.url, stream = True, timeout = TIMEOUT).raw
+    try:
+        image = image_open(raw_data)
+    except UnidentifiedImageError:
+        await error_embed(interaction, WRONG_ATTACHMENT)
+        return
+
+    try:
+        sorted_color_dict = get_sorted_color_dict(image)
+    except ValueError:
+        await error_embed(interaction, COLOR_COUNT_ERROR)
+        return
+
+    if not sorted_color_dict:
+        no_pair_embed = Embed(title = SIMILAR_TITLE, description = NO_SIM_PAIRS)
+        await interaction.response.send_message(embed = no_pair_embed)
+        return
+
+    pair_list = []
+    for color_pair in sorted_color_dict:
+        rgb_pair = get_rgb_pair(color_pair)
+        pair_list.append(rgb_pair)
+
+    too_many_pairs = len(pair_list) > PAIR_LIST_LIMIT
+    if too_many_pairs:
+        pair_list = pair_list[0:PAIR_LIST_LIMIT]
+
+    formatted_list = format_list(pair_list)
+    similar_embed  = Embed(title = SIMILAR_TITLE,description = formatted_list)
+    if too_many_pairs:
+        similar_embed.set_footer(text = CULLED_PAIRS_FOOTER)
+    await interaction.response.send_message(embed = similar_embed)
+
+
+
+
+def get_sorted_color_dict(image) -> frozenset[frozenset[tuple]]:
+    if "P" == image.mode:  # Indexed mode
+        useful_indexed_palette = analysis_sprite.get_useful_indexed_palette(image)
+        rgb_color_list = analysis_sprite.get_indexed_to_rgb_color_list(useful_indexed_palette)
+    else:
+        all_colors = image.getcolors(ALL_COLOR_LIMIT)
+        if not all_colors:  # Color count higher than 256
+            raise ValueError
+        useful_colors = analysis_sprite.remove_useless_colors(all_colors)
+        rgb_color_list = analysis_sprite.get_rgb_color_list(useful_colors)
+
+    similar_color_dict = analysis_sprite.get_similar_color_dict(rgb_color_list)
+    sorted_color_dict = analysis_sprite.sort_color_dict(similar_color_dict)
+
+    return sorted_color_dict
+
+
+def get_rgb_pair(color_pair: frozenset[tuple]) -> tuple[str, str]:
+    pair_list = list(color_pair)
+    first_tuple = pair_list[0]
+    second_tuple = pair_list[1]
+    first_color = sRGBColor(first_tuple[0], first_tuple[1], first_tuple[2], True)
+    second_color = sRGBColor(second_tuple[0], second_tuple[1], second_tuple[2], True)
+    return first_color.get_rgb_hex(), second_color.get_rgb_hex()
+
+
+def format_list(pair_list: [[str, str]]):
+    formatted_list = ""
+    for pair in pair_list:
+        temp_str = "- **" + pair[0] + "** and **" + pair[1] + "**\n"
+        formatted_list = formatted_list + temp_str
+    return  formatted_list
+
+
+async def error_embed(interaction: discord.Interaction, message: str):
+    error_description =  message + ERROR_ADDENUM
+    new_error_embed = Embed(title = ERROR_TITLE, description = error_description)
+    await interaction.response.send_message(embed = new_error_embed)
