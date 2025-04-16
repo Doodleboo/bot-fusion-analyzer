@@ -66,13 +66,15 @@ class ContentContext():
 
 
 def main(analysis:Analysis):
-    if analysis.specific_attachment is None:
-        if utils.have_attachment(analysis):
-            handle_some_content(analysis)
-        else:
-            handle_no_content(analysis)
-    else:
+    if analysis.specific_attachment is not None:
         handle_some_content(analysis)
+        return
+
+    if utils.have_attachment(analysis):
+        handle_some_content(analysis)
+        return
+
+    handle_no_content(analysis)
 
 
 def handle_some_content(analysis:Analysis):
