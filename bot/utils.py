@@ -179,7 +179,6 @@ def get_multiple_fusion_id_from_text(text:str):
 
 def id_to_name_map():   # Thanks Greystorm for the util and file
     """Returns dictionary mapping id numbers to display names"""
-    print(NAMES_JSON_FILE)
     with open(NAMES_JSON_FILE) as f:
         data = json.loads(f.read())
         return {element["id"]:element["display_name"] for element in data["pokemon"]}

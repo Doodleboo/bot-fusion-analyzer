@@ -300,7 +300,6 @@ def get_user(user_id) -> (User | None):
 
 def get_discord_token():
     token_dir = os.path.join(CURRENT_DIR, "..", "token", "discord.txt")
-    print(token_dir)
     token = open(token_dir).read().rstrip()
     return token
 
