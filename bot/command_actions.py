@@ -1,6 +1,7 @@
 import discord
 import requests
 from colormath.color_objects import sRGBColor
+from discord.embeds import Embed
 
 import analysis_sprite
 
@@ -22,7 +23,7 @@ async def similar_action(interaction: discord.Interaction, attachment: discord.A
     if attachment is None:
         return
 
-    raw_data = requests.get(attachment.url, stream=True, timeout=TIMEOUT).raw
+    raw_data = requests.get(attachment.url, stream = True, timeout = TIMEOUT).raw
     image = image_open(raw_data)
 
     sorted_color_dict = get_sorted_color_dict(image)
@@ -31,8 +32,10 @@ async def similar_action(interaction: discord.Interaction, attachment: discord.A
         rgb_pair = get_rgb_pair(color_pair)
         pair_list.append(rgb_pair)
 
+    formatted_list = format_list(pair_list)
+    similar_embed  = Embed(description = formatted_list)
 
-    await interaction.response.send_message(pair_list)  # TODO: Format response
+    await interaction.response.send_message(embed = similar_embed)
 
 
 
@@ -61,3 +64,10 @@ def get_rgb_pair(color_pair: frozenset[tuple]) -> tuple[str, str]:
     first_color = sRGBColor(first_tuple[0], first_tuple[1], first_tuple[2], True)
     second_color = sRGBColor(second_tuple[0], second_tuple[1], second_tuple[2], True)
     return first_color.get_rgb_hex(), second_color.get_rgb_hex()
+
+def format_list(pair_list: [[str, str]]):
+    formatted_list = "**Rank of most similar pairs:**\n"
+    for pair in pair_list:
+        temp_str = "- **" + pair[0] + "** and **" + pair[1] + "**\n"
+        formatted_list = formatted_list + temp_str
+    return  formatted_list
