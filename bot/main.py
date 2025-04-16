@@ -21,6 +21,7 @@ ERROR_EMOJI_NAME = "NANI"
 ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 intents = discord.Intents.default()
@@ -298,13 +299,9 @@ def get_user(user_id) -> (User | None):
 
 
 def get_discord_token():
-    token = None
-    try:
-        # Heroku
-        token = os.environ["DISCORD_KEY"]
-    except KeyError:
-        # Local
-        token = open("../token/discord.txt").read().rstrip()
+    token_dir = os.path.join(CURRENT_DIR, "..", "token", "discord.txt")
+    print(token_dir)
+    token = open(token_dir).read().rstrip()
     return token
 
 
