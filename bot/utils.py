@@ -181,3 +181,5 @@ def id_to_name_map():   # Thanks Greystorm for the util and file
     with open(NAMES_JSON_FILE) as f:
         data = json.loads(f.read())
         return {element["id"]:element["display_name"] for element in data["pokemon"]}
+
+

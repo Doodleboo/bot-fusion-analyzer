@@ -4,6 +4,7 @@ import os
 
 import discord
 import utils
+import command_actions
 from analysis import generate_bonus_file
 from analyzer import Analysis, generate_analysis
 from discord import Client, PartialEmoji, app_commands, HTTPException
@@ -14,8 +15,6 @@ from discord.user import User
 from enums import DiscordColour, Severity
 from exceptions import MissingBotContext
 from models import GlobalContext, ServerContext
-from PIL import Image
-from PIL.PyAccess import PyAccess
 
 
 ERROR_EMOJI_NAME = "NANI"
@@ -185,10 +184,14 @@ async def handle_reply_message(message:Message):
             print(f"R>> Missing permissions in {message.channel}")
 
 
-@tree.command(name="help", description="Get some help")
+@tree.command(name="help", description="Fusion bot help")
 async def help_command(interaction: discord.Interaction):
-    text = "You can contact Doodledoo if you need help with anything related to the fusion bot. Let me know if you've got suggestions or ideas too!"
-    await interaction.response.send_message(text)
+    await command_actions.help_action(interaction)
+
+
+@tree.command(name="similar", description="Get the list of similar colors")
+async def similar_command(interaction: discord.Interaction, sprite: discord.Attachment):
+    await command_actions.similar_action(interaction, sprite)
 
 
 @bot.event
@@ -216,10 +219,6 @@ async def on_ready():
     await ctx().doodledoo.logs.send(content="(OK)")
 
 
-def get_pixels(image:Image.Image) -> PyAccess:
-    return image.load()  # type: ignore
-
-
 @bot.event
 async def on_guild_join(guild):
     embed = discord.Embed(title="Joined the server", colour=DiscordColour.green.value, description=guild.name+"\n"+str(guild.id))
@@ -238,8 +237,10 @@ async def on_guild_remove(guild):
 async def on_message(message:Message):
     try:
         if utils.is_message_from_human(message, bot_id):
-            if is_sprite_gallery(message) or is_test_gallery(message):
+            if is_sprite_gallery(message):
                 await handle_sprite_gallery(message)
+            elif is_test_gallery(message):
+                await handle_test_sprite_gallery(message)
             elif is_mentioning_reply(message):
                 await handle_reply(message)
 
@@ -301,7 +302,7 @@ def get_discord_token():
     try:
         # Heroku
         token = os.environ["DISCORD_KEY"]
-    except:
+    except KeyError:
         # Local
         token = open("../token/discord.txt").read().rstrip()
     return token
