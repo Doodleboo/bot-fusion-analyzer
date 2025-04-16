@@ -1,5 +1,6 @@
 import discord
 import requests
+from PIL import UnidentifiedImageError
 from colormath.color_objects import sRGBColor
 from discord.embeds import Embed
 
@@ -11,11 +12,12 @@ HELP_RESPONSE = ("Do you need help using the Fusion Bot to analyze sprites?\n"
             "You can use it by **mentioning the bot** (using @) **while replying to a sprite**!\n"
             "You can contact Doodledoo if you need help with anything related to the fusion bot. "
             "Let me know if you've got suggestions or ideas too!")
-ERROR_RESPONSE = "**An error has occurred processing your command:**\n"
-ERROR_ADDENUM = ("If you believe this is incorrect, notify the error either to Doodledoo or here:\n"
+ERROR_RESPONSE = "**An error has occurred processing your command:**"
+ERROR_ADDENUM = ("\n\nIf you believe this is incorrect, notify the error either to Doodledoo or here:\n"
                  "https://github.com/Doodleboo/bot-fusion-analyzer/issues")
-NO_ATTACHMENT = "No suitable attachment was found.\n"
-NO_COLOR_DICT = "Couldn't extract the list of colors from this image.\n"
+NO_ATTACHMENT = "No suitable attachment was found."
+WRONG_ATTACHMENT = "Couldn't parse the attachment as an image."
+NO_COLOR_DICT = "Couldn't extract the list of colors from this image."
 TIMEOUT = 10
 ALL_COLOR_LIMIT = 256
 
@@ -30,7 +32,11 @@ async def similar_action(interaction: discord.Interaction, attachment: discord.A
         return
 
     raw_data = requests.get(attachment.url, stream = True, timeout = TIMEOUT).raw
-    image = image_open(raw_data)
+    try:
+        image = image_open(raw_data)
+    except UnidentifiedImageError:
+        await error_embed(interaction, WRONG_ATTACHMENT)
+        return
 
     sorted_color_dict = get_sorted_color_dict(image)
 
@@ -86,6 +92,6 @@ def format_list(pair_list: [[str, str]]):
     return  formatted_list
 
 async def error_embed(interaction: discord.Interaction, message: str):
-    error_message =  ERROR_RESPONSE + message + ERROR_ADDENUM
-    new_error_embed = Embed(description = error_message)
+    error_description =  message + ERROR_ADDENUM
+    new_error_embed = Embed(title = ERROR_RESPONSE, description = error_description)
     await interaction.response.send_message(embed = new_error_embed)
