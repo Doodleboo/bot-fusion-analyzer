@@ -36,7 +36,8 @@ YAGPDB_ID = 204255221017214977
 LCB = "{"
 RCB = "}"
 
-NAMES_JSON_FILE =  os.path.join(os.getcwd(), "..", "data", "PokemonNames.json" )
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+NAMES_JSON_FILE =  os.path.join(CURRENT_DIR, "..", "data", "PokemonNames.json")
 
 
 def log_event(decorator:str, event:Message|Thread):
@@ -178,6 +179,7 @@ def get_multiple_fusion_id_from_text(text:str):
 
 def id_to_name_map():   # Thanks Greystorm for the util and file
     """Returns dictionary mapping id numbers to display names"""
+    print(NAMES_JSON_FILE)
     with open(NAMES_JSON_FILE) as f:
         data = json.loads(f.read())
         return {element["id"]:element["display_name"] for element in data["pokemon"]}
