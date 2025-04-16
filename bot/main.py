@@ -187,11 +187,13 @@ async def handle_reply_message(message:Message):
 
 @tree.command(name="help", description="Fusion bot help")
 async def help_command(interaction: discord.Interaction):
+    utils.log_command("C>", interaction, "/help")
     await command_actions.help_action(interaction)
 
 
 @tree.command(name="similar", description="Get the list of similar colors")
 async def similar_command(interaction: discord.Interaction, sprite: discord.Attachment):
+    utils.log_command("C>", interaction, "/similar")
     await command_actions.similar_action(interaction, sprite)
 
 

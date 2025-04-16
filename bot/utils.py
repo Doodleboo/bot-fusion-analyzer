@@ -2,6 +2,7 @@ import json
 import os
 import re
 
+from discord import Interaction
 from discord.message import Message
 from discord.asset import Asset
 from discord.user import User, ClientUser
@@ -46,11 +47,11 @@ def log_event(decorator:str, event:Message|Thread):
 
 
 def _log_message(decorator:str, message:Message):
-    channel_name = get_channel_name(message)
+    channel_name = get_channel_name_from_message(message)
     print(f"{decorator} [{message.author.name}] {LCB}{channel_name}{RCB} {message.content}")
 
 
-def get_channel_name(message:Message):
+def get_channel_name_from_message(message:Message):
     try:
         channel_name = message.channel.name  # type: ignore
         if not isinstance(channel_name, str):
@@ -61,6 +62,21 @@ def get_channel_name(message:Message):
         channel_name = "INVALID"
     return channel_name
 
+
+def log_command(decorator:str, interaction:Interaction, command:str):
+    channel_name = get_channel_name_from_interaction(interaction)
+    print(f"{decorator} [{interaction.user.name}] {LCB}{channel_name}{RCB} {command}")
+
+def get_channel_name_from_interaction(interaction:Interaction):
+    try:
+        channel_name = interaction.channel.name  # type: ignore
+        if not isinstance(channel_name, str):
+            channel_name = "INVALID"
+    except SystemExit:
+        raise
+    except BaseException:
+        channel_name = "INVALID"
+    return channel_name
 
 # is_message_not_from_a_bot
 def is_message_from_human(message:Message, fusion_bot_id:int|None):
