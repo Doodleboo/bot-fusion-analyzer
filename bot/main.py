@@ -22,6 +22,7 @@ ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+OLD_FUSION_BOT_ID = 836686828215992430
 
 
 intents = discord.Intents.default()
@@ -139,7 +140,7 @@ async def send_without_content(analysis:Analysis):
 
 
 async def handle_sprite_gallery(message:Message):
-    utils.log_event("SG>", message)
+    utils.log_event("SG>", message)     # TODO: Analyze multiple images in the same gallery message
     analysis = generate_analysis(message)
     if analysis.severity in MAX_SEVERITY:
         try:
@@ -165,24 +166,30 @@ async def handle_test_sprite_gallery(message:Message):
         )
 
 
-async def handle_reply_message(message:Message):
-    utils.log_event("R>", message)
+async def handle_reply_message(message:Message, old_bot:bool):
+    if not old_bot:
+        utils.log_event("R>", message)
+        channel = message.channel
+    else:
+        utils.log_event("OLD_R>", message)
+        channel = ctx().pif.logs
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment)
         try:
-            await message.channel.send(embed=analysis.embed)
+            await channel.send(embed=analysis.embed)
             if analysis.transparency_issue:
-                await message.channel.send(
+                await channel.send(
                     embed=analysis.transparency_embed,
                     file=generate_bonus_file(analysis.transparency_image)
                 )
             if analysis.half_pixels_issue:
-                await message.channel.send(
+                await channel.send(
                     embed=analysis.half_pixels_embed,
                     file=generate_bonus_file(analysis.half_pixels_image)
                 )
         except discord.Forbidden:
-            print(f"R>> Missing permissions in {message.channel}")
+            print(f"R>> Missing permissions in {channel}")
+
 
 
 @tree.command(name="help", description="Fusion bot help")
@@ -245,7 +252,9 @@ async def on_message(message:Message):
             elif is_test_gallery(message):
                 await handle_test_sprite_gallery(message)
             elif is_mentioning_reply(message):
-                await handle_reply(message)
+                await handle_reply(message, old_bot=False)
+            elif is_mentioning_old_bot(message) and is_reply(message):
+                await handle_reply(message, old_bot=True)
 
     except Exception as message_exception:
         print(" ")
@@ -260,8 +269,10 @@ async def on_message(message:Message):
 def is_sprite_gallery(message:Message):
     return message.channel.id == id_channel_gallery_pif
 
+
 def is_test_gallery(message:Message):
     return message.channel.id == id_channel_gallery_doodledoo
+
 
 def is_mentioning_reply(message:Message):
     return is_mentioning_bot(message) and is_reply(message)
@@ -280,9 +291,18 @@ def is_mentioning_bot(message:Message):
     return result
 
 
-async def handle_reply(message:Message):
+def is_mentioning_old_bot(message:Message):
+    result = False
+    for user in message.mentions:
+        if OLD_FUSION_BOT_ID == user.id:
+            result = True
+            break
+    return result
+
+
+async def handle_reply(message:Message, old_bot:bool):
     reply_message = await get_reply_message(message)
-    await handle_reply_message(reply_message)
+    await handle_reply_message(reply_message, old_bot)
 
 
 async def get_reply_message(message:Message):
