@@ -41,14 +41,15 @@ worksheet_name = "Full dex"
 # Doodledoo test server
 id_server_doodledoo = 446241769462562827
 id_channel_gallery_doodledoo = 1360964111718158498
+id_channel_assets_doodledoo = 1363610399064330480
 id_channel_logs_doodledoo = 1360969318296322328  # Here, debug and logs share a channel
 
-# Pokémon Infinite Fusion (changed to the test server temporarily)
-id_server_pif = 302153478556352513
-id_channel_gallery_pif = 543958354377179176
-id_channel_assets_pif = 1094790320891371640
-id_channel_logs_pif = 999653562202214450
-id_channel_debug_pif = 703351286019653762
+# Pokémon Infinite Fusion
+id_server_pif = 446241769462562827 #302153478556352513
+id_channel_gallery_pif = 1360964111718158498 #543958354377179176
+id_channel_assets_pif = 1363610399064330480 #1094790320891371640
+id_channel_logs_pif = 1360969318296322328 #999653562202214450
+id_channel_debug_pif = 1360969318296322328 #703351286019653762
 
 
 def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
@@ -159,22 +160,6 @@ async def handle_gallery(message: Message, is_assets: bool = False):
         await send_bot_logs(analysis, message.author.id)
 
 
-async def handle_test_sprite_gallery(message: Message):
-    utils.log_event("T-SG>", message)
-    analysis = generate_analysis(message)
-    await ctx().doodledoo.logs.send(embed=analysis.embed)
-    if analysis.transparency_issue:
-        await ctx().doodledoo.logs.send(
-            embed=analysis.transparency_embed,
-            file=generate_bonus_file(analysis.transparency_image)
-        )
-    if analysis.half_pixels_issue:
-        await ctx().doodledoo.logs.send(
-            embed=analysis.half_pixels_embed,
-            file=generate_bonus_file(analysis.half_pixels_image)
-        )
-
-
 async def handle_reply_message(message: Message, old_bot: bool = False):
     if not old_bot:
         utils.log_event("R>", message)
@@ -250,8 +235,6 @@ async def on_message(message: Message):
             await handle_sprite_gallery(message)
         elif is_assets_custom_base(message):
             await handle_assets_gallery(message)
-        elif is_test_gallery(message):
-            await handle_test_sprite_gallery(message)
         elif is_mentioning_reply(message):
             await handle_reply(message, old_bot=False)
         elif is_mentioning_old_bot(message) and is_reply(message):

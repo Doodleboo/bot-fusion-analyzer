@@ -21,20 +21,25 @@ PATTERN_EGG = r'[eE]gg'
 PATTERN_CUSTOM_BASE = r'[cC]ustom [bB]ase'
 
 LETTER_AND_PNG_PATTERN = r'[a-z]{0,1}\.png$'
-LAZY_PATTERN_FUSION_ID = r'([1-9]\d{0,2})\.([1-9]\d{0,2})'
-LAZY_PATTERN_CUSTOM_BASE_ID = r'([1-9]\d{0,2})'
 
-TEXT_PATTERN_FUSION_ID = r'\(([1-9]\d{0,2})\.([1-9]\d{0,2})\)'
-TEXT_PATTERN_CUSTOM_BASE_ID = r'\(([1-9]\d{0,2})\)'
+# 123.456
+NUMBER_PATTERN_FUSION_ID = r'([1-9]\d{0,2})\.([1-9]\d{0,2})'
+# 123
+NUMBER_PATTERN_CUSTOM_ID = r'([1-9]\d{0,2})'
 
-STRICT_PATTERN_FUSION_ID = LAZY_PATTERN_FUSION_ID + LETTER_AND_PNG_PATTERN
-STRICT_PATTERN_CUSTOM_BASE_ID = LAZY_PATTERN_CUSTOM_BASE_ID + LETTER_AND_PNG_PATTERN
+# (123.456a)
+TEXT_PATTERN_FUSION_ID = r'\(([1-9]\d{0,2})\.([1-9]\d{0,2})[a-z]{0,1}\)'
+# (123a)
+TEXT_PATTERN_CUSTOM_ID = r'\(([1-9]\d{0,2})[a-z]{0,1}\)'
 
-REGULAR_PATTERN_FUSION_ID = rf'^{STRICT_PATTERN_FUSION_ID}'
-SPOILER_PATTERN_FUSION_ID = rf'^SPOILER_{STRICT_PATTERN_FUSION_ID}'
+FILENAME_FUSION_ID = NUMBER_PATTERN_FUSION_ID + LETTER_AND_PNG_PATTERN
+FILENAME_CUSTOM_ID = NUMBER_PATTERN_CUSTOM_ID + LETTER_AND_PNG_PATTERN
 
-REGULAR_PATTERN_CUSTOM_BASE_ID = rf'^{STRICT_PATTERN_CUSTOM_BASE_ID}'
-SPOILER_PATTERN_CUSTOM_BASE_ID = rf'^SPOILER_{STRICT_PATTERN_CUSTOM_BASE_ID}'
+REGULAR_PATTERN_FUSION_ID = rf'^{FILENAME_FUSION_ID}'
+SPOILER_PATTERN_FUSION_ID = rf'^SPOILER_{FILENAME_FUSION_ID}'
+
+REGULAR_PATTERN_CUSTOM_ID = rf'^{FILENAME_CUSTOM_ID}'
+SPOILER_PATTERN_CUSTOM_ID = rf'^SPOILER_{FILENAME_CUSTOM_ID}'
 
 RAW_GITHUB = "https://raw.githubusercontent.com"
 RAW_GITLAB = "https://gitlab.com"
@@ -186,53 +191,52 @@ def extract_fusion_id_from_filename(analysis: Analysis):
 
 
 def get_fusion_id_from_filename(filename: str):
-    fusion_id = None
     result = re.match(REGULAR_PATTERN_FUSION_ID, filename)
     if result is not None:
-        return (get_fusion_id_from_text(result[0], False), False)
+        return (get_clean_id_from_result(result[0], False), False)
 
     result = re.match(SPOILER_PATTERN_FUSION_ID, filename)
     if result is not None:
-        return (get_fusion_id_from_text(result[0], False), False)
+        return (get_clean_id_from_result(result[0], False), False)
 
-    result = re.match(REGULAR_PATTERN_CUSTOM_BASE_ID, filename)
+    result = re.match(REGULAR_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return (get_fusion_id_from_text(result[0], True), True)
+        return (get_clean_id_from_result(result[0], True), True)
 
-    result = re.match(SPOILER_PATTERN_CUSTOM_BASE_ID, filename)
+    result = re.match(SPOILER_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return (get_fusion_id_from_text(result[0], True), True)
+        return (get_clean_id_from_result(result[0], True), True)
     else:
         return (None, False)
 
 
 def extract_fusion_ids_from_content(message: Message, custom_base: bool = False):
-    return get_multiple_fusion_id_from_text(message.content, custom_base)
+    content = message.content
+    id_list = []
+    if custom_base:
+        search_pattern = TEXT_PATTERN_CUSTOM_ID
+    else:
+        search_pattern = TEXT_PATTERN_FUSION_ID
+
+    iterator = re.finditer(search_pattern, content)
+    for result in iterator:
+        id = get_clean_id_from_result(result[0], custom_base)
+        id_list.append(id)
+
+    return id_list
 
 
-def get_fusion_id_from_text(text: str, custom_base: bool = False):
+def get_clean_id_from_result(text: str, custom_base: bool = False):
     fusion_id = None
     if custom_base:
-        search_pattern = LAZY_PATTERN_CUSTOM_BASE_ID
+        search_pattern = NUMBER_PATTERN_CUSTOM_ID
     else:
-        search_pattern = LAZY_PATTERN_FUSION_ID
+        search_pattern = NUMBER_PATTERN_FUSION_ID
     result = re.search(search_pattern, text)
     if result:
         fusion_id = result[0]
     return fusion_id
 
-
-def get_multiple_fusion_id_from_text(text: str, custom_base: bool = False):
-    id_list = []
-    if custom_base:
-        search_pattern = TEXT_PATTERN_CUSTOM_BASE_ID
-    else:
-        search_pattern = TEXT_PATTERN_FUSION_ID
-    iterator = re.finditer(search_pattern, text)
-    for id in iterator:
-        without_parentheses = id[0][1:-1]
-        id_list.append(without_parentheses)
-    return id_list
 
 
 def id_to_name_map():  # Thanks Greystorm for the util and file
