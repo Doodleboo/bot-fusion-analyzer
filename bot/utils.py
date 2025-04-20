@@ -11,7 +11,6 @@ from discord.threads import Thread
 
 from analysis import Analysis
 
-
 MAX_DEX_ID = 600
 MISSING_DEX_ID = 420
 
@@ -19,12 +18,23 @@ PATTERN_ICON = r'[iI]con'
 PATTERN_CUSTOM = r'[cC]ustom'
 PATTERN_BASE = r'[bB]ase'
 PATTERN_EGG = r'[eE]gg'
+PATTERN_CUSTOM_BASE = r'[cC]ustom [bB]ase'
 
-LAZY_PATTERN_FUSION_ID = r'([1-9]+\d*)\.([1-9]+\d*)'
-STRICT_PATTERN_FUSION_ID = LAZY_PATTERN_FUSION_ID + r'[a-z]{0,1}\.png$'
+LETTER_AND_PNG_PATTERN = r'[a-z]{0,1}\.png$'
+LAZY_PATTERN_FUSION_ID = r'([1-9]\d{0,2})\.([1-9]\d{0,2})'
+LAZY_PATTERN_CUSTOM_BASE_ID = r'([1-9]\d{0,2})'
+
+TEXT_PATTERN_FUSION_ID = r'\(([1-9]\d{0,2})\.([1-9]\d{0,2})\)'
+TEXT_PATTERN_CUSTOM_BASE_ID = r'\(([1-9]\d{0,2})\)'
+
+STRICT_PATTERN_FUSION_ID = LAZY_PATTERN_FUSION_ID + LETTER_AND_PNG_PATTERN
+STRICT_PATTERN_CUSTOM_BASE_ID = LAZY_PATTERN_CUSTOM_BASE_ID + LETTER_AND_PNG_PATTERN
 
 REGULAR_PATTERN_FUSION_ID = rf'^{STRICT_PATTERN_FUSION_ID}'
 SPOILER_PATTERN_FUSION_ID = rf'^SPOILER_{STRICT_PATTERN_FUSION_ID}'
+
+REGULAR_PATTERN_CUSTOM_BASE_ID = rf'^{STRICT_PATTERN_CUSTOM_BASE_ID}'
+SPOILER_PATTERN_CUSTOM_BASE_ID = rf'^SPOILER_{STRICT_PATTERN_CUSTOM_BASE_ID}'
 
 RAW_GITHUB = "https://raw.githubusercontent.com"
 RAW_GITLAB = "https://gitlab.com"
@@ -33,25 +43,26 @@ AUTOGEN_FUSION_URL = f"{RAW_GITLAB}/pokemoninfinitefusion/autogen-fusion-sprites
 QUESTION_URL = f"{RAW_GITHUB}/Doodleboo/bot-fusion-analyzer/main/bot/question.png"
 
 YAGPDB_ID = 204255221017214977
+ZIGZAG_ID = 1185671488611819560
 
 LCB = "{"
 RCB = "}"
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-NAMES_JSON_FILE =  os.path.join(CURRENT_DIR, "..", "data", "PokemonNames.json")
+NAMES_JSON_FILE = os.path.join(CURRENT_DIR, "..", "data", "PokemonNames.json")
 
 
-def log_event(decorator:str, event:Message|Thread):
+def log_event(decorator: str, event: Message | Thread):
     if isinstance(event, Message):
         _log_message(decorator, event)
 
 
-def _log_message(decorator:str, message:Message):
+def _log_message(decorator: str, message: Message):
     channel_name = get_channel_name_from_message(message)
     print(f"{decorator} [{message.author.name}] {LCB}{channel_name}{RCB} {message.content}")
 
 
-def get_channel_name_from_message(message:Message):
+def get_channel_name_from_message(message: Message):
     try:
         channel_name = message.channel.name  # type: ignore
         if not isinstance(channel_name, str):
@@ -63,11 +74,12 @@ def get_channel_name_from_message(message:Message):
     return channel_name
 
 
-def log_command(decorator:str, interaction:Interaction, command:str):
+def log_command(decorator: str, interaction: Interaction, command: str):
     channel_name = get_channel_name_from_interaction(interaction)
     print(f"{decorator} [{interaction.user.name}] {LCB}{channel_name}{RCB} {command}")
 
-def get_channel_name_from_interaction(interaction:Interaction):
+
+def get_channel_name_from_interaction(interaction: Interaction):
     try:
         channel_name = interaction.channel.name  # type: ignore
         if not isinstance(channel_name, str):
@@ -78,125 +90,155 @@ def get_channel_name_from_interaction(interaction:Interaction):
         channel_name = "INVALID"
     return channel_name
 
+
 # is_message_not_from_a_bot
-def is_message_from_human(message:Message, fusion_bot_id:int|None):
-    return message.author.id not in (fusion_bot_id, YAGPDB_ID)
+def is_message_from_human(message: Message, fusion_bot_id: int | None):
+    return message.author.id not in (fusion_bot_id, YAGPDB_ID, ZIGZAG_ID)
 
 
-def get_thread(message:Message) -> (Thread | None):
+def get_thread(message: Message) -> (Thread | None):
     thread = message.channel
     if isinstance(thread, Thread):
         return thread
     return None
 
 
-def get_filename(analysis:Analysis):
+def get_filename(analysis: Analysis):
     if analysis.specific_attachment is None:
-        return  analysis.message.attachments[0].filename
+        return analysis.message.attachments[0].filename
     return analysis.specific_attachment.filename
 
 
-def get_attachment_url(analysis:Analysis):
+def get_attachment_url(analysis: Analysis):
     if analysis.specific_attachment is None:
-        return  analysis.message.attachments[0].url
+        return analysis.message.attachments[0].url
     return analysis.specific_attachment.url
 
 
-def interesting_results(results:list):
+def interesting_results(results: list):
     return results[1] is not None
 
 
-def have_icon_in_message(message:Message):
+def have_icon_in_message(message: Message):
     result = re.search(PATTERN_ICON, message.content)
     return result is not None
 
 
-def have_custom_in_message(message:Message):
+def have_custom_base_in_message(message: Message):
+    result = re.search(PATTERN_CUSTOM_BASE, message.content)
+    return result is not None
+
+
+def have_custom_in_message(message: Message):
     result = re.search(PATTERN_CUSTOM, message.content)
     return result is not None
 
 
-def have_base_in_message(message:Message):
+def have_base_in_message(message: Message):
     result = re.search(PATTERN_BASE, message.content)
     return result is not None
 
 
-def have_egg_in_message(message:Message):
+def have_egg_in_message(message: Message):
     result = re.search(PATTERN_EGG, message.content)
     return result is not None
 
 
-def have_attachment(analysis:Analysis):
+def have_attachment(analysis: Analysis):
     return len(analysis.message.attachments) >= 1
 
 
-def is_missing_autogen(fusion_id:str):
+def is_missing_autogen(fusion_id: str):
     split_fusion_id = fusion_id.split(".")
     head_id = int(split_fusion_id[0])
     body_id = int(split_fusion_id[1])
     return head_id > MISSING_DEX_ID or body_id > MISSING_DEX_ID
 
 
-def get_autogen_url(fusion_id:str):
+def get_autogen_url(fusion_id: str):
+    # If it starts working again, it should adapt to work with custom bases
     if is_missing_autogen(fusion_id):
         return QUESTION_URL
     return AUTOGEN_FUSION_URL + fusion_id.split(".")[0] + "/" + fusion_id + ".png"
 
 
-def is_invalid_fusion_id(fusion_id:str):
+def is_invalid_fusion_id(fusion_id: str):
     head, body = fusion_id.split(".")
     head_id, body_id = int(head), int(body)
     return head_id > MAX_DEX_ID or body_id > MAX_DEX_ID
 
 
-def get_display_avatar(user: User|Member|ClientUser) -> Asset:
+def is_invalid_base_id(base_id: str):
+    pokemon_id = int(base_id)
+    return pokemon_id > MAX_DEX_ID
+
+
+def get_display_avatar(user: User | Member | ClientUser) -> Asset:
     return user.display_avatar.with_format("png").with_size(256)
 
 
-def extract_fusion_id_from_filename(analysis:Analysis):
+def extract_fusion_id_from_filename(analysis: Analysis):
     fusion_id = None
     if have_attachment(analysis):
         filename = get_filename(analysis)
-        fusion_id = get_fusion_id_from_filename(filename)
-    return fusion_id
+        fusion_id, is_custom_base = get_fusion_id_from_filename(filename)
+    return fusion_id, is_custom_base
 
 
-def get_fusion_id_from_filename(filename:str):
+def get_fusion_id_from_filename(filename: str):
     fusion_id = None
     result = re.match(REGULAR_PATTERN_FUSION_ID, filename)
     if result is not None:
-        fusion_id = get_fusion_id_from_text(result[0])
+        return (get_fusion_id_from_text(result[0], False), False)
+
+    result = re.match(SPOILER_PATTERN_FUSION_ID, filename)
+    if result is not None:
+        return (get_fusion_id_from_text(result[0], False), False)
+
+    result = re.match(REGULAR_PATTERN_CUSTOM_BASE_ID, filename)
+    if result is not None:
+        return (get_fusion_id_from_text(result[0], True), True)
+
+    result = re.match(SPOILER_PATTERN_CUSTOM_BASE_ID, filename)
+    if result is not None:
+        return (get_fusion_id_from_text(result[0], True), True)
     else:
-        result = re.match(SPOILER_PATTERN_FUSION_ID, filename)
-        if result is not None:
-            fusion_id = get_fusion_id_from_text(result[0])
-    return fusion_id
+        return (None, False)
 
 
-def extract_fusion_ids_from_content(message:Message):
-    return get_multiple_fusion_id_from_text(message.content)
+def extract_fusion_ids_from_content(message: Message, custom_base: bool = False):
+    return get_multiple_fusion_id_from_text(message.content, custom_base)
 
 
-def get_fusion_id_from_text(text:str):
+def get_fusion_id_from_text(text: str, custom_base: bool = False):
     fusion_id = None
-    result = re.search(LAZY_PATTERN_FUSION_ID, text)
+    if custom_base:
+        search_pattern = LAZY_PATTERN_CUSTOM_BASE_ID
+    else:
+        search_pattern = LAZY_PATTERN_FUSION_ID
+    result = re.search(search_pattern, text)
     if result:
         fusion_id = result[0]
     return fusion_id
 
 
-def get_multiple_fusion_id_from_text(text:str):
+def get_multiple_fusion_id_from_text(text: str, custom_base: bool = False):
     id_list = []
-    iterator = re.finditer(LAZY_PATTERN_FUSION_ID, text)
+    if custom_base:
+        search_pattern = TEXT_PATTERN_CUSTOM_BASE_ID
+    else:
+        search_pattern = TEXT_PATTERN_FUSION_ID
+    iterator = re.finditer(search_pattern, text)
     for id in iterator:
-        id_list.append(id[0])
+        without_parentheses = id[0][1:-1]
+        id_list.append(without_parentheses)
     return id_list
 
 
-def id_to_name_map():   # Thanks Greystorm for the util and file
+def id_to_name_map():  # Thanks Greystorm for the util and file
     """Returns dictionary mapping id numbers to display names"""
     with open(NAMES_JSON_FILE) as f:
         data = json.loads(f.read())
-        return {element["id"]:element["display_name"] for element in data["pokemon"]}
+        return {element["id"]: element["display_name"] for element in data["pokemon"]}
 
 

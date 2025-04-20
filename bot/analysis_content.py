@@ -3,7 +3,7 @@ from fileinput import filename
 import utils
 from analysis import Analysis
 from enums import Severity
-from issues import (CustomSprite, DifferentSprite, EggSprite, IconSprite,
+from issues import (CustomBase, DifferentSprite, EggSprite, IconSprite,
                     IncomprehensibleSprite, MissingFilename, MissingSprite,
                     OutOfDex, FileName, PokemonNames)
 
@@ -13,14 +13,16 @@ def exists(value):
 
 
 class ContentContext():
-    def __init__(self, analysis:Analysis):
-        self.filename_fusion_id = utils.extract_fusion_id_from_filename(analysis)
-        self.content_fusion_ids_list = utils.extract_fusion_ids_from_content(analysis.message)
+    def __init__(self, analysis: Analysis):
+
+        self.filename_fusion_id, self.is_custom_base = utils.extract_fusion_id_from_filename(analysis)
+
+        self.content_fusion_ids_list = utils.extract_fusion_ids_from_content(analysis.message, self.is_custom_base)
+
         if self.content_fusion_ids_list:
             self.content_fusion_id = self.content_fusion_ids_list[0]
         else:
             self.content_fusion_id = None
-
 
     def have_two_values(self):
         return exists(self.filename_fusion_id) and exists(self.content_fusion_id)
@@ -28,7 +30,7 @@ class ContentContext():
     def have_one_value(self):
         return exists(self.filename_fusion_id) or exists(self.content_fusion_id)
 
-    def handle_one_value(self, analysis:Analysis):
+    def handle_one_value(self, analysis: Analysis):
         if self.content_fusion_id is not None:
             analysis.severity = Severity.refused
             analysis.issues.add(MissingFilename())
@@ -36,10 +38,10 @@ class ContentContext():
             analysis.issues.add(FileName(filename))
         elif self.filename_fusion_id is not None:
             analysis.fusion_id = self.filename_fusion_id
-            analysis.autogen_url = utils.get_autogen_url(analysis.fusion_id)
-            handle_dex_verification(analysis, self.filename_fusion_id)
+            # analysis.autogen_url = utils.get_autogen_url(analysis.fusion_id)
+            self.handle_dex_verification(analysis, self.filename_fusion_id)
 
-    def handle_two_values(self, analysis:Analysis):
+    def handle_two_values(self, analysis: Analysis):
         if self.filename_fusion_id != self.content_fusion_id:
             if self.filename_fusion_id not in self.content_fusion_ids_list:
                 self.handle_two_different_values(analysis)
@@ -49,23 +51,35 @@ class ContentContext():
         else:
             self.handle_two_same_values(analysis)
         if self.filename_fusion_id is not None:
-            handle_dex_verification(analysis, self.filename_fusion_id)
+            self.handle_dex_verification(analysis, self.filename_fusion_id)
 
-    def handle_two_different_values(self, analysis:Analysis):
+    def handle_two_different_values(self, analysis: Analysis):
         if self.filename_fusion_id is not None and self.content_fusion_id is not None:
             analysis.severity = Severity.refused
             issue = DifferentSprite(self.filename_fusion_id, self.content_fusion_id)
             analysis.issues.add(issue)
-            handle_dex_verification(analysis, self.content_fusion_id)
+            self.handle_dex_verification(analysis, self.content_fusion_id)
 
-    def handle_two_same_values(self, analysis:Analysis):
+    def handle_two_same_values(self, analysis: Analysis):
         if self.filename_fusion_id is not None:
             analysis.fusion_id = self.filename_fusion_id
-        if analysis.fusion_id is not None:
-            analysis.autogen_url = utils.get_autogen_url(analysis.fusion_id)
+        # if analysis.fusion_id is not None:
+        # analysis.autogen_url = utils.get_autogen_url(analysis.fusion_id)
+
+    def handle_dex_verification(self, analysis: Analysis, fusion_id: str):
+        if ((self.is_custom_base and utils.is_invalid_base_id(fusion_id))
+                or (not self.is_custom_base and utils.is_invalid_fusion_id(fusion_id))):
+
+            analysis.severity = Severity.refused
+            analysis.issues.add(OutOfDex(fusion_id))
+
+        elif self.is_custom_base:
+            handle_pokemon_name(analysis, fusion_id)
+        else:
+            handle_pokemon_names(analysis, fusion_id)
 
 
-def main(analysis:Analysis):
+def main(analysis: Analysis):
     if analysis.specific_attachment is not None:
         handle_some_content(analysis)
         return
@@ -77,7 +91,7 @@ def main(analysis:Analysis):
     handle_no_content(analysis)
 
 
-def handle_some_content(analysis:Analysis):
+def handle_some_content(analysis: Analysis):
     content_context = ContentContext(analysis)
     analysis.attachment_url = utils.get_attachment_url(analysis)
     if content_context.have_two_values():
@@ -88,38 +102,37 @@ def handle_some_content(analysis:Analysis):
         handle_zero_value(analysis)
 
 
-def handle_no_content(analysis:Analysis):
+def handle_no_content(analysis: Analysis):
     analysis.severity = Severity.ignored
     analysis.issues.add(MissingSprite())
 
 
-def handle_zero_value(analysis:Analysis):
+def handle_zero_value(analysis: Analysis):
     analysis.severity = Severity.ignored
     if utils.have_egg_in_message(analysis.message):
         analysis.issues.add(EggSprite())
     elif utils.have_icon_in_message(analysis.message):
         analysis.issues.add(IconSprite())
     elif utils.have_custom_in_message(analysis.message):
-        analysis.issues.add(CustomSprite())
+        analysis.issues.add(CustomBase())
     elif utils.have_base_in_message(analysis.message):
-        analysis.issues.add(CustomSprite())
+        analysis.issues.add(CustomBase())
     else:
         analysis.issues.add(IncomprehensibleSprite())
         filename = utils.get_filename(analysis)
         analysis.issues.add(FileName(filename))
 
 
-def handle_dex_verification(analysis:Analysis, fusion_id:str):
-    if utils.is_invalid_fusion_id(fusion_id):
-        analysis.severity = Severity.refused
-        analysis.issues.add(OutOfDex(fusion_id))
-    else:
-        handle_pokemon_names(analysis, fusion_id)
-
-
-def handle_pokemon_names(analysis:Analysis, fusion_id:str):
+def handle_pokemon_names(analysis: Analysis, fusion_id: str):
     head, body = fusion_id.split(".")
     name_map = utils.id_to_name_map()
     head_name = name_map.get(head)
     body_name = name_map.get(body)
     analysis.issues.add(PokemonNames(head_name, body_name))
+
+
+def handle_pokemon_name(analysis: Analysis, base_id: str):
+    name_map = utils.id_to_name_map()
+    base_name = name_map.get(base_id)
+    analysis.issues.add(CustomBase(base_name))
+
