@@ -8,16 +8,16 @@ class Description(str, Enum):
     missing_file_name   = "Missing file name"
     missing_fusion_id   = "Unable to identify fusion sprite"
     different_fusion_id = "Different ID"
-    colour_excess       = "Colour excess"
+    colour_excess       = "Color excess"
     transparency_amount = "Transparency"
     half_pixels_amount  = "Half-pixels"
-    colour_amount       = "Colours"
+    colour_amount       = "Colors"
     file_name           = "Filename"
     invalid_fusion_id   = "Invalid fusion ID"
     sprite_error        = "Invalid sprite"
     invalid_size        = "Invalid size"
     icon                = "Icon sprite"
-    custom              = "Custom sprite"
+    custom              = "custom base"
     egg                 = "Egg sprite"
     incomprehensible    = "Incomprehensible name"
     test                = "Description test"
@@ -25,6 +25,8 @@ class Description(str, Enum):
     aseprite_user       = "Aseprite"
     graphics_gale_user  = "GraphicsGale"
     similarity_amount   = "Similarity"
+    high_similarity     = "High number of similar color pairs"
+    refused_similarity  = "Over maximum limit of similar color pairs"
 
 
 class Severity(Enum):
