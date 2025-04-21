@@ -327,6 +327,10 @@ async def rocket_event(message:Message):
     elif is_sprite_gallery(message):# and await rocket_analyzer.author_is_rocket_grunt(message):
         rocket_analysis, score = await rocket_analyzer.handle_rocket_analysis(message)
         rocket_analysis.description += f"\n[Link to message]({message.jump_url})"
+        try:
+            rocket_analysis.set_image(url=message.attachments[0].url)
+        except Exception:
+            pass
         await ctx().pif.events.send(embed=rocket_analysis)
         await ctx().pif.events.send(f"!cyrus-grant-points {message.author.id} {int(score)}")
 
