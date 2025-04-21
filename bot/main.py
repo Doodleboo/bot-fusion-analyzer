@@ -328,7 +328,7 @@ async def rocket_event(message:Message):
         rocket_analysis, score = await rocket_analyzer.handle_rocket_analysis(message)
         rocket_analysis.description += f"\n[Link to message]({message.jump_url})"
         await ctx().pif.events.send(embed=rocket_analysis)
-        #await ctx().pif.events.send(f"!cyrus-grant-points grunt:<@!{message.author.id}> points:{int(score)}")
+        await ctx().pif.events.send(f"!cyrus-grant-points {message.author.id} {int(score)}")
 
 
 def get_user(user_id) -> (User | None):
