@@ -317,17 +317,18 @@ async def get_reply_message(message: Message):
 
 
 async def rocket_event(message:Message):
-    if is_mentioning_reply(message):  # and rocket_analyzer.is_replying_to_rocket_grunt(message):
+    if is_mentioning_reply(message):# and await rocket_analyzer.is_replying_to_rocket_grunt(message):
         replied_message = await get_reply_message(message)
         result = await rocket_analyzer.handle_rocket_analysis(replied_message)
         if result is not None:
             rocket_analysis, score = result
             await message.channel.send(embed=rocket_analysis)
-            await message.channel.send("If you submit it to the gallery for us to aqcuire, you will be compensated for it.")
-    elif is_sprite_gallery(message):  # and rocket_analyzer.author_is_rocket_grunt(message):
+            await message.channel.send("If you submit it to the gallery for us to acquire, you will be compensated for it.")
+    elif is_sprite_gallery(message):# and await rocket_analyzer.author_is_rocket_grunt(message):
         rocket_analysis, score = await rocket_analyzer.handle_rocket_analysis(message)
+        rocket_analysis.description += f"\n[Link to message]({message.jump_url})"
         await ctx().pif.events.send(embed=rocket_analysis)
-        await ctx().pif.events.send(f"!cyrus-grant-points grunt:<@!{message.author.id}> points:{int(score)}")
+        #await ctx().pif.events.send(f"!cyrus-grant-points grunt:<@!{message.author.id}> points:{int(score)}")
 
 
 def get_user(user_id) -> (User | None):
