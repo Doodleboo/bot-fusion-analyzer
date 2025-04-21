@@ -7,16 +7,19 @@ class ServerContext():
     gallery: Channel
     logs: Channel
     debug: Channel|None
+    events: Channel|None
     def __init__(self,
             server: Guild,
             gallery: Channel,
             logs: Channel,
-            debug: Channel|None
+            debug: Channel|None,
+            events: Channel|None
             ) -> None:
         self.server = server
         self.gallery = gallery
         self.logs = logs
         self.debug = debug
+        self.events = events
 
 
 class GlobalContext():

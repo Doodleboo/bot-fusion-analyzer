@@ -6,6 +6,7 @@ import discord
 import utils
 import command_actions
 import random
+import rocket_analyzer
 from analysis import generate_bonus_file
 from analyzer import Analysis, generate_analysis
 from discord import Client, PartialEmoji, app_commands, HTTPException
@@ -50,6 +51,7 @@ id_channel_gallery_pif = 1360964111718158498 #543958354377179176
 id_channel_assets_pif = 1363610399064330480 #1094790320891371640
 id_channel_logs_pif = 1360969318296322328 #999653562202214450
 id_channel_debug_pif = 1360969318296322328 #703351286019653762
+id_channel_events_pif = 1360969318296322328 #737765817474744350
 
 
 def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
@@ -78,19 +80,22 @@ class BotContext:
             server=server_doodledoo,
             gallery=channel_gallery_doodledoo,
             logs=channel_log_doodledoo,
-            debug=channel_log_doodledoo
+            debug=channel_log_doodledoo,
+            events=channel_log_doodledoo
         )
 
         server_pif = get_server_from_id(client, id_server_pif)
         channel_gallery_pif = get_channel_from_id(server_pif, id_channel_gallery_pif)
         channel_log_pif = get_channel_from_id(server_pif, id_channel_logs_pif)
         channel_debug_pif = get_channel_from_id(server_pif, id_channel_debug_pif)
+        channel_events_pif = get_channel_from_id(server_pif, id_channel_events_pif)
 
         pif_context = ServerContext(
             server=server_pif,
             gallery=channel_gallery_pif,
             logs=channel_log_pif,
-            debug=channel_debug_pif
+            debug=channel_debug_pif,
+            events=channel_events_pif
         )
 
         self.context = GlobalContext(
@@ -240,6 +245,8 @@ async def on_message(message: Message):
         elif is_mentioning_old_bot(message) and is_reply(message):
             await handle_reply(message, old_bot=True)
 
+        await rocket_event(message)
+
     except Exception as message_exception:
         print(" ")
         print(message)
@@ -307,6 +314,20 @@ async def get_reply_message(message: Message):
         raise RuntimeError(message)
 
     return await message.channel.fetch_message(reply_id)
+
+
+async def rocket_event(message:Message):
+    if is_mentioning_reply(message):  # and rocket_analyzer.is_replying_to_rocket_grunt(message):
+        replied_message = await get_reply_message(message)
+        result = await rocket_analyzer.handle_rocket_analysis(replied_message)
+        if result is not None:
+            rocket_analysis, score = result
+            await message.channel.send(embed=rocket_analysis)
+            await message.channel.send("If you submit it to the gallery for us to aqcuire, you will be compensated for it.")
+    elif is_sprite_gallery(message):  # and rocket_analyzer.author_is_rocket_grunt(message):
+        rocket_analysis, score = await rocket_analyzer.handle_rocket_analysis(message)
+        await ctx().pif.events.send(embed=rocket_analysis)
+        await ctx().pif.events.send(f"!cyrus-grant-points grunt:<@!{message.author.id}> points:{int(score)}")
 
 
 def get_user(user_id) -> (User | None):
