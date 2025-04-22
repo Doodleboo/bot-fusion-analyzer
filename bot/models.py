@@ -8,18 +8,21 @@ class ServerContext():
     logs: Channel
     debug: Channel|None
     events: Channel|None
+    zigzag: Channel|None
     def __init__(self,
             server: Guild,
             gallery: Channel,
             logs: Channel,
             debug: Channel|None,
-            events: Channel|None
+            events: Channel|None,
+            zigzag: Channel|None
             ) -> None:
         self.server = server
         self.gallery = gallery
         self.logs = logs
         self.debug = debug
         self.events = events
+        self.zigzag = zigzag
 
 
 class GlobalContext():

@@ -8,12 +8,12 @@ from discord import Message, Member, Embed
 
 from bot.rocket_villains import villain_pokemon_points
 
-RAINBOW_ROCKET_ROLE_ID = 1361787890052501525
+
 ROCKET_GRUNT_ROLE_ID = 1361797020578480369
 BASE_POINTS = 5
 DIMINISHING_FACTOR = 0.3
 LIKES_LIMIT = math.ceil(25 * DIMINISHING_FACTOR)
-LOVES_LIMIT = math.ceil(50 * DIMINISHING_FACTOR)
+LOVES_LIMIT = math.ceil(46 * DIMINISHING_FACTOR)
 ROCKET_TIER_1 = BASE_POINTS + LIKES_LIMIT
 ROCKET_TIER_2 = BASE_POINTS + LOVES_LIMIT
 
@@ -41,7 +41,7 @@ async def author_is_rocket_grunt(message: Message) -> bool:
     roles = author.roles
 
     for role in roles:
-        if (role.id == RAINBOW_ROCKET_ROLE_ID) or (role.id == ROCKET_GRUNT_ROLE_ID):
+        if role.id == ROCKET_GRUNT_ROLE_ID:
             return True
 
     return False
@@ -110,9 +110,9 @@ def generate_rocket_embed(integer_points: numpy.array(float)) -> (Embed, int):
     text_list += "\n**TOTAL POINTS**: " + str(total_score_int) + "\n"
 
     if total_score <= BASE_POINTS:
-        text_list += "Rainbow rocket accepts your contribution."
+        text_list += "Rainbow Rocket accepts your contribution."
     elif total_score <= ROCKET_TIER_1:
-        text_list += "Rainbow rocket appreciates your contribution."
+        text_list += "Rainbow Rocket appreciates your contribution."
     elif total_score <= ROCKET_TIER_2:
         text_list += "Rainbow Rocket is enthused about your contribution."
     else:

@@ -52,6 +52,7 @@ id_channel_assets_pif = 1363610399064330480 #1094790320891371640
 id_channel_logs_pif = 1360969318296322328 #999653562202214450
 id_channel_debug_pif = 1360969318296322328 #703351286019653762
 id_channel_events_pif = 1360969318296322328 #737765817474744350
+id_channel_zigzag_pif = 1360969318296322328 #1332161834605875200
 
 
 def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
@@ -81,7 +82,8 @@ class BotContext:
             gallery=channel_gallery_doodledoo,
             logs=channel_log_doodledoo,
             debug=channel_log_doodledoo,
-            events=channel_log_doodledoo
+            events=channel_log_doodledoo,
+            zigzag=channel_log_doodledoo
         )
 
         server_pif = get_server_from_id(client, id_server_pif)
@@ -89,13 +91,15 @@ class BotContext:
         channel_log_pif = get_channel_from_id(server_pif, id_channel_logs_pif)
         channel_debug_pif = get_channel_from_id(server_pif, id_channel_debug_pif)
         channel_events_pif = get_channel_from_id(server_pif, id_channel_events_pif)
+        channel_zigzag_pif = get_channel_from_id(server_pif, id_channel_zigzag_pif)
 
         pif_context = ServerContext(
             server=server_pif,
             gallery=channel_gallery_pif,
             logs=channel_log_pif,
             debug=channel_debug_pif,
-            events=channel_events_pif
+            events=channel_events_pif,
+            zigzag=channel_zigzag_pif
         )
 
         self.context = GlobalContext(
@@ -203,6 +207,7 @@ async def help_command(interaction: discord.Interaction):
 async def similar_command(interaction: discord.Interaction, sprite: discord.Attachment):
     utils.log_command("C>", interaction, "/similar")
     await command_actions.similar_action(interaction, sprite)
+    await ctx().pif.zigzag.send("{“user”: 363351925711831042, “points”: 1}")
 
 
 @bot.event
@@ -317,14 +322,14 @@ async def get_reply_message(message: Message):
 
 
 async def rocket_event(message:Message):
-    if is_mentioning_reply(message):# and await rocket_analyzer.is_replying_to_rocket_grunt(message):
+    if is_mentioning_reply(message) and await rocket_analyzer.is_replying_to_rocket_grunt(message):
         replied_message = await get_reply_message(message)
         result = await rocket_analyzer.handle_rocket_analysis(replied_message)
         if result is not None:
             rocket_analysis, score = result
             await message.channel.send(embed=rocket_analysis)
             await message.channel.send("If you submit it to the gallery for us to acquire, you will be compensated for it.")
-    elif (is_sprite_gallery(message) or is_assets_custom_base(message)):# and await rocket_analyzer.author_is_rocket_grunt(message):
+    elif (is_sprite_gallery(message) or is_assets_custom_base(message)) and await rocket_analyzer.author_is_rocket_grunt(message):
         rocket_analysis, score = await rocket_analyzer.handle_rocket_analysis(message)
         rocket_analysis.description += f"\n[Link to message]({message.jump_url})"
         try:
@@ -332,8 +337,10 @@ async def rocket_event(message:Message):
         except Exception:
             pass
         await ctx().pif.events.send(embed=rocket_analysis)
-        await ctx().pif.events.send(f"!cyrus-grant-points {message.author.id} {int(score)}")
-
+        #await ctx().pif.events.send(f"!cyrus-grant-points {message.author.id} {int(score)}")
+        await ctx().pif.events.send(
+            f"**Note from the boss:** tell that Meowth to stop slacking and give **{message.author.display_name} {int(score)} grunt points**.")
+        await ctx().pif.zigzag.send(f"{{“user”: {message.author.display_name}, “points”: {int(score)}}}")
 
 
 def get_user(user_id) -> (User | None):
