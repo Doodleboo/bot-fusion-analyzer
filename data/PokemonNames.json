@@ -3008,40 +3008,260 @@
         "display_name": "Luvdisc"
     },
     {
-        "id": "502",
-        "display_name": "?"
+        "id":"502",
+        "display_name":"Poochyena"
     },
     {
-        "id": "503",
-        "display_name": "?"
+        "id":"503",
+        "display_name":"Mightyena"
     },
     {
-        "id": "504",
-        "display_name": "?"
+        "id":"504",
+        "display_name":"Zigzagoon"
     },
     {
-        "id": "505",
-        "display_name": "?"
+        "id":"505",
+        "display_name":"Linoone"
     },
     {
-        "id": "506",
-        "display_name": "?"
+        "id":"506",
+        "display_name":"Wurmple"
     },
     {
-        "id": "507",
-        "display_name": "?"
+        "id":"507",
+        "display_name":"Silcoon"
     },
     {
-        "id": "508",
-        "display_name": "?"
+        "id":"508",
+        "display_name":"Beautifly"
     },
     {
-        "id": "509",
-        "display_name": "?"
+        "id":"509",
+        "display_name":"Cascoon"
     },
     {
-        "id": "510",
-        "display_name": "?"
+        "id":"510",
+        "display_name":"Dustox"
+    },
+    {
+        "id":"511",
+        "display_name":"Seedot"
+    },
+    {
+        "id":"512",
+        "display_name":"Nuzleaf"
+    },
+    {
+        "id":"513",
+        "display_name":"Shiftry"
+    },
+    {
+        "id":"514",
+        "display_name":"Taillow"
+    },
+    {
+        "id":"515",
+        "display_name":"Swellow"
+    },
+    {
+        "id":"516",
+        "display_name":"Wingull"
+    },
+    {
+        "id":"517",
+        "display_name":"Pelipper"
+    },
+    {
+        "id":"518",
+        "display_name":"Surskit"
+    },
+    {
+        "id":"519",
+        "display_name":"Masquerain"
+    },
+    {
+        "id":"520",
+        "display_name":"Whismur"
+    },
+    {
+        "id":"521",
+        "display_name":"Loudred"
+    },
+    {
+        "id":"522",
+        "display_name":"Exploud"
+    },
+    {
+        "id":"523",
+        "display_name":"Makuhita"
+    },
+    {
+        "id":"524",
+        "display_name":"Hariyama"
+    },
+    {
+        "id":"525",
+        "display_name":"Skitty"
+    },
+    {
+        "id":"526",
+        "display_name":"Delcatty"
+    },
+    {
+        "id":"527",
+        "display_name":"Meditite"
+    },
+    {
+        "id":"528",
+        "display_name":"Medicham"
+    },
+    {
+        "id":"529",
+        "display_name":"Electrike"
+    },
+    {
+        "id":"530",
+        "display_name":"Manectric"
+    },
+    {
+        "id":"531",
+        "display_name":"Plusle"
+    },
+    {
+        "id":"532",
+        "display_name":"Minun"
+    },
+    {
+        "id":"533",
+        "display_name":"Volbeat"
+    },
+    {
+        "id":"534",
+        "display_name":"Illumise"
+    },
+    {
+        "id":"535",
+        "display_name":"Gulpin"
+    },
+    {
+        "id":"536",
+        "display_name":"Swalot"
+    },
+    {
+        "id":"537",
+        "display_name":"Numel"
+    },
+    {
+        "id":"538",
+        "display_name":"Camerupt"
+    },
+    {
+        "id":"539",
+        "display_name":"Spoink"
+    },
+    {
+        "id":"540",
+        "display_name":"Grumpig"
+    },
+    {
+        "id":"541",
+        "display_name":"Spinda"
+    },
+    {
+        "id":"542",
+        "display_name":"Zangoose"
+    },
+    {
+        "id":"543",
+        "display_name":"Seviper"
+    },
+    {
+        "id":"544",
+        "display_name":"Lunatone"
+    },
+    {
+        "id":"545",
+        "display_name":"Solrock"
+    },
+    {
+        "id":"546",
+        "display_name":"Barboach"
+    },
+    {
+        "id":"547",
+        "display_name":"Whiscash"
+    },
+    {
+        "id":"548",
+        "display_name":"Corphish"
+    },
+    {
+        "id":"549",
+        "display_name":"Crawdaught"
+    },
+    {
+        "id":"550",
+        "display_name":"Baltoy"
+    },
+    {
+        "id":"551",
+        "display_name":"Claydol"
+    },
+    {
+        "id":"552",
+        "display_name":"Castform"
+    },
+    {
+        "id":"553",
+        "display_name":"Castform(Sunny)"
+    },
+    {
+        "id":"554",
+        "display_name":"Castform(Rainy)"
+    },
+    {
+        "id":"555",
+        "display_name":"Castform(Snowy)"
+    },
+    {
+        "id":"556",
+        "display_name":"Tropius"
+    },
+    {
+        "id":"557",
+        "display_name":"Chingling"
+    },
+    {
+        "id":"558",
+        "display_name":"Chimecho"
+    },
+    {
+        "id":"559",
+        "display_name":"Spheal"
+    },
+    {
+        "id":"560",
+        "display_name":"Sealeo"
+    },
+    {
+        "id":"561",
+        "display_name":"Walrein"
+    },
+    {
+        "id":"562",
+        "display_name":"Clamperl"
+    },
+    {
+        "id":"563",
+        "display_name":"Huntail"
+    },
+    {
+        "id":"564",
+        "display_name":"Gorebyss"
+    },
+    {
+        "id":"565",
+        "display_name":"Relicanth"
     }
 
     ]
