@@ -28,26 +28,31 @@ GIOVANNI = {
 ARCHIE = {
     340: 100,# Kyogre
     437: 80,# Sharpedo
-    436: 50,#Carvanha
+    503: 40,# Mightyena
+    502: 30,# Poochyena
+    436: 50,# Carvanha
     229: 30,
     89: 30,
     88: 10,
     228: 10,
-    169: 5,
-    42: 5,
-    41: 5,
+    169: 5,# Crobat
+    42: 5,# Golbat
+    41: 5,# Zubat
     387: 10,# Wailmer
     314: 10,# Wailord
 }
 
 MAXIE = {
-    341: 100,
+    341: 100,# Groudon
+    538: 80,# Camerupt
     488: 50,# Torkoal
-    110: 30,
-    109: 10,
-    169: 5,
-    42: 5,
-    41: 5,
+    503: 40,# Mightyena
+    502: 30,# Poochyena
+    110: 40,# Weezing
+    109: 20,# Koffing
+    169: 5,# Crobat
+    42: 5,# Golbat
+    41: 5,# Zubat
 }
 
 CYRUS = {
@@ -60,9 +65,9 @@ CYRUS = {
     215: 20,
     198: 10,
     228: 10,
-    169: 5,
-    42: 5,
-    41: 5,
+    169: 5,# Crobat
+    42: 5,# Golbat
+    41: 5,# Zubat
 }
 
 GHETSIS = {
