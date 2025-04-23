@@ -111,7 +111,7 @@ def generate_rocket_embed(integer_points: numpy.array(float), hoenn_bonus: bool=
 
     total_score = numpy.ceil(np.sum(integer_points)) + BASE_POINTS
     if hoenn_bonus:
-        text_list = "Archie and Maxie give you 1 bonus point each for helping document newly-discovered Hoenn pokemon.\n"
+        text_list += "Archie and Maxie give you 1 bonus point each for helping document newly-discovered Hoenn pokemon.\n"
         total_score += HOENN_BONUS_POINTS
     total_score_int = str(total_score.astype(int))
     text_list += "\n**TOTAL POINTS**: " + str(total_score_int) + "\n"
