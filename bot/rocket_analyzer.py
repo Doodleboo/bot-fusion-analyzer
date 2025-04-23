@@ -16,6 +16,8 @@ LIKES_LIMIT = math.ceil(25 * DIMINISHING_FACTOR)
 LOVES_LIMIT = math.ceil(46 * DIMINISHING_FACTOR)
 ROCKET_TIER_1 = BASE_POINTS + LIKES_LIMIT
 ROCKET_TIER_2 = BASE_POINTS + LOVES_LIMIT
+NEW_HOENN_DEX_NUM = 502
+HOENN_BONUS_POINTS = 2
 
 
 async def is_replying_to_rocket_grunt(message: Message) -> bool:
@@ -60,6 +62,7 @@ async def handle_rocket_analysis(message:Message) -> (Embed, int):
     if is_custom_base:
         id_number = int(ids)
         extra_points = calc_rocket_points_list(id_number)
+        hoenn_bonus = (id_number >= NEW_HOENN_DEX_NUM)
     else:
         head, body = ids.split(".")
         head_number = int(head)
@@ -67,12 +70,13 @@ async def handle_rocket_analysis(message:Message) -> (Embed, int):
         extra_points_head = calc_rocket_points_list(head_number)
         extra_points_body = calc_rocket_points_list(body_number)
         extra_points = (extra_points_head + extra_points_body) / 2
+        hoenn_bonus = (head_number >= NEW_HOENN_DEX_NUM) or (body_number >= NEW_HOENN_DEX_NUM)
 
     # Diminish factor
     extra_points = extra_points * DIMINISHING_FACTOR
     integer_points = np.ceil(extra_points)
 
-    return generate_rocket_embed(integer_points)
+    return generate_rocket_embed(integer_points, hoenn_bonus)
 
 
 def calc_rocket_points_list(id:int) -> numpy.array:
@@ -90,7 +94,7 @@ def calc_rocket_points_list(id:int) -> numpy.array:
 
 
 
-def generate_rocket_embed(integer_points: numpy.array(float)) -> (Embed, int):
+def generate_rocket_embed(integer_points: numpy.array(float), hoenn_bonus: bool=False) -> (Embed, int):
     text_list = "\n"
     i = 0
     for villain in villain_pokemon_points:
@@ -107,6 +111,9 @@ def generate_rocket_embed(integer_points: numpy.array(float)) -> (Embed, int):
 
     total_score = numpy.ceil(np.sum(integer_points)) + BASE_POINTS
     total_score_int = str(total_score.astype(int))
+    if hoenn_bonus:
+        text_list = "Axie and Maxie give you 1 bonus point each for helping document newly-discovered Hoenn pokemon.\n"
+        total_score_int += HOENN_BONUS_POINTS  # To not affect the Rainbow Rocket review
     text_list += "\n**TOTAL POINTS**: " + str(total_score_int) + "\n"
 
     if total_score <= BASE_POINTS:

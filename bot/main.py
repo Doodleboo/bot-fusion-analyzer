@@ -330,7 +330,10 @@ async def rocket_event(message:Message):
             await message.channel.send(embed=rocket_analysis)
             await message.channel.send("If you submit it to the gallery for us to acquire, you will be compensated for it.")
     elif (is_sprite_gallery(message) or is_assets_custom_base(message)) and await rocket_analyzer.author_is_rocket_grunt(message):
-        rocket_analysis, score = await rocket_analyzer.handle_rocket_analysis(message)
+        result = await rocket_analyzer.handle_rocket_analysis(message)
+        if result is None:
+            return
+        rocket_analysis, score = result
         rocket_analysis.description += f"\n[Link to message]({message.jump_url})"
         try:
             rocket_analysis.set_image(url=message.attachments[0].url)

@@ -28,13 +28,13 @@ GIOVANNI = {
 ARCHIE = {
     340: 100,# Kyogre
     437: 80,# Sharpedo
+    436: 50,# Carvanha
     503: 40,# Mightyena
     502: 30,# Poochyena
-    436: 50,# Carvanha
-    229: 30,
-    89: 30,
-    88: 10,
-    228: 10,
+    229: 30,# Houndoom
+    228: 10,# Houndour
+    89: 30,# Muk
+    88: 10,# Grimer
     169: 5,# Crobat
     42: 5,# Golbat
     41: 5,# Zubat
@@ -56,57 +56,58 @@ MAXIE = {
 }
 
 CYRUS = {
-    345: 100,
-    343: 80,
-    344: 80,
-    262: 60,
-    256: 20,
-    229: 30,
-    215: 20,
-    198: 10,
-    228: 10,
+    345: 100,# Giratina
+    343: 80,# Dialga
+    344: 80,# Palkia
+    262: 60,# Weavile
+    215: 20,# Sneasel
+    256: 20,# Honchkrow
+    198: 10,# Murkrow
+    229: 30,# Houndoom
+    228: 10,# Houndour
     169: 5,# Crobat
     42: 5,# Golbat
     41: 5,# Zubat
 }
 
 GHETSIS = {
-    351: 100,
-    362: 80,
-    331: 60,
-    330: 50,
-    349: 45,
-    350: 45,
-    377: 40,
-    376: 20,
-    375: 10
+    351: 100,# Kyurem
+    362: 80,# Cofagrigus
+    411: 50,# Yamask
+    331: 60,# Bisharp
+    330: 50,# Pawniard
+    349: 45,# Reshiram
+    350: 45,# Zekrom
+    377: 40,# Hydreigon
+    376: 20,# Zweilous
+    375: 10# Deino
 }
 
 N = {
-    338: 100,
+    338: 100,# Zoroark
+    399: 60,# Zorua
     337: 40,# Klinklang
     398: 30,# Klang
     397: 20,# Klink
-    399: 60,
-    494: 50,
-    410: 50,
+    494: 50,# Scrafty
+    493: 30,# Scraggy
+    410: 50,# Krokorok
+    361: 40,# Krookodile
+    409: 30,# Sandile
     349: 45,# Reshiram
     350: 45,# Zekrom
-    361: 40,
-    412: 30,
-    409: 30,
-    493: 30,
-    413: 20,
+    412: 30,# Joltik
+    413: 20,# Ferroseed
 }
 
 LYSSANDRE = {
-    130: 80,
-    256: 20,
+    130: 80,# Gyarados
+    129: 5,# Magikarp
+    256: 20,# Honchkrow
+    198: 10,# Murkrow
     372: 50,# Talonflame
     418: 40,# Fletchinder
     417: 20,# Fletchling
-    198: 10,
-    129: 5,
 }
 
 LUSAMINE = {
@@ -115,35 +116,35 @@ LUSAMINE = {
     36: 80,# Clefable
     35: 30,# Clefairy
     173: 10,# Cleffa
-    470: 80,
-    354: 70,
-    450: 70,
-    255: 40,# Mismagius
-    200: 10,# Misdreavus
-    403: 40,
     335: 40,# Milotic
     394: 5,# Feebas
+    470: 80,# Ultra Necrozma
+    450: 70,# Necrozma
+    354: 70,# Lopunny
+    403: 40,# Buneary
+    255: 40,# Mismagius
+    200: 10,# Misdreavus
     25: 5,# Pikachu
     26: 5,# Raichu
     172: 5,# Pichu
     79: 5,# Slowpoke
     80: 5,# Slowbro
     199: 5,# Slowking
-    121: 5,
-    126: 5,
-    209: 5,
-    402: 5,
-    370: 5,
+    121: 5,# Starmie
+    126: 5,# Magmar
+    209: 5,# Snubbull
+    402: 5,# Drifloon
+    370: 5,# Pyukumuku
 }
 
 GUZMA = {
-    475: 100,
-    168: 80,
-    127: 70,
-    474: 50,
-    123: 50,
-    455: 30,
-    167: 20,
+    475: 100,# Golisopod
+    474: 50,# Wimpod
+    168: 80,# Ariados
+    167: 20,# Spinarak
+    127: 70,# Pinsir
+    123: 50,# Scyther
+    455: 30,# Toxapex
     256: 20,
     454: 10,
     198: 10,
