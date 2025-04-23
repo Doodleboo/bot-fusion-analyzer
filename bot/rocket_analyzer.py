@@ -95,25 +95,25 @@ def calc_rocket_points_list(id:int) -> numpy.array:
 
 
 def generate_rocket_embed(integer_points: numpy.array(float), hoenn_bonus: bool=False) -> (Embed, int):
-    text_list = "\n"
+    text_list = "\nBase points: " + str(BASE_POINTS) + "\n"
     i = 0
     for villain in villain_pokemon_points:
         name = villain
-        score = integer_points[i]
+        score = integer_points[i].astype(int)
         if score > 0:
             if score <= LIKES_LIMIT:
-                text_list += name + " likes it.\n"
+                text_list += name + " likes it. (+" + str(score) + ")\n"
             elif score <= LOVES_LIMIT:
-                text_list += name + " loves it!\n"
+                text_list += name + " loves it! (+" + str(score) + ")\n"
             else:
-                text_list += "It's among " + name + "'s favorites!\n"
+                text_list += "It's among " + name + "'s favorites! (+" + str(score) + ")\n"
         i += 1
 
     total_score = numpy.ceil(np.sum(integer_points)) + BASE_POINTS
-    total_score_int = str(total_score.astype(int))
     if hoenn_bonus:
-        text_list = "Axie and Maxie give you 1 bonus point each for helping document newly-discovered Hoenn pokemon.\n"
-        total_score_int += HOENN_BONUS_POINTS  # To not affect the Rainbow Rocket review
+        text_list = "Archie and Maxie give you 1 bonus point each for helping document newly-discovered Hoenn pokemon.\n"
+        total_score += HOENN_BONUS_POINTS
+    total_score_int = str(total_score.astype(int))
     text_list += "\n**TOTAL POINTS**: " + str(total_score_int) + "\n"
 
     if total_score <= BASE_POINTS:
