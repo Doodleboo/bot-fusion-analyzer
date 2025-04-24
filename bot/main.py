@@ -1,5 +1,5 @@
 # coding: utf-8
-
+import asyncio
 import os
 
 import discord
@@ -157,7 +157,11 @@ async def handle_gallery(message: Message, is_assets: bool = False):
                 await message.add_reaction(ERROR_EMOJI)
             except HTTPException:
                 await message.add_reaction("😡")  # Nani failsafe
-        await send_bot_logs(analysis, message.author.id)
+        try:
+            await send_bot_logs(analysis, message.author.id)
+        except HTTPException:  # Rate limit
+            await asyncio.sleep(300)
+            await send_bot_logs(analysis, message.author.id)
 
 
 async def handle_reply_message(message: Message, old_bot: bool = False):
