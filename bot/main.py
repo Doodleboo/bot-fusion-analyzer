@@ -9,7 +9,7 @@ import random
 import rocket_analyzer
 from analysis import generate_bonus_file
 from analyzer import Analysis, generate_analysis
-from discord import Client, PartialEmoji, app_commands, HTTPException
+from discord import Client, PartialEmoji, app_commands, HTTPException, Thread
 from discord.channel import TextChannel
 from discord.guild import Guild
 from discord.message import Message
@@ -53,7 +53,7 @@ id_channel_logs_pif = 1360969318296322328 #999653562202214450
 id_channel_debug_pif = 1360969318296322328 #703351286019653762
 id_channel_events_pif = 1360969318296322328 #737765817474744350
 id_channel_zigzag_pif = 1360969318296322328 #1332161834605875200
-id_channel_spritework_pif = 1050404143807873157     # Just to check if the  channel is spritework
+id_forum_spritework_pif = 1050404143807873157     # Just to check if the  channel is spritework
 
 
 def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
@@ -323,12 +323,21 @@ async def get_reply_message(message: Message):
 
 
 async def rocket_event(message:Message):
-    if is_mentioning_reply(message) and (message.channel.id == id_channel_spritework_pif) and await rocket_analyzer.is_replying_to_rocket_grunt(message):
+    if is_mentioning_reply(message) and await rocket_analyzer.is_replying_to_rocket_grunt(message):
+        print(f"Channel ID: {message.channel.id}")
+        if not isinstance(message.channel, Thread):
+            return
+
+        forum_id = message.channel.parent_id
+        if forum_id != id_forum_spritework_pif:
+            return
+
         replied_message = await get_reply_message(message)
         result = await rocket_analyzer.handle_rocket_analysis(replied_message)
         if result is not None:
             rocket_analysis, score = result
             await message.channel.send(embed=rocket_analysis)
+
     elif (is_sprite_gallery(message) or is_assets_custom_base(message)) and await rocket_analyzer.author_is_rocket_grunt(message):
         result = await rocket_analyzer.handle_rocket_analysis(message)
         if result is None:
