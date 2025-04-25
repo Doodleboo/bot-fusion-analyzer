@@ -5,7 +5,6 @@ import os
 import discord
 import utils
 import command_actions
-import random
 from analysis import generate_bonus_file
 from analyzer import Analysis, generate_analysis
 from discord import Client, PartialEmoji, app_commands, HTTPException
@@ -22,7 +21,6 @@ ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-OLD_FUSION_BOT_ID = 836686828215992430
 
 intents = discord.Intents.default()
 intents.guild_messages = True
@@ -164,13 +162,9 @@ async def handle_gallery(message: Message, is_assets: bool = False):
             await send_bot_logs(analysis, message.author.id)
 
 
-async def handle_reply_message(message: Message, old_bot: bool = False):
-    if not old_bot:
-        utils.log_event("R>", message)
-        channel = message.channel
-    else:
-        utils.log_event("OLD_R>", message)
-        channel = message.channel
+async def handle_reply_message(message: Message):
+    utils.log_event("R>", message)
+    channel = message.channel
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, True)
         try:
@@ -186,10 +180,7 @@ async def handle_reply_message(message: Message, old_bot: bool = False):
                     file=generate_bonus_file(analysis.half_pixels_image)
                 )
         except discord.Forbidden:
-            if not old_bot:
-                print(f"R> Missing permissions in {channel}")
-            else:
-                print(f"OLD_R> Missing permissions in {channel}")
+            print(f"R> Missing permissions in {channel}")
 
 
 @tree.command(name="help", description="Fusion bot help")
@@ -240,9 +231,7 @@ async def on_message(message: Message):
         elif is_assets_custom_base(message):
             await handle_assets_gallery(message)
         elif is_mentioning_reply(message):
-            await handle_reply(message, old_bot=False)
-        elif is_mentioning_old_bot(message) and is_reply(message):
-            await handle_reply(message, old_bot=True)
+            await handle_reply(message)
 
     except Exception as message_exception:
         print(" ")
@@ -288,18 +277,9 @@ def is_mentioning_bot(message: Message):
     return result
 
 
-def is_mentioning_old_bot(message: Message):
-    result = False
-    for user in message.mentions:
-        if OLD_FUSION_BOT_ID == user.id:
-            result = True
-            break
-    return result
-
-
-async def handle_reply(message: Message, old_bot: bool):
+async def handle_reply(message: Message):
     reply_message = await get_reply_message(message)
-    await handle_reply_message(reply_message, old_bot)
+    await handle_reply_message(reply_message)
 
 
 async def get_reply_message(message: Message):
