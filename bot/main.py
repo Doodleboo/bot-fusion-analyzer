@@ -353,7 +353,7 @@ async def rocket_event(message:Message):
         except Exception:
             print("Exception setting image in Rocket Analyzer")
 
-        await ctx().pif.events.send(embed=rocket_analysis)
+        await ctx().pif.logs.send(embed=rocket_analysis)
         #await ctx().pif.zigzag.send(f"{{“user”: {message.author.display_name}, “points”: {int(score)}}}")
         await ctx().pif.zigzag.send(f"!cyrus-grant-points {message.author.id} {int(score)}")
 
