@@ -7,7 +7,7 @@ import utils
 import command_actions
 from analysis import generate_bonus_file
 from analyzer import Analysis, generate_analysis
-from discord import Client, PartialEmoji, app_commands, HTTPException
+from discord import Client, PartialEmoji, app_commands, HTTPException, Thread, ForumChannel
 from discord.channel import TextChannel
 from discord.guild import Guild
 from discord.message import Message
@@ -43,11 +43,12 @@ id_channel_assets_doodledoo = 1363610399064330480
 id_channel_logs_doodledoo = 1360969318296322328  # Here, debug and logs share a channel
 
 # Pokémon Infinite Fusion
-id_server_pif = 446241769462562827 #302153478556352513
-id_channel_gallery_pif = 1360964111718158498 #543958354377179176
-id_channel_assets_pif = 1363610399064330480 #1094790320891371640
-id_channel_logs_pif = 1360969318296322328 #999653562202214450
-id_channel_debug_pif = 1360969318296322328 #703351286019653762
+id_server_pif           = 446241769462562827 #302153478556352513
+id_channel_gallery_pif  = 1360964111718158498 #543958354377179176
+id_channel_assets_pif   = 1363610399064330480 #1094790320891371640
+id_channel_logs_pif     = 1360969318296322328 #999653562202214450
+id_channel_debug_pif    = 1360969318296322328 #703351286019653762
+id_spriter_apps_pif     = 1365804567127916655 #1134483288703119361
 
 
 # Commands and bot events
@@ -113,6 +114,33 @@ async def on_message(message: Message):
         await ctx().doodledoo.debug.send(
             f"{ping_doodledoo}/{ping_author} : {error_message} #{message.channel} ({message.jump_url})")  # type: ignore
         raise RuntimeError from message_exception
+
+
+@bot.event
+async def on_thread_create(thread: Thread):
+    if thread.parent.type != discord.ChannelType.forum:
+        return
+
+    if thread.parent_id != id_spriter_apps_pif:
+        return
+
+    await asyncio.sleep(10)
+    try:
+        application_message = await thread.fetch_message(thread.id)
+    except discord.errors.NotFound:
+        last_message_id = thread.last_message_id
+        try:
+            application_message = await thread.fetch_message(last_message_id)
+        except discord.errors.NotFound:
+            print("Discord returned Not Found twice")
+            return
+    except discord.errors.Forbidden:
+        print("Discord returned Forbidden while fetching thread message")
+        return
+    if application_message is None:
+        print("Could not fetch message on thread creation")
+        return
+    await handle_reply_message(application_message)
 
 
 
@@ -272,6 +300,15 @@ def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
     return channel
 
 
+def get_forum_from_id(server: Guild, channel_id) -> ForumChannel:
+    channel = server.get_channel(channel_id)
+    if channel is None:
+        raise KeyError(channel_id)
+    if not isinstance(channel, ForumChannel):
+        raise TypeError(channel)
+    return channel
+
+
 def get_server_from_id(client: Client, server_id) -> Guild:
     server = client.get_guild(server_id)
     if server is None:
@@ -298,12 +335,14 @@ class BotContext:
         channel_gallery_pif = get_channel_from_id(server_pif, id_channel_gallery_pif)
         channel_log_pif = get_channel_from_id(server_pif, id_channel_logs_pif)
         channel_debug_pif = get_channel_from_id(server_pif, id_channel_debug_pif)
+        spriter_apps_pif = get_forum_from_id(server_pif, id_spriter_apps_pif)
 
         pif_context = ServerContext(
             server=server_pif,
             gallery=channel_gallery_pif,
             logs=channel_log_pif,
-            debug=channel_debug_pif
+            debug=channel_debug_pif,
+            spriter_apps=spriter_apps_pif
         )
 
         self.context = GlobalContext(

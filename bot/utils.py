@@ -112,9 +112,9 @@ def get_filename(analysis: Analysis):
 
 def get_attachment_url(analysis: Analysis):
     if analysis.type.is_zigzag_galpost():
-        return get_attachment_url_from_message(analysis)
-    else:
         return get_attachment_url_from_embed(analysis)
+    else:
+        return get_attachment_url_from_message(analysis)
 
 
 def get_attachment_url_from_message(analysis: Analysis):
