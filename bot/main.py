@@ -34,7 +34,7 @@ bot_avatar_url = None
 bot_context = None
 
 ping_doodledoo = "<@!171301358186659841>"
-ZIGZAG_ID = 1185671488611819560
+ZIGZAG_ID = 1185671488611819560 #1185671488611819560
 
 # Doodledoo test server
 id_server_doodledoo = 446241769462562827
@@ -151,6 +151,22 @@ async def handle_gallery(message: Message, is_assets: bool = False):
             await send_bot_logs(analysis, message.author.id)
 
 
+async def handle_zigzag_galpost(message: Message):
+    utils.log_event("ZG>", message)
+
+    if is_assets_gallery(message):
+        analysis_type = AnalysisType.zigzag_base
+    else:
+        analysis_type = AnalysisType.zigzag_fusion
+
+    analysis = generate_analysis(message, specific_attachment=None, analysis_type=analysis_type)
+    if analysis.severity in MAX_SEVERITY:
+        ping_zigzagoon = "<@&1182898845563228232>"
+        await ctx().pif.logs.send(embed=analysis.embed, content=ping_zigzagoon)
+    else:
+        await ctx().pif.logs.send(embed=analysis.embed)
+
+
 async def handle_reply_message(message: Message):
     utils.log_event("R>", message)
     channel = message.channel
@@ -170,10 +186,6 @@ async def handle_reply_message(message: Message):
                 )
         except discord.Forbidden:
             print(f"R> Missing permissions in {channel}")
-
-
-async def handle_zigzag_galpost(message: Message):
-    utils.log_event("ZG>", message)
 
 
 

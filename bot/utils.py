@@ -111,9 +111,25 @@ def get_filename(analysis: Analysis):
 
 
 def get_attachment_url(analysis: Analysis):
+    if analysis.type.is_zigzag_galpost():
+        return get_attachment_url_from_message(analysis)
+    else:
+        return get_attachment_url_from_embed(analysis)
+
+
+def get_attachment_url_from_message(analysis: Analysis):
     if analysis.specific_attachment is None:
         return analysis.message.attachments[0].url
     return analysis.specific_attachment.url
+
+
+def get_attachment_url_from_embed(analysis: Analysis):
+    if not analysis.message.embeds:
+        return None
+    embed = analysis.message.embeds[0]
+    if embed.image is None:
+        return None
+    return embed.image.url
 
 
 def interesting_results(results: list):
@@ -147,6 +163,12 @@ def have_egg_in_message(message: Message):
 
 def have_attachment(analysis: Analysis):
     return len(analysis.message.attachments) >= 1
+
+
+def have_zigzag_embed(analysis: Analysis) -> bool:
+    if not analysis.type.is_zigzag_galpost():
+        return False
+    return analysis.embed is not None
 
 
 def is_missing_autogen(fusion_id: str):

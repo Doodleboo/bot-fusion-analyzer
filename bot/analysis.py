@@ -111,11 +111,13 @@ class Analysis:
         if self.attachment_url is not None:
             self.embed.set_thumbnail(url=self.attachment_url)
 
+
 def get_bonus_embed(discord_colour:Colour):
     bonus_embed = Embed()
     bonus_embed.colour = discord_colour
     bonus_embed.set_image(url="attachment://image.png")
     return bonus_embed
+
 
 def generate_bonus_file(image:Image):
     if image is None:
