@@ -6,7 +6,8 @@ from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
                     ColorExcessRefused, ColorOverExcess, GraphicsGaleUser,
                     HalfPixelsAmount, InvalidSize, MissingTransparency,
                     SimilarityAmount, TransparencyAmount, CustomBase,
-                    SimilarityExcessControversial, SimilarityExcessRefused)
+                    SimilarityExcessControversial, SimilarityExcessRefused,
+                    MisplacedGrid)
 
 # Pillow
 from PIL.Image import open as image_open
@@ -128,7 +129,7 @@ class SpriteContext():
     def handle_color_similarity(self, analysis: Analysis):
         similarity_amount = self.get_similarity_amount()
         analysis.issues.add(SimilarityAmount(similarity_amount))
-        if (similarity_amount > self.refused_sim_lim):
+        if similarity_amount > self.refused_sim_lim:
             analysis.severity = Severity.refused
             analysis.issues.add(SimilarityExcessRefused(self.refused_sim_lim))
         elif (similarity_amount > self.controv_sim_lim) and (analysis.severity is not Severity.refused):
@@ -184,13 +185,26 @@ class SpriteContext():
         return similarity_amount
 
     def handle_sprite_half_pixels(self, analysis: Analysis):
-        if analysis.size_issue is False:
-            half_pixels_amount, image = self.highlight_half_pixels()
-            if half_pixels_amount > 0:
-                analysis.half_pixels_issue = True
-                analysis.half_pixels_image = image
-                analysis.severity = Severity.refused
-                analysis.issues.add(HalfPixelsAmount(half_pixels_amount))
+        if analysis.size_issue is True:
+            return
+
+        half_pixels_amount, image = self.highlight_half_pixels(strict_grid=True)
+        if half_pixels_amount == 0:
+            return
+
+        # If the strict search returns half pixels, double check to check
+        # if they are real, or it's just that the grid doesn't align
+        lax_half_pixels_amount = self.highlight_half_pixels(strict_grid=False)[0]
+        if lax_half_pixels_amount > 0:
+            analysis.half_pixels_issue = True
+            analysis.half_pixels_image = image
+            analysis.severity = Severity.refused
+            analysis.issues.add(HalfPixelsAmount(half_pixels_amount))
+        else:
+            if analysis.severity != Severity.refused:
+                analysis.severity = Severity.controversial
+            analysis.issues.add(MisplacedGrid())
+
 
     def highlight_transparency(self) -> tuple[int, Image]:
         """# TransparencyException"""
@@ -217,10 +231,13 @@ class SpriteContext():
             raise TransparencyException
         return transparency_amount, local_image
 
-    def highlight_half_pixels(self) -> tuple[int, Image]:
+    def highlight_half_pixels(self, strict_grid:bool = False) -> tuple[int, Image]:
         local_image = new("RGBA", (MAX_SIZE, MAX_SIZE))
         local_pixels = get_pixels(local_image)
-        (delta_i, delta_j) = find_first_pixel(self.pixels)
+        if strict_grid:
+            (delta_i, delta_j) = (0,0)
+        else:
+            (delta_i, delta_j) = find_first_pixel(self.pixels)
         max_i = 288 - (STEP - delta_i)
         max_j = 288 - (STEP - delta_j)
         half_pixels_amount = 0

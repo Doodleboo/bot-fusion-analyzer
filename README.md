@@ -9,6 +9,10 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - **Greystorm** for giving permission to use various utilities from spritebot
 
 # Changelog
+## Version 2.1
+- New Hoenn dex numbers
+- **Zigzag** posts in the galleries will now be analyzed
+
 ## Version 2.0
 - **Similarity score** now works with **indexed mode** sprites (previously it was always 0)
 - **Pokemon names** are now displayed when the dex IDs are valid

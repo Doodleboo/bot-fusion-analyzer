@@ -241,3 +241,7 @@ class PokemonNames(Issue):
 
     def __str__(self) -> str:
         return f"{self.head_name}/{self.body_name}"
+
+class MisplacedGrid(Issue):
+    description = Description.misplaced_grid
+    severity = Severity.controversial
