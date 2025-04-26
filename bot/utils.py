@@ -47,9 +47,6 @@ RAW_GITLAB = "https://gitlab.com"
 AUTOGEN_FUSION_URL = f"{RAW_GITLAB}/pokemoninfinitefusion/autogen-fusion-sprites/-/raw/master/Battlers/"
 QUESTION_URL = f"{RAW_GITHUB}/Doodleboo/bot-fusion-analyzer/main/bot/question.png"
 
-YAGPDB_ID = 204255221017214977
-ZIGZAG_ID = 1185671488611819560
-
 LCB = "{"
 RCB = "}"
 
@@ -96,9 +93,8 @@ def get_channel_name_from_interaction(interaction: Interaction):
     return channel_name
 
 
-# is_message_not_from_a_bot
-def is_message_from_human(message: Message, fusion_bot_id: int | None):
-    return message.author.id not in (fusion_bot_id, YAGPDB_ID, ZIGZAG_ID)
+def is_message_from_itself(message: Message, fusion_bot_id: int | None):
+    return message.author.id == fusion_bot_id
 
 
 def get_thread(message: Message) -> (Thread | None):
@@ -115,9 +111,25 @@ def get_filename(analysis: Analysis):
 
 
 def get_attachment_url(analysis: Analysis):
+    if analysis.type.is_zigzag_galpost():
+        return get_attachment_url_from_message(analysis)
+    else:
+        return get_attachment_url_from_embed(analysis)
+
+
+def get_attachment_url_from_message(analysis: Analysis):
     if analysis.specific_attachment is None:
         return analysis.message.attachments[0].url
     return analysis.specific_attachment.url
+
+
+def get_attachment_url_from_embed(analysis: Analysis):
+    if not analysis.message.embeds:
+        return None
+    embed = analysis.message.embeds[0]
+    if embed.image is None:
+        return None
+    return embed.image.url
 
 
 def interesting_results(results: list):
@@ -151,6 +163,12 @@ def have_egg_in_message(message: Message):
 
 def have_attachment(analysis: Analysis):
     return len(analysis.message.attachments) >= 1
+
+
+def have_zigzag_embed(analysis: Analysis) -> bool:
+    if not analysis.type.is_zigzag_galpost():
+        return False
+    return analysis.embed is not None
 
 
 def is_missing_autogen(fusion_id: str):
