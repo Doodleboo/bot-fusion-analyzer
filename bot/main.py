@@ -50,6 +50,203 @@ id_channel_logs_pif = 1360969318296322328 #999653562202214450
 id_channel_debug_pif = 1360969318296322328 #703351286019653762
 
 
+# Commands and bot events
+
+@tree.command(name="help", description="Fusion bot help")
+async def help_command(interaction: discord.Interaction):
+    utils.log_command("C>", interaction, "/help")
+    await command_actions.help_action(interaction)
+
+
+@tree.command(name="similar", description="Get the list of similar colors")
+async def similar_command(interaction: discord.Interaction, sprite: discord.Attachment):
+    utils.log_command("C>", interaction, "/similar")
+    await command_actions.similar_action(interaction, sprite)
+
+
+@bot.event
+async def on_ready():
+    await tree.sync()
+
+    global bot_id
+    app_info = await bot.application_info()
+    bot_id = app_info.id
+    permission_id = "17179929600"
+
+    global bot_avatar_url
+
+    bot_user = bot.user
+    if bot_user is not None:
+        bot_avatar_url = utils.get_display_avatar(bot_user).url
+
+    global bot_context
+    bot_context = BotContext(bot)
+
+    invite_parameters = f"client_id={str(bot_id)}&permissions={permission_id}&scope=bot"
+    invite_link = f"https://discordapp.com/api/oauth2/authorize?{invite_parameters}"
+    print(f"\n\nReady! bot invite:\n\n{invite_link}\n\n")
+
+    await ctx().doodledoo.logs.send(content="Bot online")
+
+
+@bot.event
+async def on_message(message: Message):
+    try:
+        if utils.is_message_from_itself(message, bot_id):
+            return
+
+        if is_zigzag_galpost(message):
+            await handle_zigzag_galpost(message)
+        elif is_sprite_gallery(message):
+            await handle_sprite_gallery(message)
+        elif is_assets_custom_base(message):
+            await handle_assets_gallery(message)
+        elif is_mentioning_reply(message):
+            await handle_reply(message)
+
+    except Exception as message_exception:
+        print(" ")
+        print(message)
+        print(" ")
+        ping_author = f"<@!{message.author.id}>"
+        error_message = "An error occurred while processing your message from"
+        await ctx().doodledoo.debug.send(
+            f"{ping_doodledoo}/{ping_author} : {error_message} #{message.channel} ({message.jump_url})")  # type: ignore
+        raise RuntimeError from message_exception
+
+
+
+# Handler methods
+
+
+async def handle_sprite_gallery(message: Message):
+    await handle_gallery(message, is_assets=False)
+
+
+async def handle_assets_gallery(message: Message):
+    await handle_gallery(message, is_assets=True)
+
+
+async def handle_gallery(message: Message, is_assets: bool = False):
+    if is_assets:
+        utils.log_event("AG>", message)
+    else:
+        utils.log_event("SG>", message)
+
+    for specific_attachment in message.attachments:
+        analysis = generate_analysis(message, specific_attachment, is_reply=False, is_assets=is_assets)
+        if analysis.severity in MAX_SEVERITY:
+            try:
+                await message.add_reaction(ERROR_EMOJI)
+            except HTTPException:
+                await message.add_reaction("😡")  # Nani failsafe
+        try:
+            await send_bot_logs(analysis, message.author.id)
+        except HTTPException:  # Rate limit
+            await asyncio.sleep(300)
+            await send_bot_logs(analysis, message.author.id)
+
+
+async def handle_reply_message(message: Message):
+    utils.log_event("R>", message)
+    channel = message.channel
+    for specific_attachment in message.attachments:
+        analysis = generate_analysis(message, specific_attachment, True)
+        try:
+            await channel.send(embed=analysis.embed)
+            if analysis.transparency_issue:
+                await channel.send(
+                    embed=analysis.transparency_embed,
+                    file=generate_bonus_file(analysis.transparency_image)
+                )
+            if analysis.half_pixels_issue:
+                await channel.send(
+                    embed=analysis.half_pixels_embed,
+                    file=generate_bonus_file(analysis.half_pixels_image)
+                )
+        except discord.Forbidden:
+            print(f"R> Missing permissions in {channel}")
+
+
+async def handle_zigzag_galpost(message: Message):
+    utils.log_event("ZG>", message)
+
+
+
+# Message identifying methods
+
+
+def is_sprite_gallery(message: Message):
+    return message.channel.id == id_channel_gallery_pif
+
+
+def is_assets_custom_base(message: Message):
+    return is_assets_gallery(message) and utils.have_custom_base_in_message(message)
+
+
+def is_assets_gallery(message: Message):
+    return message.channel.id == id_channel_assets_pif
+
+
+def is_test_gallery(message: Message):
+    return message.channel.id == id_channel_gallery_doodledoo
+
+
+def is_mentioning_reply(message: Message):
+    return is_mentioning_bot(message) and is_reply(message)
+
+
+def is_reply(message: Message):
+    return message.reference is not None
+
+
+def is_zigzag_galpost(message: Message):
+    return is_zigzag_message(message) and (is_sprite_gallery(message) or is_assets_gallery(message))
+
+
+def is_zigzag_message(message: Message):
+    return message.author.id == ZIGZAG_ID
+
+
+def is_mentioning_bot(message: Message):
+    result = False
+    for user in message.mentions:
+        if bot_id == user.id:
+            result = True
+            break
+    return result
+
+
+async def handle_reply(message: Message):
+    reply_message = await get_reply_message(message)
+    await handle_reply_message(reply_message)
+
+
+
+# Message and channel utilities
+
+
+async def get_reply_message(message: Message):
+    if message.reference is None:
+        raise RuntimeError(message)
+
+    reply_id = message.reference.message_id
+    if reply_id is None:
+        raise RuntimeError(message)
+
+    return await message.channel.fetch_message(reply_id)
+
+
+def get_user(user_id) -> (User | None):
+    return bot.get_user(user_id)
+
+
+def get_discord_token():
+    token_dir = os.path.join(CURRENT_DIR, "..", "token", "discord.txt")
+    token = open(token_dir).read().rstrip()
+    return token
+
+
 def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
     channel = server.get_channel(channel_id)
     if channel is None:
@@ -65,6 +262,8 @@ def get_server_from_id(client: Client, server_id) -> Guild:
         raise KeyError(server_id)
     return server
 
+
+# BotContext and sending methods
 
 class BotContext:
     def __init__(self, client: Client):
@@ -132,185 +331,6 @@ async def send_with_content(analysis: Analysis, author_id: int):
 
 async def send_without_content(analysis: Analysis):
     await ctx().pif.logs.send(embed=analysis.embed)
-
-
-async def handle_sprite_gallery(message: Message):
-    await handle_gallery(message, is_assets=False)
-
-
-async def handle_assets_gallery(message: Message):
-    await handle_gallery(message, is_assets=True)
-
-
-async def handle_gallery(message: Message, is_assets: bool = False):
-    if is_assets:
-        utils.log_event("AG>", message)
-    else:
-        utils.log_event("SG>", message)
-
-    for specific_attachment in message.attachments:
-        analysis = generate_analysis(message, specific_attachment, is_reply=False, is_assets=is_assets)
-        if analysis.severity in MAX_SEVERITY:
-            try:
-                await message.add_reaction(ERROR_EMOJI)
-            except HTTPException:
-                await message.add_reaction("😡")  # Nani failsafe
-        try:
-            await send_bot_logs(analysis, message.author.id)
-        except HTTPException:  # Rate limit
-            await asyncio.sleep(300)
-            await send_bot_logs(analysis, message.author.id)
-
-
-async def handle_reply_message(message: Message):
-    utils.log_event("R>", message)
-    channel = message.channel
-    for specific_attachment in message.attachments:
-        analysis = generate_analysis(message, specific_attachment, True)
-        try:
-            await channel.send(embed=analysis.embed)
-            if analysis.transparency_issue:
-                await channel.send(
-                    embed=analysis.transparency_embed,
-                    file=generate_bonus_file(analysis.transparency_image)
-                )
-            if analysis.half_pixels_issue:
-                await channel.send(
-                    embed=analysis.half_pixels_embed,
-                    file=generate_bonus_file(analysis.half_pixels_image)
-                )
-        except discord.Forbidden:
-            print(f"R> Missing permissions in {channel}")
-
-
-@tree.command(name="help", description="Fusion bot help")
-async def help_command(interaction: discord.Interaction):
-    utils.log_command("C>", interaction, "/help")
-    await command_actions.help_action(interaction)
-
-
-@tree.command(name="similar", description="Get the list of similar colors")
-async def similar_command(interaction: discord.Interaction, sprite: discord.Attachment):
-    utils.log_command("C>", interaction, "/similar")
-    await command_actions.similar_action(interaction, sprite)
-
-
-@bot.event
-async def on_ready():
-    await tree.sync()
-
-    global bot_id
-    app_info = await bot.application_info()
-    bot_id = app_info.id
-    permission_id = "17179929600"
-
-    global bot_avatar_url
-
-    bot_user = bot.user
-    if bot_user is not None:
-        bot_avatar_url = utils.get_display_avatar(bot_user).url
-
-    global bot_context
-    bot_context = BotContext(bot)
-
-    invite_parameters = f"client_id={str(bot_id)}&permissions={permission_id}&scope=bot"
-    invite_link = f"https://discordapp.com/api/oauth2/authorize?{invite_parameters}"
-    print(f"\n\nReady! bot invite:\n\n{invite_link}\n\n")
-
-    await ctx().doodledoo.logs.send(content="Bot online")
-
-
-@bot.event
-async def on_message(message: Message):
-    try:
-        if utils.is_message_from_itself(message, bot_id):
-            return
-
-        if is_zigzag_galpost(message):
-            pass
-        elif is_sprite_gallery(message):
-            await handle_sprite_gallery(message)
-        elif is_assets_custom_base(message):
-            await handle_assets_gallery(message)
-        elif is_mentioning_reply(message):
-            await handle_reply(message)
-
-    except Exception as message_exception:
-        print(" ")
-        print(message)
-        print(" ")
-        ping_author = f"<@!{message.author.id}>"
-        error_message = "An error occurred while processing your message from"
-        await ctx().doodledoo.debug.send(
-            f"{ping_doodledoo}/{ping_author} : {error_message} #{message.channel} ({message.jump_url})")  # type: ignore
-        raise RuntimeError from message_exception
-
-
-def is_sprite_gallery(message: Message):
-    return message.channel.id == id_channel_gallery_pif
-
-
-def is_assets_custom_base(message: Message):
-    return is_assets_gallery(message) and utils.have_custom_base_in_message(message)
-
-
-def is_assets_gallery(message: Message):
-    return message.channel.id == id_channel_assets_pif
-
-
-def is_test_gallery(message: Message):
-    return message.channel.id == id_channel_gallery_doodledoo
-
-
-def is_mentioning_reply(message: Message):
-    return is_mentioning_bot(message) and is_reply(message)
-
-
-def is_reply(message: Message):
-    return message.reference is not None
-
-
-def is_zigzag_galpost(message: Message):
-    return is_zigzag_message(message) and (is_sprite_gallery(message) or is_assets_gallery(message))
-
-
-def is_zigzag_message(message: Message):
-    return message.author.id == ZIGZAG_ID
-
-
-def is_mentioning_bot(message: Message):
-    result = False
-    for user in message.mentions:
-        if bot_id == user.id:
-            result = True
-            break
-    return result
-
-
-async def handle_reply(message: Message):
-    reply_message = await get_reply_message(message)
-    await handle_reply_message(reply_message)
-
-
-async def get_reply_message(message: Message):
-    if message.reference is None:
-        raise RuntimeError(message)
-
-    reply_id = message.reference.message_id
-    if reply_id is None:
-        raise RuntimeError(message)
-
-    return await message.channel.fetch_message(reply_id)
-
-
-def get_user(user_id) -> (User | None):
-    return bot.get_user(user_id)
-
-
-def get_discord_token():
-    token_dir = os.path.join(CURRENT_DIR, "..", "token", "discord.txt")
-    token = open(token_dir).read().rstrip()
-    return token
 
 
 if __name__ == "__main__":
