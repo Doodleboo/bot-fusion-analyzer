@@ -47,9 +47,6 @@ RAW_GITLAB = "https://gitlab.com"
 AUTOGEN_FUSION_URL = f"{RAW_GITLAB}/pokemoninfinitefusion/autogen-fusion-sprites/-/raw/master/Battlers/"
 QUESTION_URL = f"{RAW_GITHUB}/Doodleboo/bot-fusion-analyzer/main/bot/question.png"
 
-YAGPDB_ID = 204255221017214977
-ZIGZAG_ID = 1185671488611819560
-
 LCB = "{"
 RCB = "}"
 
@@ -96,9 +93,8 @@ def get_channel_name_from_interaction(interaction: Interaction):
     return channel_name
 
 
-# is_message_not_from_a_bot
-def is_message_from_human(message: Message, fusion_bot_id: int | None):
-    return message.author.id not in (fusion_bot_id, YAGPDB_ID, ZIGZAG_ID)
+def is_message_from_itself(message: Message, fusion_bot_id: int | None):
+    return message.author.id == fusion_bot_id
 
 
 def get_thread(message: Message) -> (Thread | None):

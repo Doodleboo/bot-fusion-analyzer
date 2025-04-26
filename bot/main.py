@@ -34,7 +34,7 @@ bot_avatar_url = None
 bot_context = None
 
 ping_doodledoo = "<@!171301358186659841>"
-worksheet_name = "Full dex"
+ZIGZAG_ID = 1185671488611819560
 
 # Doodledoo test server
 id_server_doodledoo = 446241769462562827
@@ -223,10 +223,12 @@ async def on_ready():
 @bot.event
 async def on_message(message: Message):
     try:
-        if not utils.is_message_from_human(message, bot_id):
+        if utils.is_message_from_itself(message, bot_id):
             return
 
-        if is_sprite_gallery(message):
+        if is_zigzag_galpost(message):
+            pass
+        elif is_sprite_gallery(message):
             await handle_sprite_gallery(message)
         elif is_assets_custom_base(message):
             await handle_assets_gallery(message)
@@ -266,6 +268,14 @@ def is_mentioning_reply(message: Message):
 
 def is_reply(message: Message):
     return message.reference is not None
+
+
+def is_zigzag_galpost(message: Message):
+    return is_zigzag_message(message) and (is_sprite_gallery(message) or is_assets_gallery(message))
+
+
+def is_zigzag_message(message: Message):
+    return message.author.id == ZIGZAG_ID
 
 
 def is_mentioning_bot(message: Message):
