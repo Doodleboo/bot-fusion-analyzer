@@ -12,6 +12,7 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 ## Version 2.1
 - New Hoenn dex numbers
 - **Zigzag** posts in the galleries will now be analyzed
+- It will now detect when there's no hal pixels but it doesn't adhere to the grid
 
 ## Version 2.0
 - **Similarity score** now works with **indexed mode** sprites (previously it was always 0)
