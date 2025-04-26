@@ -37,18 +37,29 @@ ping_doodledoo = "<@!171301358186659841>"
 ZIGZAG_ID = 1185671488611819560 #1185671488611819560
 
 # Doodledoo test server
-id_server_doodledoo = 446241769462562827
+id_server_doodledoo          = 446241769462562827
 id_channel_gallery_doodledoo = 1360964111718158498
-id_channel_assets_doodledoo = 1363610399064330480
-id_channel_logs_doodledoo = 1360969318296322328  # Here, debug and logs share a channel
+id_channel_assets_doodledoo  = 1363610399064330480
+id_channel_logs_doodledoo    = 1360969318296322328  # Here, debug and logs share a channel
+
+local_environment = True
 
 # Pokémon Infinite Fusion
-id_server_pif           = 446241769462562827 #302153478556352513
-id_channel_gallery_pif  = 1360964111718158498 #543958354377179176
-id_channel_assets_pif   = 1363610399064330480 #1094790320891371640
-id_channel_logs_pif     = 1360969318296322328 #999653562202214450
-id_channel_debug_pif    = 1360969318296322328 #703351286019653762
-id_spriter_apps_pif     = 1365804567127916655 #1134483288703119361
+if local_environment:
+    id_server_pif           = 446241769462562827
+    id_channel_gallery_pif  = 1360964111718158498
+    id_channel_assets_pif   = 1363610399064330480
+    id_channel_logs_pif     = 1360969318296322328
+    id_channel_debug_pif    = 1360969318296322328
+    id_spriter_apps_pif     = 1365804567127916655
+else:
+    id_server_pif           = 302153478556352513
+    id_channel_gallery_pif  = 543958354377179176
+    id_channel_assets_pif   = 1094790320891371640
+    id_channel_logs_pif     = 999653562202214450
+    id_channel_debug_pif    = 703351286019653762
+    id_spriter_apps_pif     = 1134483288703119361
+
 
 
 # Commands and bot events
@@ -300,15 +311,6 @@ def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
     return channel
 
 
-def get_forum_from_id(server: Guild, channel_id) -> ForumChannel:
-    channel = server.get_channel(channel_id)
-    if channel is None:
-        raise KeyError(channel_id)
-    if not isinstance(channel, ForumChannel):
-        raise TypeError(channel)
-    return channel
-
-
 def get_server_from_id(client: Client, server_id) -> Guild:
     server = client.get_guild(server_id)
     if server is None:
@@ -321,28 +323,22 @@ def get_server_from_id(client: Client, server_id) -> Guild:
 class BotContext:
     def __init__(self, client: Client):
         server_doodledoo = get_server_from_id(client, id_server_doodledoo)
-        channel_gallery_doodledoo = get_channel_from_id(server_doodledoo, id_channel_gallery_doodledoo)
         channel_log_doodledoo = get_channel_from_id(server_doodledoo, id_channel_logs_doodledoo)
 
         doodledoo_context = ServerContext(
             server=server_doodledoo,
-            gallery=channel_gallery_doodledoo,
             logs=channel_log_doodledoo,
             debug=channel_log_doodledoo
         )
 
         server_pif = get_server_from_id(client, id_server_pif)
-        channel_gallery_pif = get_channel_from_id(server_pif, id_channel_gallery_pif)
         channel_log_pif = get_channel_from_id(server_pif, id_channel_logs_pif)
         channel_debug_pif = get_channel_from_id(server_pif, id_channel_debug_pif)
-        spriter_apps_pif = get_forum_from_id(server_pif, id_spriter_apps_pif)
 
         pif_context = ServerContext(
             server=server_pif,
-            gallery=channel_gallery_pif,
             logs=channel_log_pif,
-            debug=channel_debug_pif,
-            spriter_apps=spriter_apps_pif
+            debug=channel_debug_pif
         )
 
         self.context = GlobalContext(
