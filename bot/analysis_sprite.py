@@ -1,6 +1,6 @@
 import requests
 from analysis import Analysis
-from enums import Severity
+from enums import Severity, AnalysisType
 from exceptions import TransparencyException
 from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
                     ColorExcessRefused, ColorOverExcess, GraphicsGaleUser,
@@ -60,7 +60,7 @@ GREEN = (0, 255, 0, 255)
 
 
 class SpriteContext():
-    def __init__(self, analysis: Analysis, is_assets: bool):
+    def __init__(self, analysis: Analysis):
         if analysis.attachment_url is None:
             raise RuntimeError()
 
@@ -75,7 +75,7 @@ class SpriteContext():
         self.similar_color_dict: dict = {}
 
         self.custom_base = analysis.issues.has_issue(CustomBase)
-        self.is_assets = is_assets or self.custom_base
+        self.is_assets = analysis.type.is_assets_gallery() or self.custom_base
         # To both cover:
         # replied custom bases detected in analysis_content
         # and custom bases from assets gallery
@@ -415,13 +415,13 @@ def get_color_delta(rgb_a: tuple, rgb_b: tuple):
     return [int(cie2000), int(cmc), max_difference]
 
 
-def main(analysis: Analysis, is_reply: bool, is_assets):
-    if (analysis.severity == Severity.accepted) or is_reply:
-        handle_valid_sprite(analysis, is_assets)
+def main(analysis: Analysis):
+    if (analysis.severity == Severity.accepted) or analysis.type.is_reply():
+        handle_valid_sprite(analysis)
 
 
-def handle_valid_sprite(analysis: Analysis, is_assets: bool = False):
-    context = SpriteContext(analysis, is_assets)
+def handle_valid_sprite(analysis: Analysis):
+    context = SpriteContext(analysis)
     context.handle_sprite_size(analysis)
     context.handle_sprite_colors(analysis)
     context.handle_sprite_transparency(analysis)

@@ -12,7 +12,7 @@ from discord.channel import TextChannel
 from discord.guild import Guild
 from discord.message import Message
 from discord.user import User
-from enums import DiscordColour, Severity
+from enums import Severity, AnalysisType
 from exceptions import MissingBotContext
 from models import GlobalContext, ServerContext
 
@@ -134,7 +134,11 @@ async def handle_gallery(message: Message, is_assets: bool = False):
         utils.log_event("SG>", message)
 
     for specific_attachment in message.attachments:
-        analysis = generate_analysis(message, specific_attachment, is_reply=False, is_assets=is_assets)
+        if is_assets:
+            analysis_type = AnalysisType.assets_gallery
+        else:
+            analysis_type = AnalysisType.sprite_gallery
+        analysis = generate_analysis(message, specific_attachment, analysis_type)
         if analysis.severity in MAX_SEVERITY:
             try:
                 await message.add_reaction(ERROR_EMOJI)
@@ -151,7 +155,7 @@ async def handle_reply_message(message: Message):
     utils.log_event("R>", message)
     channel = message.channel
     for specific_attachment in message.attachments:
-        analysis = generate_analysis(message, specific_attachment, True)
+        analysis = generate_analysis(message, specific_attachment, AnalysisType.ping_reply)
         try:
             await channel.send(embed=analysis.embed)
             if analysis.transparency_issue:

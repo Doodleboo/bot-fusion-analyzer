@@ -5,7 +5,7 @@ from discord.colour import Colour
 from discord.embeds import Embed
 from discord.file import File
 from discord.message import Attachment, Message
-from enums import DiscordColour, Severity
+from enums import DiscordColour, Severity, AnalysisType
 from issues import Issues
 from PIL.Image import Image
 
@@ -39,11 +39,15 @@ class Analysis:
     half_pixels_image: Image
     half_pixels_embed: Embed
 
-    def __init__(self, message:Message, specific_attachment:Attachment|None) -> None:
+    def __init__(self,
+                 message:Message,
+                 specific_attachment:Attachment|None,
+                 analysis_type:AnalysisType|None) -> None:
         self.message = message
         self.specific_attachment = specific_attachment
         self.issues = Issues()
         self.severity = Severity.accepted
+        self.type = analysis_type
 
     def generate_embed(self):
         self.embed = Embed()
