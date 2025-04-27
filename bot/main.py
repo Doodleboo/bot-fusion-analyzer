@@ -5,13 +5,16 @@ import os
 import discord
 import utils
 import command_actions
-from analysis import generate_bonus_file
-from analyzer import Analysis, generate_analysis
+
 from discord import Client, PartialEmoji, app_commands, HTTPException, Thread, ForumChannel
 from discord.channel import TextChannel
 from discord.guild import Guild
 from discord.message import Message
 from discord.user import User
+
+from analysis import generate_bonus_file
+from analyzer import Analysis, generate_analysis
+from spritework_checker import get_spritework_thread_times
 from enums import Severity, AnalysisType
 from exceptions import MissingBotContext
 from models import GlobalContext, ServerContext
@@ -134,31 +137,7 @@ async def on_thread_create(thread: Thread):
     if thread.parent_id != id_spriter_apps_pif:
         return
 
-    await asyncio.sleep(10)
-    try:
-        application_message = await thread.fetch_message(thread.id)
-    except discord.errors.NotFound:
-        last_message_id = thread.last_message_id
-        try:
-            application_message = await thread.fetch_message(last_message_id)
-        except discord.errors.NotFound:
-            await ctx().doodledoo.debug.send("Discord returned Not Found twice")
-            return
-    except discord.errors.Forbidden:
-        await ctx().doodledoo.debug.send("Discord returned Forbidden while fetching thread message")
-        return
-    if application_message is None:
-        await ctx().doodledoo.debug.send("Could not fetch message on thread creation")
-        return
-    try:
-        await handle_reply_message(application_message)
-    except Exception as message_exception:
-        print(" ")
-        print(application_message)
-        print(" ")
-        await ctx().doodledoo.debug.send(
-            f"ERROR in #{application_message.channel} ({application_message.jump_url})")
-        raise RuntimeError from message_exception
+    await handle_spriter_application(thread)
 
 
 
@@ -206,7 +185,7 @@ async def handle_zigzag_galpost(message: Message):
         analysis_type = AnalysisType.zigzag_fusion
 
     analysis = generate_analysis(message, specific_attachment=None, analysis_type=analysis_type)
-    if analysis.severity in MAX_SEVERITY:
+    if analysis.severity == Severity.refused:       # Controversial won't ping
         ping_zigzagoon = "<@&1182898845563228232>"
         await ctx().pif.logs.send(embed=analysis.embed, content=ping_zigzagoon)
     else:
@@ -214,7 +193,7 @@ async def handle_zigzag_galpost(message: Message):
 
 
 async def handle_reply_message(message: Message):
-    utils.log_event("R>", message)
+    utils.log_event("R>", message.channel)
     channel = message.channel
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, AnalysisType.ping_reply)
@@ -232,6 +211,44 @@ async def handle_reply_message(message: Message):
                 )
         except discord.Forbidden:
             print(f"R> Missing permissions in {channel}")
+
+
+async def handle_spriter_application(thread: Thread):
+    await asyncio.sleep(10)
+    try:
+        application_message = await thread.fetch_message(thread.id)
+    except discord.errors.NotFound:
+        last_message_id = thread.last_message_id
+        try:
+            application_message = await thread.fetch_message(last_message_id)
+        except discord.errors.NotFound:
+            await ctx().doodledoo.debug.send("Discord returned Not Found twice")
+            return
+    except discord.errors.Forbidden:
+        await ctx().doodledoo.debug.send("Discord returned Forbidden while fetching thread message")
+        return
+    if application_message is None:
+        await ctx().doodledoo.debug.send("Could not fetch message on thread creation")
+        return
+    print("SPR_APP>", application_message.channel)
+    try:
+        await handle_reply_message(application_message)
+        await handle_spritework_thread_times(application_message)
+    except Exception as message_exception:
+        print(" ")
+        print(application_message)
+        print(" ")
+        await ctx().doodledoo.debug.send(
+            f"ERROR in #{application_message.channel} ({application_message.jump_url})")
+        raise RuntimeError from message_exception
+
+
+async def handle_spritework_thread_times(message: Message):
+    times_embed = await get_spritework_thread_times(message)
+    try:
+        await message.channel.send(embed=times_embed)
+    except discord.Forbidden:
+        print(f"SPR_APP> Missing permissions in {message.channel}")
 
 
 
