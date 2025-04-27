@@ -13,7 +13,7 @@ from discord.message import Message
 from discord.user import User
 
 from analysis import generate_bonus_file
-from analyzer import Analysis, generate_analysis
+from analyzer import Analysis, generate_analysis, send_bot_logs, send_bonus_content
 from spritework_checker import get_spritework_thread_times
 from enums import Severity, AnalysisType
 from exceptions import MissingBotContext
@@ -170,10 +170,10 @@ async def handle_gallery(message: Message, is_assets: bool = False):
             except HTTPException:
                 await message.add_reaction("😡")  # Nani failsafe
         try:
-            await send_bot_logs(analysis, message.author.id)
+            await send_bot_logs(analysis, ctx(), message.author.id)
         except HTTPException:  # Rate limit
             await asyncio.sleep(300)
-            await send_bot_logs(analysis, message.author.id)
+            await send_bot_logs(analysis, ctx(), message.author.id)
 
 
 async def handle_zigzag_galpost(message: Message):
@@ -342,7 +342,6 @@ def get_server_from_id(client: Client, server_id) -> Guild:
     return server
 
 
-# BotContext and sending methods
 
 class BotContext:
     def __init__(self, client: Client):
@@ -378,35 +377,6 @@ def ctx() -> GlobalContext:
     else:
         raise MissingBotContext
 
-
-async def send_bot_logs(analysis: Analysis, author_id: int):
-    if analysis.severity in MAX_SEVERITY:
-        await send_with_content(analysis, author_id)
-    else:
-        await send_without_content(analysis)
-    await send_bonus_content(analysis)
-
-
-async def send_bonus_content(analysis: Analysis):
-    if analysis.transparency_issue:
-        await ctx().pif.logs.send(
-            embed=analysis.transparency_embed,
-            file=generate_bonus_file(analysis.transparency_image)
-        )
-    if analysis.half_pixels_issue:
-        await ctx().pif.logs.send(
-            embed=analysis.half_pixels_embed,
-            file=generate_bonus_file(analysis.half_pixels_image)
-        )
-
-
-async def send_with_content(analysis: Analysis, author_id: int):
-    ping_owner = f"<@!{author_id}>"
-    await ctx().pif.logs.send(embed=analysis.embed, content=ping_owner)
-
-
-async def send_without_content(analysis: Analysis):
-    await ctx().pif.logs.send(embed=analysis.embed)
 
 
 if __name__ == "__main__":
