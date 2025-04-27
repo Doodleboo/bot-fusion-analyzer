@@ -40,7 +40,8 @@ ZIGZAG_ID = 1185671488611819560 #1185671488611819560
 id_server_doodledoo          = 446241769462562827
 id_channel_gallery_doodledoo = 1360964111718158498
 id_channel_assets_doodledoo  = 1363610399064330480
-id_channel_logs_doodledoo    = 1360969318296322328  # Here, debug and logs share a channel
+id_channel_logs_doodledoo    = 1360969318296322328
+id_channel_debug_doodledoo   = 1360964178927554680
 
 local_environment = True
 
@@ -50,7 +51,7 @@ if local_environment:
     id_channel_gallery_pif  = 1360964111718158498
     id_channel_assets_pif   = 1363610399064330480
     id_channel_logs_pif     = 1360969318296322328
-    id_channel_debug_pif    = 1360969318296322328
+    id_channel_debug_pif    = 1360964178927554680
     id_spriter_apps_pif     = 1365804567127916655
 else:
     id_server_pif           = 302153478556352513
@@ -120,10 +121,8 @@ async def on_message(message: Message):
         print(" ")
         print(message)
         print(" ")
-        ping_author = f"<@!{message.author.id}>"
-        error_message = "An error occurred while processing your message from"
         await ctx().doodledoo.debug.send(
-            f"{ping_doodledoo}/{ping_author} : {error_message} #{message.channel} ({message.jump_url})")  # type: ignore
+            f"ERROR in #{message.channel} ({message.jump_url})")
         raise RuntimeError from message_exception
 
 
@@ -143,15 +142,23 @@ async def on_thread_create(thread: Thread):
         try:
             application_message = await thread.fetch_message(last_message_id)
         except discord.errors.NotFound:
-            print("Discord returned Not Found twice")
+            await ctx().doodledoo.debug.send("Discord returned Not Found twice")
             return
     except discord.errors.Forbidden:
-        print("Discord returned Forbidden while fetching thread message")
+        await ctx().doodledoo.debug.send("Discord returned Forbidden while fetching thread message")
         return
     if application_message is None:
-        print("Could not fetch message on thread creation")
+        await ctx().doodledoo.debug.send("Could not fetch message on thread creation")
         return
-    await handle_reply_message(application_message)
+    try:
+        await handle_reply_message(application_message)
+    except Exception as message_exception:
+        print(" ")
+        print(application_message)
+        print(" ")
+        await ctx().doodledoo.debug.send(
+            f"ERROR in #{application_message.channel} ({application_message.jump_url})")
+        raise RuntimeError from message_exception
 
 
 
@@ -324,11 +331,12 @@ class BotContext:
     def __init__(self, client: Client):
         server_doodledoo = get_server_from_id(client, id_server_doodledoo)
         channel_log_doodledoo = get_channel_from_id(server_doodledoo, id_channel_logs_doodledoo)
+        channel_debug_doodledoo = get_channel_from_id(server_doodledoo, id_channel_debug_doodledoo)
 
         doodledoo_context = ServerContext(
             server=server_doodledoo,
             logs=channel_log_doodledoo,
-            debug=channel_log_doodledoo
+            debug=channel_debug_doodledoo
         )
 
         server_pif = get_server_from_id(client, id_server_pif)
