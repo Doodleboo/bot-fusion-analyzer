@@ -3,12 +3,13 @@ import asyncio
 import discord
 import utils
 from discord import Message, Thread, HTTPException, PartialEmoji
-from bot.analysis import generate_bonus_file
-from bot.analyzer import send_bot_logs, generate_analysis
+from analysis import generate_bonus_file, Analysis
+from analyzer import send_bot_logs, generate_analysis
+from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
 from bot.setup import ctx
-from bot.enums import AnalysisType, Severity
-from bot.message_identifier import is_assets_gallery
-from bot.spritework_checker import get_spritework_thread_times
+from enums import AnalysisType, Severity
+from message_identifier import is_assets_gallery
+from spritework_checker import get_spritework_thread_times
 
 
 ERROR_EMOJI_NAME = "NANI"
@@ -38,7 +39,13 @@ async def handle_gallery(message: Message, is_assets: bool = False):
             analysis_type = AnalysisType.assets_gallery
         else:
             analysis_type = AnalysisType.sprite_gallery
+
         analysis = generate_analysis(message, specific_attachment, analysis_type)
+
+        if analysis.issues.has_issue(DifferentSprite):
+            await handle_misnumbered_in_gallery(message)
+            return
+
         if analysis.severity in MAX_SEVERITY:
             try:
                 await message.add_reaction(ERROR_EMOJI)
@@ -68,7 +75,6 @@ async def handle_zigzag_galpost(message: Message):
 
 
 async def handle_reply_message(message: Message):
-    utils.log_event("Reply>", message.channel)
     channel = message.channel
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, AnalysisType.ping_reply)
@@ -128,4 +134,18 @@ async def handle_spritework_thread_times(message: Message):
 
 async def handle_reply(message: Message):
     reply_message = await utils.get_reply_message(message)
+    utils.log_event("Reply>", reply_message.channel)
     await handle_reply_message(reply_message)
+
+
+async def handle_misnumbered_in_gallery(message: Message):
+    copied_message = await ctx().pif.logs.send(f"Hi {message.author.mention}, here's your gallery message, you can copy the block "
+                                               f"below and it will have the same text you just sent:\n```{message.content}```")
+    await message.channel.send(content=
+                               f"Hi {message.author.mention}, \n\nUnfortunately your latest gallery message had a "
+                               f"**misnumbered dex id**, either in the message or filename, because they didn't match eachother.\n\n"
+                               f"You can recover and copy your message text at: {copied_message.jump_url} "
+                               f"so that you can fix the issue and post it here again.\n\nThank you!",
+                               delete_after=20)
+    await message.delete()
+    pass
