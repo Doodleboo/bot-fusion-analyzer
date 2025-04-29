@@ -148,4 +148,3 @@ async def handle_misnumbered_in_gallery(message: Message):
                                f"so that you can fix the issue and post it here again.\n\nThank you!",
                                delete_after=20)
     await message.delete()
-    pass
