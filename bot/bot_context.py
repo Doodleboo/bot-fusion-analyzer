@@ -1,0 +1,56 @@
+from discord import Client
+
+from bot.models import ServerContext, GlobalContext
+from bot.utils import get_server_from_id, get_channel_from_id
+
+# Doodledoo test server
+id_server_doodledoo          = 446241769462562827
+id_channel_gallery_doodledoo = 1360964111718158498
+id_channel_assets_doodledoo  = 1363610399064330480
+id_channel_logs_doodledoo    = 1360969318296322328
+id_channel_debug_doodledoo   = 1360964178927554680
+
+local_environment = True
+
+# Pokémon Infinite Fusion
+if local_environment:
+    id_server_pif           = 446241769462562827
+    id_channel_gallery_pif  = 1360964111718158498
+    id_channel_assets_pif   = 1363610399064330480
+    id_channel_logs_pif     = 1360969318296322328
+    id_channel_debug_pif    = 1360964178927554680
+    id_spriter_apps_pif     = 1365804567127916655
+else:
+    id_server_pif           = 302153478556352513
+    id_channel_gallery_pif  = 543958354377179176
+    id_channel_assets_pif   = 1094790320891371640
+    id_channel_logs_pif     = 999653562202214450
+    id_channel_debug_pif    = 703351286019653762
+    id_spriter_apps_pif     = 1134483288703119361
+
+class BotContext:
+    def __init__(self, client: Client):
+        server_doodledoo = get_server_from_id(client, id_server_doodledoo)
+        channel_log_doodledoo = get_channel_from_id(server_doodledoo, id_channel_logs_doodledoo)
+        channel_debug_doodledoo = get_channel_from_id(server_doodledoo, id_channel_debug_doodledoo)
+
+        doodledoo_context = ServerContext(
+            server=server_doodledoo,
+            logs=channel_log_doodledoo,
+            debug=channel_debug_doodledoo
+        )
+
+        server_pif = get_server_from_id(client, id_server_pif)
+        channel_log_pif = get_channel_from_id(server_pif, id_channel_logs_pif)
+        channel_debug_pif = get_channel_from_id(server_pif, id_channel_debug_pif)
+
+        pif_context = ServerContext(
+            server=server_pif,
+            logs=channel_log_pif,
+            debug=channel_debug_pif
+        )
+
+        self.context = GlobalContext(
+            doodledoo=doodledoo_context,
+            pif=pif_context
+        )

@@ -2,7 +2,7 @@ import json
 import os
 import re
 
-from discord import Interaction
+from discord import Interaction, TextChannel, Guild, Client
 from discord.message import Message
 from discord.asset import Asset
 from discord.user import User, ClientUser
@@ -10,6 +10,7 @@ from discord.member import Member
 from discord.threads import Thread
 
 from analysis import Analysis
+from bot import setup
 
 MAX_DEX_ID = 565
 MISSING_DEX_ID = 420
@@ -93,8 +94,8 @@ def get_channel_name_from_interaction(interaction: Interaction):
     return channel_name
 
 
-def is_message_from_itself(message: Message, fusion_bot_id: int | None):
-    return message.author.id == fusion_bot_id
+def is_message_from_itself(message: Message):
+    return message.author.id == setup.bot_id
 
 
 def get_thread(message: Message) -> (Thread | None):
@@ -112,9 +113,9 @@ def get_filename(analysis: Analysis):
 
 def get_attachment_url(analysis: Analysis):
     if analysis.type.is_zigzag_galpost():
-        return get_attachment_url_from_message(analysis)
-    else:
         return get_attachment_url_from_embed(analysis)
+    else:
+        return get_attachment_url_from_message(analysis)
 
 
 def get_attachment_url_from_message(analysis: Analysis):
@@ -202,6 +203,7 @@ def get_display_avatar(user: User | Member | ClientUser) -> Asset:
 
 def extract_fusion_id_from_filename(analysis: Analysis):
     fusion_id = None
+    is_custom_base = False
     if have_attachment(analysis):
         filename = get_filename(analysis)
         fusion_id, is_custom_base = get_fusion_id_from_filename(filename)
@@ -211,21 +213,21 @@ def extract_fusion_id_from_filename(analysis: Analysis):
 def get_fusion_id_from_filename(filename: str):
     result = re.match(REGULAR_PATTERN_FUSION_ID, filename)
     if result is not None:
-        return (get_clean_id_from_result(result[0], False), False)
+        return get_clean_id_from_result(result[0], False), False
 
     result = re.match(SPOILER_PATTERN_FUSION_ID, filename)
     if result is not None:
-        return (get_clean_id_from_result(result[0], False), False)
+        return get_clean_id_from_result(result[0], False), False
 
     result = re.match(REGULAR_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return (get_clean_id_from_result(result[0], True), True)
+        return get_clean_id_from_result(result[0], True), True
 
     result = re.match(SPOILER_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return (get_clean_id_from_result(result[0], True), True)
+        return get_clean_id_from_result(result[0], True), True
     else:
-        return (None, False)
+        return None, False
 
 
 def extract_fusion_ids_from_content(message: Message, custom_base: bool = False):
@@ -238,8 +240,8 @@ def extract_fusion_ids_from_content(message: Message, custom_base: bool = False)
 
     iterator = re.finditer(search_pattern, content)
     for result in iterator:
-        id = get_clean_id_from_result(result[0], custom_base)
-        id_list.append(id)
+        clean_id = get_clean_id_from_result(result[0], custom_base)
+        id_list.append(clean_id)
 
     return id_list
 
@@ -263,4 +265,35 @@ def id_to_name_map():  # Thanks Greystorm for the util and file
         data = json.loads(f.read())
         return {element["id"]: element["display_name"] for element in data["pokemon"]}
 
+
+
+# Message and channel utilities
+
+
+async def get_reply_message(message: Message):
+    if message.reference is None:
+        raise RuntimeError(message)
+
+    reply_id = message.reference.message_id
+    if reply_id is None:
+        raise RuntimeError(message)
+
+    return await message.channel.fetch_message(reply_id)
+
+
+
+def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
+    channel = server.get_channel(channel_id)
+    if channel is None:
+        raise KeyError(channel_id)
+    if not isinstance(channel, TextChannel):
+        raise TypeError(channel)
+    return channel
+
+
+def get_server_from_id(client: Client, server_id) -> Guild:
+    server = client.get_guild(server_id)
+    if server is None:
+        raise KeyError(server_id)
+    return server
 
