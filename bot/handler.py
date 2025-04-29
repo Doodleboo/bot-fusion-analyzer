@@ -61,8 +61,8 @@ async def handle_zigzag_galpost(message: Message):
 
     analysis = generate_analysis(message, specific_attachment=None, analysis_type=analysis_type)
     if analysis.severity == Severity.refused:       # Controversial won't ping
-        ping_zigzagoon = "<@&1182898845563228232>"
-        await ctx().pif.logs.send(embed=analysis.embed, content=ping_zigzagoon)
+        zigzagoon_message = "This zigzag galpost seems to have issues. If this is incorrect, contact Doodledoo."
+        await ctx().pif.zigzagoon.send(embed=analysis.embed, content=zigzagoon_message)
     else:
         await ctx().pif.logs.send(embed=analysis.embed)
 

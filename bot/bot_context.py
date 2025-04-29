@@ -20,6 +20,7 @@ if local_environment:
     id_channel_logs_pif     = 1360969318296322328
     id_channel_debug_pif    = 1360964178927554680
     id_spriter_apps_pif     = 1365804567127916655
+    id_channel_zigzagoon    = 1360964178927554680
 else:
     id_server_pif           = 302153478556352513
     id_channel_gallery_pif  = 543958354377179176
@@ -27,27 +28,32 @@ else:
     id_channel_logs_pif     = 999653562202214450
     id_channel_debug_pif    = 703351286019653762
     id_spriter_apps_pif     = 1134483288703119361
+    id_channel_zigzagoon    = 1234176742957121607
+
 
 class BotContext:
     def __init__(self, client: Client):
-        server_doodledoo = get_server_from_id(client, id_server_doodledoo)
-        channel_log_doodledoo = get_channel_from_id(server_doodledoo, id_channel_logs_doodledoo)
+        server_doodledoo        = get_server_from_id(client, id_server_doodledoo)
+        channel_log_doodledoo   = get_channel_from_id(server_doodledoo, id_channel_logs_doodledoo)
         channel_debug_doodledoo = get_channel_from_id(server_doodledoo, id_channel_debug_doodledoo)
 
         doodledoo_context = ServerContext(
-            server=server_doodledoo,
-            logs=channel_log_doodledoo,
-            debug=channel_debug_doodledoo
+            server    = server_doodledoo,
+            logs      = channel_log_doodledoo,
+            debug     = channel_debug_doodledoo,
+            zigzagoon = channel_debug_doodledoo
         )
 
-        server_pif = get_server_from_id(client, id_server_pif)
-        channel_log_pif = get_channel_from_id(server_pif, id_channel_logs_pif)
+        server_pif        = get_server_from_id(client, id_server_pif)
+        channel_log_pif   = get_channel_from_id(server_pif, id_channel_logs_pif)
         channel_debug_pif = get_channel_from_id(server_pif, id_channel_debug_pif)
+        channel_zigzagoon = get_channel_from_id(server_pif, id_channel_zigzagoon)
 
         pif_context = ServerContext(
-            server=server_pif,
-            logs=channel_log_pif,
-            debug=channel_debug_pif
+            server    = server_pif,
+            logs      = channel_log_pif,
+            debug     = channel_debug_pif,
+            zigzagoon = channel_zigzagoon
         )
 
         self.context = GlobalContext(
