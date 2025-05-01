@@ -11,11 +11,10 @@ from discord.message import Message
 from discord.user import User
 
 from bot.setup import set_bot_up, ctx
-from bot.utils import is_message_from_itself
 from bot.handler import handle_zigzag_galpost, handle_sprite_gallery, handle_assets_gallery, handle_spriter_application, \
     handle_reply
 from bot.message_identifier import is_zigzag_galpost, is_sprite_gallery, is_assets_custom_base, is_mentioning_reply, \
-    is_spriter_application
+    is_spriter_application, is_message_from_ignored_bots
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -51,7 +50,7 @@ async def on_ready():
 @bot.event
 async def on_message(message: Message):
     try:
-        if is_message_from_itself(message):
+        if is_message_from_ignored_bots(message):
             return
 
         if is_zigzag_galpost(message):

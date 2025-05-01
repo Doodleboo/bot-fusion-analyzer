@@ -94,10 +94,6 @@ def get_channel_name_from_interaction(interaction: Interaction):
     return channel_name
 
 
-def is_message_from_itself(message: Message):
-    return message.author.id == setup.bot_id
-
-
 def get_thread(message: Message) -> (Thread | None):
     thread = message.channel
     if isinstance(thread, Thread):
