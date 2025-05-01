@@ -43,7 +43,7 @@ async def handle_gallery(message: Message, is_assets: bool = False):
         analysis = generate_analysis(message, specific_attachment, analysis_type)
 
         if analysis.issues.has_issue(DifferentSprite):
-            await handle_misnumbered_in_gallery(message)
+            await handle_misnumbered_in_gallery(message, analysis)
             return
 
         if analysis.severity in MAX_SEVERITY:
@@ -59,7 +59,7 @@ async def handle_gallery(message: Message, is_assets: bool = False):
 
 
 async def handle_zigzag_galpost(message: Message):
-    utils.log_event("Zigzag>", message)
+    utils.log_event("Zigzag>", message.embeds[0].title)
 
     if is_assets_gallery(message):
         analysis_type = AnalysisType.zigzag_base
@@ -68,7 +68,7 @@ async def handle_zigzag_galpost(message: Message):
 
     analysis = generate_analysis(message, specific_attachment=None, analysis_type=analysis_type)
     if analysis.severity == Severity.refused:       # Controversial won't ping
-        zigzagoon_message = "This zigzag galpost seems to have issues. If this is incorrect, contact Doodledoo."
+        zigzagoon_message = "This Zigzag galpost seems to have issues. If this is incorrect, contact Doodledoo."
         await ctx().pif.zigzagoon.send(embed=analysis.embed, content=zigzagoon_message)
     else:
         await ctx().pif.logs.send(embed=analysis.embed)
@@ -138,12 +138,23 @@ async def handle_reply(message: Message):
     await handle_reply_message(reply_message)
 
 
-async def handle_misnumbered_in_gallery(message: Message):
+async def handle_misnumbered_in_gallery(message: Message, analysis: Analysis):
+    misnumbered_issue = None
+    for issue in analysis.issues.issue_list:
+        if isinstance(issue, DifferentSprite):
+            misnumbered_issue = issue
+            break
+
+    if misnumbered_issue is None:
+        return
+
     copied_message = await ctx().pif.logs.send(f"Hi {message.author.mention}, here's your gallery message, you can copy the block "
                                                f"below and it will have the same text you just sent:\n```{message.content}```")
     await message.channel.send(content=
                                f"Hi {message.author.mention}, \n\nUnfortunately your latest gallery message had a "
-                               f"**misnumbered dex id**, either in the message or filename, because they didn't match eachother.\n\n"
+                               f"**misnumbered dex id**, either in the message or filename, because they didn't match eachother:\n\n"
+                               f"* **Filename ID: {misnumbered_issue.filename_fusion_id}**\n"
+                               f"* **Message ID: {misnumbered_issue.content_fusion_id}**\n\n"
                                f"You can recover and copy your message text at: {copied_message.jump_url} "
                                f"so that you can fix the issue and post it here again.\n\nThank you!",
                                delete_after=20)
