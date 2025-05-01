@@ -106,6 +106,9 @@ def get_thread(message: Message) -> (Thread | None):
 
 
 def get_filename(analysis: Analysis):
+    if analysis.type.is_zigzag_galpost():
+        image_url = get_attachment_url_from_embed(analysis)
+        return get_filename_from_image_url(image_url)
     if analysis.specific_attachment is None:
         return analysis.message.attachments[0].filename
     return analysis.specific_attachment.filename
@@ -131,6 +134,13 @@ def get_attachment_url_from_embed(analysis: Analysis):
     if embed.image is None:
         return None
     return embed.image.url
+
+
+def get_filename_from_image_url(url: str):
+    url_parts = url.split(".png")       # Getting everything before the ? and url parameters
+    url_parts = url_parts[0].split("/") # Grabbing only the filename: 1.1_by_doodledoo
+    dex_id = url_parts[-1].split("_")[0]    # Filtering the credit to keep only the dex id
+    return dex_id + ".png"
 
 
 def interesting_results(results: list):
@@ -169,7 +179,8 @@ def have_attachment(analysis: Analysis):
 def have_zigzag_embed(analysis: Analysis) -> bool:
     if not analysis.type.is_zigzag_galpost():
         return False
-    return analysis.embed is not None
+    embeds = analysis.message.embeds
+    return embeds is not None
 
 
 def is_missing_autogen(fusion_id: str):
@@ -204,7 +215,7 @@ def get_display_avatar(user: User | Member | ClientUser) -> Asset:
 def extract_fusion_id_from_filename(analysis: Analysis):
     fusion_id = None
     is_custom_base = False
-    if have_attachment(analysis):
+    if have_attachment(analysis) or analysis.type.is_zigzag_galpost():
         filename = get_filename(analysis)
         fusion_id, is_custom_base = get_fusion_id_from_filename(filename)
     return fusion_id, is_custom_base

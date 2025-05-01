@@ -10,18 +10,18 @@ id_channel_assets_doodledoo  = 1363610399064330480
 id_channel_logs_doodledoo    = 1360969318296322328
 id_channel_debug_doodledoo   = 1360964178927554680
 
-local_environment = True
+bot_environment = "pif"
 
 # Pokémon Infinite Fusion
-if local_environment:
-    id_server_pif           = 446241769462562827
-    id_channel_gallery_pif  = 1360964111718158498
-    id_channel_assets_pif   = 1363610399064330480
-    id_channel_logs_pif     = 1360969318296322328
-    id_channel_debug_pif    = 1360964178927554680
+if bot_environment == "local":
+    id_server_pif           = id_server_doodledoo
+    id_channel_gallery_pif  = id_channel_gallery_doodledoo
+    id_channel_assets_pif   = id_channel_assets_doodledoo
+    id_channel_logs_pif     = id_channel_logs_doodledoo
+    id_channel_debug_pif    = id_channel_debug_doodledoo
     id_spriter_apps_pif     = 1365804567127916655
-    id_channel_zigzagoon    = 1360964178927554680
-else:
+    id_channel_zigzagoon    = id_channel_debug_doodledoo
+elif bot_environment == "pif":
     id_server_pif           = 302153478556352513
     id_channel_gallery_pif  = 543958354377179176
     id_channel_assets_pif   = 1094790320891371640
@@ -29,6 +29,14 @@ else:
     id_channel_debug_pif    = 703351286019653762
     id_spriter_apps_pif     = 1134483288703119361
     id_channel_zigzagoon    = 1234176742957121607
+else:
+    id_server_pif           = 756264475102937199
+    id_channel_gallery_pif  = 1185991301645209610
+    id_channel_assets_pif   = 1226648126375596145
+    id_channel_logs_pif     = 1367184071389614091
+    id_channel_debug_pif    = 1367184071389614091
+    id_spriter_apps_pif     = 1193291636457865266 # sprite-errors
+    id_channel_zigzagoon    = 1332162874931413104 # zigzag-chatter
 
 
 class BotContext:

@@ -59,7 +59,7 @@ async def handle_gallery(message: Message, is_assets: bool = False):
 
 
 async def handle_zigzag_galpost(message: Message):
-    utils.log_event("Zigzag>", message)
+    utils.log_event("Zigzag>", message.embeds[0].title)
 
     if is_assets_gallery(message):
         analysis_type = AnalysisType.zigzag_base
@@ -68,7 +68,7 @@ async def handle_zigzag_galpost(message: Message):
 
     analysis = generate_analysis(message, specific_attachment=None, analysis_type=analysis_type)
     if analysis.severity == Severity.refused:       # Controversial won't ping
-        zigzagoon_message = "This zigzag galpost seems to have issues. If this is incorrect, contact Doodledoo."
+        zigzagoon_message = "This Zigzag galpost seems to have issues. If this is incorrect, contact Doodledoo."
         await ctx().pif.zigzagoon.send(embed=analysis.embed, content=zigzagoon_message)
     else:
         await ctx().pif.logs.send(embed=analysis.embed)
