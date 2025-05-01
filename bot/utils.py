@@ -2,7 +2,7 @@ import json
 import os
 import re
 
-from discord import Interaction
+from discord import Interaction, TextChannel, Guild, Client
 from discord.message import Message
 from discord.asset import Asset
 from discord.user import User, ClientUser
@@ -10,6 +10,7 @@ from discord.member import Member
 from discord.threads import Thread
 
 from analysis import Analysis
+from bot import setup
 
 MAX_DEX_ID = 565
 MISSING_DEX_ID = 420
@@ -46,9 +47,6 @@ RAW_GITLAB = "https://gitlab.com"
 
 AUTOGEN_FUSION_URL = f"{RAW_GITLAB}/pokemoninfinitefusion/autogen-fusion-sprites/-/raw/master/Battlers/"
 QUESTION_URL = f"{RAW_GITHUB}/Doodleboo/bot-fusion-analyzer/main/bot/question.png"
-
-YAGPDB_ID = 204255221017214977
-ZIGZAG_ID = 1185671488611819560
 
 LCB = "{"
 RCB = "}"
@@ -96,9 +94,8 @@ def get_channel_name_from_interaction(interaction: Interaction):
     return channel_name
 
 
-# is_message_not_from_a_bot
-def is_message_from_human(message: Message, fusion_bot_id: int | None):
-    return message.author.id not in (fusion_bot_id, YAGPDB_ID, ZIGZAG_ID)
+def is_message_from_itself(message: Message):
+    return message.author.id == setup.bot_id
 
 
 def get_thread(message: Message) -> (Thread | None):
@@ -109,15 +106,41 @@ def get_thread(message: Message) -> (Thread | None):
 
 
 def get_filename(analysis: Analysis):
+    if analysis.type.is_zigzag_galpost():
+        image_url = get_attachment_url_from_embed(analysis)
+        return get_filename_from_image_url(image_url)
     if analysis.specific_attachment is None:
         return analysis.message.attachments[0].filename
     return analysis.specific_attachment.filename
 
 
 def get_attachment_url(analysis: Analysis):
+    if analysis.type.is_zigzag_galpost():
+        return get_attachment_url_from_embed(analysis)
+    else:
+        return get_attachment_url_from_message(analysis)
+
+
+def get_attachment_url_from_message(analysis: Analysis):
     if analysis.specific_attachment is None:
         return analysis.message.attachments[0].url
     return analysis.specific_attachment.url
+
+
+def get_attachment_url_from_embed(analysis: Analysis):
+    if not analysis.message.embeds:
+        return None
+    embed = analysis.message.embeds[0]
+    if embed.image is None:
+        return None
+    return embed.image.url
+
+
+def get_filename_from_image_url(url: str):
+    url_parts = url.split(".png")       # Getting everything before the ? and url parameters
+    url_parts = url_parts[0].split("/") # Grabbing only the filename: 1.1_by_doodledoo
+    dex_id = url_parts[-1].split("_")[0]    # Filtering the credit to keep only the dex id
+    return dex_id + ".png"
 
 
 def interesting_results(results: list):
@@ -153,6 +176,13 @@ def have_attachment(analysis: Analysis):
     return len(analysis.message.attachments) >= 1
 
 
+def have_zigzag_embed(analysis: Analysis) -> bool:
+    if not analysis.type.is_zigzag_galpost():
+        return False
+    embeds = analysis.message.embeds
+    return embeds is not None
+
+
 def is_missing_autogen(fusion_id: str):
     split_fusion_id = fusion_id.split(".")
     head_id = int(split_fusion_id[0])
@@ -184,7 +214,8 @@ def get_display_avatar(user: User | Member | ClientUser) -> Asset:
 
 def extract_fusion_id_from_filename(analysis: Analysis):
     fusion_id = None
-    if have_attachment(analysis):
+    is_custom_base = False
+    if have_attachment(analysis) or analysis.type.is_zigzag_galpost():
         filename = get_filename(analysis)
         fusion_id, is_custom_base = get_fusion_id_from_filename(filename)
     return fusion_id, is_custom_base
@@ -193,21 +224,21 @@ def extract_fusion_id_from_filename(analysis: Analysis):
 def get_fusion_id_from_filename(filename: str):
     result = re.match(REGULAR_PATTERN_FUSION_ID, filename)
     if result is not None:
-        return (get_clean_id_from_result(result[0], False), False)
+        return get_clean_id_from_result(result[0], False), False
 
     result = re.match(SPOILER_PATTERN_FUSION_ID, filename)
     if result is not None:
-        return (get_clean_id_from_result(result[0], False), False)
+        return get_clean_id_from_result(result[0], False), False
 
     result = re.match(REGULAR_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return (get_clean_id_from_result(result[0], True), True)
+        return get_clean_id_from_result(result[0], True), True
 
     result = re.match(SPOILER_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return (get_clean_id_from_result(result[0], True), True)
+        return get_clean_id_from_result(result[0], True), True
     else:
-        return (None, False)
+        return None, False
 
 
 def extract_fusion_ids_from_content(message: Message, custom_base: bool = False):
@@ -220,8 +251,8 @@ def extract_fusion_ids_from_content(message: Message, custom_base: bool = False)
 
     iterator = re.finditer(search_pattern, content)
     for result in iterator:
-        id = get_clean_id_from_result(result[0], custom_base)
-        id_list.append(id)
+        clean_id = get_clean_id_from_result(result[0], custom_base)
+        id_list.append(clean_id)
 
     return id_list
 
@@ -245,4 +276,35 @@ def id_to_name_map():  # Thanks Greystorm for the util and file
         data = json.loads(f.read())
         return {element["id"]: element["display_name"] for element in data["pokemon"]}
 
+
+
+# Message and channel utilities
+
+
+async def get_reply_message(message: Message):
+    if message.reference is None:
+        raise RuntimeError(message)
+
+    reply_id = message.reference.message_id
+    if reply_id is None:
+        raise RuntimeError(message)
+
+    return await message.channel.fetch_message(reply_id)
+
+
+
+def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
+    channel = server.get_channel(channel_id)
+    if channel is None:
+        raise KeyError(channel_id)
+    if not isinstance(channel, TextChannel):
+        raise TypeError(channel)
+    return channel
+
+
+def get_server_from_id(client: Client, server_id) -> Guild:
+    server = client.get_guild(server_id)
+    if server is None:
+        raise KeyError(server_id)
+    return server
 

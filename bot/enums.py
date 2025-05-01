@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 import discord
 
@@ -43,3 +43,25 @@ class DiscordColour(Enum):
     red     = discord.Colour(0xe74c3c)
     gray    = discord.Colour(0xcdcdcd)
     pink    = discord.Colour(0xff00ff)
+
+class AnalysisType(Enum):
+    sprite_gallery  = auto()
+    assets_gallery  = auto()
+    ping_reply      = auto()
+    zigzag_fusion   = auto()
+    zigzag_base     = auto()
+
+    def is_gallery(self):
+        return self in (AnalysisType.assets_gallery, AnalysisType.sprite_gallery)
+
+    def is_assets_gallery(self):
+        return (self == AnalysisType.assets_gallery) or (self == AnalysisType.zigzag_base)
+
+    def is_sprite_gallery(self):
+        return (self == AnalysisType.sprite_gallery) or (self == AnalysisType.zigzag_fusion)
+
+    def is_reply(self):
+        return self == AnalysisType.ping_reply
+
+    def is_zigzag_galpost(self):
+        return (self == AnalysisType.zigzag_fusion) or (self == AnalysisType.zigzag_base)

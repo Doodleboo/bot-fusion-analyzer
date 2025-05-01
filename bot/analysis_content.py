@@ -80,11 +80,9 @@ class ContentContext():
 
 
 def main(analysis: Analysis):
-    if analysis.specific_attachment is not None:
-        handle_some_content(analysis)
-        return
-
-    if utils.have_attachment(analysis):
+    if (analysis.specific_attachment is not None)\
+            or utils.have_attachment(analysis)\
+            or utils.have_zigzag_embed(analysis):
         handle_some_content(analysis)
         return
 
