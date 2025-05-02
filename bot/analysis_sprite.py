@@ -201,8 +201,6 @@ class SpriteContext():
             analysis.severity = Severity.refused
             analysis.issues.add(HalfPixelsAmount(half_pixels_amount))
         else:
-            if analysis.severity != Severity.refused:
-                analysis.severity = Severity.controversial
             analysis.issues.add(MisplacedGrid())
 
 

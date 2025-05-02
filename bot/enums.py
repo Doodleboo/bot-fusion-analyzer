@@ -27,7 +27,7 @@ class Description(str, Enum):
     similarity_amount   = "Similarity"
     high_similarity     = "High number of similar color pairs"
     refused_similarity  = "Over maximum limit of similar color pairs"
-    misplaced_grid      = "Not correctly aligned in the grid"
+    misplaced_grid      = "Not aligned in the grid (it's fine)"
 
 
 class Severity(Enum):
