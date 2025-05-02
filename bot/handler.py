@@ -59,7 +59,7 @@ async def handle_gallery(message: Message, is_assets: bool = False):
 
 
 async def handle_zigzag_galpost(message: Message):
-    utils.log_event("Zigzag>", message.embeds[0].title)
+    print("Zigzag> ", message.embeds[0].title)
 
     if is_assets_gallery(message):
         analysis_type = AnalysisType.zigzag_base
