@@ -62,7 +62,8 @@ def log_event(decorator: str, event: Message | Thread):
 
 def _log_message(decorator: str, message: Message):
     channel_name = get_channel_name_from_message(message)
-    print(f"{decorator} [{message.author.name}] {LCB}{channel_name}{RCB} {message.content}")
+    first_line = message.content.splitlines()[0]
+    print(f"{decorator} [{message.author.name}] {LCB}{channel_name}{RCB} {first_line}")
 
 
 def get_channel_name_from_message(message: Message):
