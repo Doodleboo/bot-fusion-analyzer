@@ -16,6 +16,8 @@ DICT_SEVERITY_COLOUR = {
     Severity.controversial : DiscordColour.pink,
     Severity.refused : DiscordColour.red
 }
+IMAGE_PNG = "image.png"
+PNG = "PNG"
 
 
 class Analysis:
@@ -51,8 +53,8 @@ class Analysis:
 
     def generate_embed(self):
         self.embed = Embed()
-        self.apply_title()
         self.apply_description()
+        self.apply_title()
         self.apply_colour()
         self.apply_author()
         self.apply_footer()
@@ -63,18 +65,18 @@ class Analysis:
     def generate_transparency_file(self):
         if self.transparency_image is None:
             raise RuntimeError()
-        bytes = BytesIO()
-        self.transparency_image.save(bytes, format="PNG")
-        bytes.seek(0)
-        return File(bytes, filename="image.png")
+        bytes_buffer = BytesIO()
+        self.transparency_image.save(bytes_buffer, format=PNG)
+        bytes_buffer.seek(0)
+        return File(bytes_buffer, filename=IMAGE_PNG)
 
     def generate_half_pixels_file(self):
         if self.half_pixels_image is None:
             raise RuntimeError()
-        bytes = BytesIO()
-        self.half_pixels_image.save(bytes, format="PNG")
-        bytes.seek(0)
-        return File(bytes, filename="image.png")
+        bytes_buffer = BytesIO()
+        self.half_pixels_image.save(bytes_buffer, format=PNG)
+        bytes_buffer.seek(0)
+        return File(bytes_buffer, filename=IMAGE_PNG)
 
     def handle_bonus_embed(self):
         if self.transparency_issue is True:
@@ -83,10 +85,14 @@ class Analysis:
             self.half_pixels_embed = get_bonus_embed(DiscordColour.red.value)
 
     def apply_title(self):
-        if self.severity == Severity.accepted:
-            self.embed.title = f"__{self.severity.value}: {self.fusion_id}__\n{str(self.issues)}"
+        if (self.severity == Severity.accepted) or (self.severity == Severity.controversial):
+            title_text = f"__{self.severity.value}: {self.fusion_id}__\n{str(self.issues)}"
         else:
-            self.embed.title = f"__{self.severity.value}:__\n{str(self.issues)}"
+            title_text = f"__{self.severity.value}:__\n{str(self.issues)}"
+        if len(title_text) > 256:   # In case it's too long for the title
+            self.embed.description = title_text
+        else:
+            self.embed.title = title_text
 
     def apply_colour(self):
         self.embed.colour = DICT_SEVERITY_COLOUR.get(self.severity, DiscordColour.gray).value
@@ -99,10 +105,17 @@ class Analysis:
         self.embed.set_author(name=self.message.author.name, icon_url=author_avatar.url)
 
     def apply_footer(self):
-        self.embed.set_footer(text=self.message.content)
+        message_lines = self.message.content.splitlines()
+
+        if len(message_lines) == 0:
+            return
+
+        first_line = message_lines[0]
+        if first_line:
+            self.embed.set_footer(text=first_line)
 
     def apply_image(self):
-        # TODO : uncomment this when "get_autogen_url" works
+        # Uncomment this when "get_autogen_url" works
         # if self.autogen_url is not None:
         #     self.embed.set_image(url=self.autogen_url)
         pass
@@ -123,6 +136,6 @@ def generate_bonus_file(image:Image):
     if image is None:
         raise RuntimeError()
     io_bytes = BytesIO()
-    image.save(io_bytes, format="PNG")
+    image.save(io_bytes, format=PNG)
     io_bytes.seek(0)
-    return File(io_bytes, filename="image.png")
+    return File(io_bytes, filename=IMAGE_PNG)
