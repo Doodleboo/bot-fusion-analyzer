@@ -5,12 +5,16 @@ from bot.bot_context import BotContext
 from bot.exceptions import MissingBotContext
 from bot.models import GlobalContext
 
+bot_client = None
 bot_id = None
 bot_avatar_url = None
 bot_context = None
 
 
 async def set_bot_up(bot: discord.Client):
+    global bot_client
+    bot_client = bot
+
     global bot_id
     app_info = await bot.application_info()
     bot_id = app_info.id
@@ -38,3 +42,6 @@ def ctx() -> GlobalContext:
 
 def get_bot_id():
     return bot_id
+
+def get_bot_client():
+    return bot_client
