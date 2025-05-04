@@ -182,7 +182,7 @@ def get_fusion_id_from_filename(filename: str) -> (str, IdType):
     if result is not None:
         return get_clean_id_from_result(result[0], IdType.triple), IdType.triple
     else:
-        return None, False
+        return None, IdType.unknown
 
 
 def extract_fusion_ids_from_content(message: Message, id_type: IdType):
