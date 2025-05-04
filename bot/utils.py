@@ -101,37 +101,6 @@ def get_thread(message: Message) -> (Thread | None):
     return None
 
 
-def get_filename(analysis: Analysis):
-    if analysis.type.is_zigzag_galpost():
-        image_url = get_attachment_url_from_embed(analysis)
-        return get_filename_from_image_url(image_url)
-    if analysis.specific_attachment is None:
-        return analysis.message.attachments[0].filename
-    return analysis.specific_attachment.filename
-
-
-def get_attachment_url(analysis: Analysis):
-    if analysis.type.is_zigzag_galpost():
-        return get_attachment_url_from_embed(analysis)
-    else:
-        return get_attachment_url_from_message(analysis)
-
-
-def get_attachment_url_from_message(analysis: Analysis):
-    if analysis.specific_attachment is None:
-        return analysis.message.attachments[0].url
-    return analysis.specific_attachment.url
-
-
-def get_attachment_url_from_embed(analysis: Analysis):
-    if not analysis.message.embeds:
-        return None
-    embed = analysis.message.embeds[0]
-    if embed.image is None:
-        return None
-    return embed.image.url
-
-
 def get_filename_from_image_url(url: str):
     url_parts = url.split(".png")  # Getting everything before the ? and url parameters
     url_parts = url_parts[0].split("/")  # Grabbing only the filename: 1.1_by_doodledoo
@@ -170,15 +139,6 @@ def is_invalid_base_id(base_id: str):
 
 def get_display_avatar(user: User | Member | ClientUser) -> Asset:
     return user.display_avatar.with_format("png").with_size(256)
-
-
-def extract_fusion_id_from_filename(analysis: Analysis):
-    fusion_id = None
-    is_custom_base = False
-    if analysis.have_attachment() or analysis.type.is_zigzag_galpost():
-        filename = get_filename(analysis)
-        fusion_id, is_custom_base = get_fusion_id_from_filename(filename)
-    return fusion_id, is_custom_base
 
 
 def get_fusion_id_from_filename(filename: str):

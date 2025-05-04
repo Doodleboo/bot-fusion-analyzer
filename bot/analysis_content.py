@@ -16,7 +16,7 @@ def exists(value):
 class ContentContext():
     def __init__(self, analysis: Analysis):
 
-        self.filename_fusion_id, self.is_custom_base = utils.extract_fusion_id_from_filename(analysis)
+        self.filename_fusion_id, self.is_custom_base = analysis.extract_fusion_id_from_filename()
 
         self.content_fusion_ids_list = utils.extract_fusion_ids_from_content(analysis.message, self.is_custom_base)
 
@@ -37,7 +37,7 @@ class ContentContext():
         if self.content_fusion_id is not None:
             analysis.severity = Severity.refused
             analysis.issues.add(MissingFilename())
-            filename = utils.get_filename(analysis)
+            filename = analysis.get_filename()
             analysis.issues.add(FileName(filename))
         elif self.filename_fusion_id is not None:
             analysis.fusion_id = self.filename_fusion_id
@@ -94,7 +94,7 @@ def main(analysis: Analysis):
 
 def handle_some_content(analysis: Analysis):
     content_context = ContentContext(analysis)
-    analysis.attachment_url = utils.get_attachment_url(analysis)
+    analysis.attachment_url = analysis.get_attachment_url()
     if content_context.have_two_values():
         content_context.handle_two_values(analysis)
     elif content_context.have_one_value():
@@ -120,7 +120,7 @@ def handle_zero_value(analysis: Analysis):
         analysis.issues.add(CustomBase())
     else:
         analysis.issues.add(IncomprehensibleSprite())
-        filename = utils.get_filename(analysis)
+        filename = analysis.get_filename()
         analysis.issues.add(FileName(filename))
 
 
