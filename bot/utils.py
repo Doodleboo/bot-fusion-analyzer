@@ -143,17 +143,6 @@ def interesting_results(results: list):
     return results[1] is not None
 
 
-def have_attachment(analysis: Analysis):
-    return len(analysis.message.attachments) >= 1
-
-
-def have_zigzag_embed(analysis: Analysis) -> bool:
-    if not analysis.type.is_zigzag_galpost():
-        return False
-    embeds = analysis.message.embeds
-    return embeds is not None
-
-
 def is_missing_autogen(fusion_id: str):
     split_fusion_id = fusion_id.split(".")
     head_id = int(split_fusion_id[0])
@@ -186,7 +175,7 @@ def get_display_avatar(user: User | Member | ClientUser) -> Asset:
 def extract_fusion_id_from_filename(analysis: Analysis):
     fusion_id = None
     is_custom_base = False
-    if have_attachment(analysis) or analysis.type.is_zigzag_galpost():
+    if analysis.have_attachment() or analysis.type.is_zigzag_galpost():
         filename = get_filename(analysis)
         fusion_id, is_custom_base = get_fusion_id_from_filename(filename)
     return fusion_id, is_custom_base

@@ -30,6 +30,12 @@ class Issues():
     def has_issue(self, issue_type) -> bool:
         return any(isinstance(issue, issue_type) for issue in self.issue_list)
 
+    def remove_issue(self, issue_type):
+        for issue in self.issue_list:
+            if isinstance(issue, issue_type):
+                self.issue_list.remove(issue)
+                return
+
 
 class DifferentSprite(Issue):
     description = Description.different_fusion_id
@@ -45,7 +51,13 @@ class DifferentSprite(Issue):
 
 class EggSprite(Issue):
     description = Description.egg
-    severity = Severity.ignored
+    severity = Severity.accepted
+
+    def __init__(self, egg_name: str = "Unknown") -> None:
+        self.egg_name = egg_name
+
+    def __str__(self) -> str:
+        return f"{self.egg_name} {self.description.value}"
 
 
 class MissingFilename(Issue):

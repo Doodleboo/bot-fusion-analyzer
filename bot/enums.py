@@ -18,7 +18,7 @@ class Description(str, Enum):
     invalid_size        = "Invalid size"
     icon                = "Icon sprite"
     custom              = "custom base"
-    egg                 = "Egg sprite"
+    egg                 = "egg sprite"
     incomprehensible    = "Incomprehensible name"
     test                = "Description test"
     no_transparency     = "Missing transparency"
@@ -52,7 +52,7 @@ class AnalysisType(Enum):
     zigzag_base     = auto()
 
     def is_gallery(self):
-        return self in (AnalysisType.assets_gallery, AnalysisType.sprite_gallery)
+        return self.is_sprite_gallery() or self.is_assets_gallery()
 
     def is_assets_gallery(self):
         return (self == AnalysisType.assets_gallery) or (self == AnalysisType.zigzag_base)

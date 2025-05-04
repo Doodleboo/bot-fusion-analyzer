@@ -124,6 +124,17 @@ class Analysis:
         if self.attachment_url is not None:
             self.embed.set_thumbnail(url=self.attachment_url)
 
+    # Non-embed methods
+
+    def have_attachment(self) -> bool:
+        return len(self.message.attachments) >= 1
+
+    def have_zigzag_embed(self) -> bool:
+        if not self.type.is_zigzag_galpost():
+            return False
+        embeds = self.message.embeds
+        return embeds is not None
+
 
 def get_bonus_embed(discord_colour:Colour):
     bonus_embed = Embed()
