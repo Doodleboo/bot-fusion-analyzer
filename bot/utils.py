@@ -62,7 +62,12 @@ def log_event(decorator: str, event: Message | Thread):
 
 def _log_message(decorator: str, message: Message):
     channel_name = get_channel_name_from_message(message)
-    first_line = message.content.splitlines()[0]
+    split_lines = message.content.splitlines()
+    if split_lines:
+        first_line = split_lines[0]
+    else:
+        first_line = ""
+
     print(f"{decorator} [{message.author.name}] {LCB}{channel_name}{RCB} {first_line}")
 
 
@@ -134,9 +139,9 @@ def get_attachment_url_from_embed(analysis: Analysis):
 
 
 def get_filename_from_image_url(url: str):
-    url_parts = url.split(".png")       # Getting everything before the ? and url parameters
-    url_parts = url_parts[0].split("/") # Grabbing only the filename: 1.1_by_doodledoo
-    dex_id = url_parts[-1].split("_")[0]    # Filtering the credit to keep only the dex id
+    url_parts = url.split(".png")  # Getting everything before the ? and url parameters
+    url_parts = url_parts[0].split("/")  # Grabbing only the filename: 1.1_by_doodledoo
+    dex_id = url_parts[-1].split("_")[0]  # Filtering the credit to keep only the dex id
     return dex_id + ".png"
 
 
@@ -266,13 +271,11 @@ def get_clean_id_from_result(text: str, custom_base: bool = False):
     return fusion_id
 
 
-
 def id_to_name_map():  # Thanks Greystorm for the util and file
     """Returns dictionary mapping id numbers to display names"""
     with open(NAMES_JSON_FILE) as f:
         data = json.loads(f.read())
         return {element["id"]: element["display_name"] for element in data["pokemon"]}
-
 
 
 # Message and channel utilities
@@ -287,7 +290,6 @@ async def get_reply_message(message: Message):
         raise RuntimeError(message)
 
     return await message.channel.fetch_message(reply_id)
-
 
 
 def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
