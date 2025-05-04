@@ -73,11 +73,15 @@ async def on_message(message: Message):
 
 @bot.event
 async def on_thread_create(thread: Thread):
+    try:
+        if not is_spriter_application(thread):
+            return
 
-    if not is_spriter_application(thread):
-        return
-
-    await handle_spriter_application(thread)
+        await handle_spriter_application(thread)
+    except Exception as message_exception:
+        await ctx().doodledoo.debug.send(
+            f"ERROR in #{thread} ({thread.jump_url})")
+        raise RuntimeError from message_exception
 
 
 
