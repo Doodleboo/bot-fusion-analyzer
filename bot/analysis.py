@@ -5,9 +5,10 @@ from discord.colour import Colour
 from discord.embeds import Embed
 from discord.file import File
 from discord.message import Attachment, Message
-from enums import DiscordColour, Severity, AnalysisType
-from issues import Issues
 from PIL.Image import Image
+
+from enums import DiscordColour, Severity, AnalysisType, IdType
+from issues import Issues
 
 
 DICT_SEVERITY_COLOUR = {
@@ -123,6 +124,52 @@ class Analysis:
     def apply_thumbnail(self):
         if self.attachment_url is not None:
             self.embed.set_thumbnail(url=self.attachment_url)
+
+    # Non-embed methods
+
+    def have_attachment(self) -> bool:
+        return len(self.message.attachments) >= 1
+
+    def have_zigzag_embed(self) -> bool:
+        if not self.type.is_zigzag_galpost():
+            return False
+        embeds = self.message.embeds
+        return embeds is not None
+
+    def get_filename(self):
+        if self.type.is_zigzag_galpost():
+            image_url = self.get_attachment_url_from_embed()
+            return utils.get_filename_from_image_url(image_url)
+        if self.specific_attachment is None:
+            return self.message.attachments[0].filename
+        return self.specific_attachment.filename
+
+    def get_attachment_url(self):
+        if self.type.is_zigzag_galpost():
+            return self.get_attachment_url_from_embed()
+        else:
+            return self.get_attachment_url_from_message()
+
+    def get_attachment_url_from_message(self):
+        if self.specific_attachment is None:
+            return self.message.attachments[0].url
+        return self.specific_attachment.url
+
+    def get_attachment_url_from_embed(self):
+        if not self.message.embeds:
+            return None
+        embed = self.message.embeds[0]
+        if embed.image is None:
+            return None
+        return embed.image.url
+
+    def extract_fusion_id_from_filename(self) -> (str, IdType):
+        fusion_id = None
+        id_type = None
+        if self.have_attachment() or self.type.is_zigzag_galpost():
+            filename = self.get_filename()
+            fusion_id, id_type = utils.get_fusion_id_from_filename(filename)
+        return fusion_id, id_type
 
 
 def get_bonus_embed(discord_colour:Colour):

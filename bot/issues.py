@@ -31,6 +31,7 @@ class Issues():
         return any(isinstance(issue, issue_type) for issue in self.issue_list)
 
 
+
 class DifferentSprite(Issue):
     description = Description.different_fusion_id
     severity = Severity.refused
@@ -43,11 +44,6 @@ class DifferentSprite(Issue):
         return f"{self.description.value} ({self.filename_fusion_id}) ({self.content_fusion_id})"
 
 
-class EggSprite(Issue):
-    description = Description.egg
-    severity = Severity.ignored
-
-
 class MissingFilename(Issue):
     description = Description.missing_file_name
     severity = Severity.refused
@@ -58,9 +54,15 @@ class MissingSprite(Issue):
     severity = Severity.ignored
 
 
-class IconSprite(Issue):
-    description = Description.icon
-    severity = Severity.ignored
+class PokemonNames(Issue):
+    severity = Severity.accepted
+
+    def __init__(self, head_id: str, body_id: str) -> None:
+        self.head_name = head_id
+        self.body_name = body_id
+
+    def __str__(self) -> str:
+        return f"{self.head_name}/{self.body_name}"
 
 
 class CustomBase(Issue):
@@ -72,6 +74,27 @@ class CustomBase(Issue):
 
     def __str__(self) -> str:
         return f"{self.base_name} {self.description.value}"
+
+
+class EggSprite(Issue):
+    description = Description.egg
+    severity = Severity.accepted
+
+    def __init__(self, egg_name: str = "Unknown") -> None:
+        self.egg_name = egg_name
+
+    def __str__(self) -> str:
+        return f"{self.egg_name} {self.description.value}"
+
+
+class TripleFusionSprite(Issue):
+    description = Description.triple
+    severity = Severity.accepted
+
+
+class IconSprite(Issue):
+    description = Description.icon
+    severity = Severity.ignored
 
 
 class IncomprehensibleSprite(Issue):
@@ -231,16 +254,6 @@ class HalfPixelsAmount(Issue):
     def __str__(self) -> str:
         return f"{self.description.value}: {self.amount}"
 
-
-class PokemonNames(Issue):
-    severity = Severity.accepted
-
-    def __init__(self, head_id: str, body_id: str) -> None:
-        self.head_name = head_id
-        self.body_name = body_id
-
-    def __str__(self) -> str:
-        return f"{self.head_name}/{self.body_name}"
 
 class MisplacedGrid(Issue):
     description = Description.misplaced_grid
