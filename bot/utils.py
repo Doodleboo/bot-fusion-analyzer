@@ -10,16 +10,10 @@ from discord.member import Member
 from discord.threads import Thread
 
 from analysis import Analysis
-from bot import setup
 
 MAX_DEX_ID = 565
 MISSING_DEX_ID = 420
 
-PATTERN_ICON = r'[iI]con'
-PATTERN_CUSTOM = r'[cC]ustom'
-PATTERN_BASE = r'[bB]ase'
-PATTERN_EGG = r'[eE]gg'
-PATTERN_CUSTOM_BASE = r'[cC]ustom [bB]ase'
 
 LETTER_AND_PNG_PATTERN = r'[a-z]{0,1}\.png$'
 
@@ -147,31 +141,6 @@ def get_filename_from_image_url(url: str):
 
 def interesting_results(results: list):
     return results[1] is not None
-
-
-def have_icon_in_message(message: Message):
-    result = re.search(PATTERN_ICON, message.content)
-    return result is not None
-
-
-def have_custom_base_in_message(message: Message):
-    result = re.search(PATTERN_CUSTOM_BASE, message.content)
-    return result is not None
-
-
-def have_custom_in_message(message: Message):
-    result = re.search(PATTERN_CUSTOM, message.content)
-    return result is not None
-
-
-def have_base_in_message(message: Message):
-    result = re.search(PATTERN_BASE, message.content)
-    return result is not None
-
-
-def have_egg_in_message(message: Message):
-    result = re.search(PATTERN_EGG, message.content)
-    return result is not None
 
 
 def have_attachment(analysis: Analysis):

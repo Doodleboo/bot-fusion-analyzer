@@ -10,7 +10,7 @@ id_channel_assets_doodledoo  = 1363610399064330480
 id_channel_logs_doodledoo    = 1360969318296322328
 id_channel_debug_doodledoo   = 1360964178927554680
 
-bot_environment = "pif"
+bot_environment = "local"
 
 # Pokémon Infinite Fusion
 if bot_environment == "local":

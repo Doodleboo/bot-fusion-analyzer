@@ -1,11 +1,11 @@
-from fileinput import filename
-
 import utils
 from analysis import Analysis
 from enums import Severity
 from issues import (CustomBase, DifferentSprite, EggSprite, IconSprite,
                     IncomprehensibleSprite, MissingFilename, MissingSprite,
                     OutOfDex, FileName, PokemonNames)
+from message_identifier import (have_icon_in_message, have_custom_in_message,
+                                have_egg_in_message, have_base_in_message)
 
 
 def exists(value):
@@ -107,13 +107,13 @@ def handle_no_content(analysis: Analysis):
 
 def handle_zero_value(analysis: Analysis):
     analysis.severity = Severity.ignored
-    if utils.have_egg_in_message(analysis.message):
+    if have_egg_in_message(analysis.message):
         analysis.issues.add(EggSprite())
-    elif utils.have_icon_in_message(analysis.message):
+    elif have_icon_in_message(analysis.message):
         analysis.issues.add(IconSprite())
-    elif utils.have_custom_in_message(analysis.message):
+    elif have_custom_in_message(analysis.message):
         analysis.issues.add(CustomBase())
-    elif utils.have_base_in_message(analysis.message):
+    elif have_base_in_message(analysis.message):
         analysis.issues.add(CustomBase())
     else:
         analysis.issues.add(IncomprehensibleSprite())

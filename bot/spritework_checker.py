@@ -1,5 +1,6 @@
 import datetime
 import re
+import math
 
 from aiohttp.abc import HTTPException
 from discord import Embed, Message, Thread, Forbidden, NotFound, HTTPException
@@ -22,7 +23,7 @@ async def get_spritework_thread_times(message: Message) -> Embed:
         if time_delta.days >= 1:
             description += f"**{spritework_thread.name}**: created **over a day ago**\n"
         else:
-            hours_delta = time_delta.seconds / 3600
+            hours_delta = math.floor(time_delta.seconds / 3600)
             if (hours_delta >= 1) and (hours_delta < 2):
                 hours = "hour"
             else:
