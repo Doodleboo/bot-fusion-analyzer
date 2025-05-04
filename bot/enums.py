@@ -72,3 +72,4 @@ class IdType(Enum):
     fusion      = auto()
     base_or_egg = auto()
     triple      = auto()
+    unknown     = auto()
