@@ -19,6 +19,7 @@ class Description(str, Enum):
     icon                = "Icon sprite"
     custom              = "custom base"
     egg                 = "egg sprite"
+    triple              = "Triple fusion"
     incomprehensible    = "Incomprehensible name"
     test                = "Description test"
     no_transparency     = "Missing transparency"
@@ -65,3 +66,9 @@ class AnalysisType(Enum):
 
     def is_zigzag_galpost(self):
         return (self == AnalysisType.zigzag_fusion) or (self == AnalysisType.zigzag_base)
+
+
+class IdType(Enum):
+    fusion      = auto()
+    base_or_egg = auto()
+    triple      = auto()

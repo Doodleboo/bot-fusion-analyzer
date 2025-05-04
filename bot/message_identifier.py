@@ -14,6 +14,7 @@ PATTERN_ICON = r'[iI]con'
 PATTERN_CUSTOM = r'[cC]ustom'
 PATTERN_BASE = r'[bB]ase'
 PATTERN_EGG = r'[eE]gg'
+PATTERN_TRIPLE = r'[tT]riple'
 PATTERN_CUSTOM_BASE = r'[cC]ustom [bB]ase'
 
 
@@ -92,4 +93,8 @@ def have_base_in_message(message: Message):
 
 def have_egg_in_message(message: Message):
     result = re.search(PATTERN_EGG, message.content)
+    return result is not None
+
+def have_triple_in_message(message: Message):
+    result = re.search(PATTERN_TRIPLE, message.content)
     return result is not None

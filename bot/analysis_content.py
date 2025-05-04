@@ -1,12 +1,12 @@
 import utils
 from analysis import Analysis
 from bot.analysis_sprite import detect_egg_size_early
-from enums import Severity
+from enums import Severity, IdType
 from issues import (CustomBase, DifferentSprite, EggSprite, IconSprite,
                     IncomprehensibleSprite, MissingFilename, MissingSprite,
-                    OutOfDex, FileName, PokemonNames)
+                    OutOfDex, FileName, PokemonNames, TripleFusionSprite)
 from message_identifier import (have_icon_in_message, have_custom_in_message,
-                                have_egg_in_message, have_base_in_message)
+                                have_egg_in_message, have_base_in_message, have_triple_in_message)
 
 
 def exists(value):
@@ -16,9 +16,10 @@ def exists(value):
 class ContentContext():
     def __init__(self, analysis: Analysis):
 
-        self.filename_fusion_id, self.is_custom_base = analysis.extract_fusion_id_from_filename()
+        self.filename_fusion_id, self.id_type = analysis.extract_fusion_id_from_filename()
+        self.is_custom_base = (self.id_type == IdType.base_or_egg) or (self.id_type.name == "base_or_egg")
 
-        self.content_fusion_ids_list = utils.extract_fusion_ids_from_content(analysis.message, self.is_custom_base)
+        self.content_fusion_ids_list = utils.extract_fusion_ids_from_content(analysis.message, self.id_type)
 
         if self.content_fusion_ids_list:
             self.content_fusion_id = self.content_fusion_ids_list[0]
@@ -78,6 +79,8 @@ class ContentContext():
 
         elif self.is_custom_base:
             handle_pokemon_name(analysis, fusion_id, self.is_egg_sprite)
+        elif self.id_type.name == "triple":
+            analysis.issues.add(TripleFusionSprite())
         else:
             handle_pokemon_names(analysis, fusion_id)
 
@@ -118,6 +121,8 @@ def handle_zero_value(analysis: Analysis):
         analysis.issues.add(CustomBase())
     elif have_base_in_message(analysis.message):
         analysis.issues.add(CustomBase())
+    elif have_triple_in_message(analysis.message):
+        analysis.issues.add(TripleFusionSprite())
     else:
         analysis.issues.add(IncomprehensibleSprite())
         filename = analysis.get_filename()

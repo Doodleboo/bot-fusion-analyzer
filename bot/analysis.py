@@ -5,9 +5,10 @@ from discord.colour import Colour
 from discord.embeds import Embed
 from discord.file import File
 from discord.message import Attachment, Message
-from enums import DiscordColour, Severity, AnalysisType
-from issues import Issues
 from PIL.Image import Image
+
+from enums import DiscordColour, Severity, AnalysisType, IdType
+from issues import Issues
 
 
 DICT_SEVERITY_COLOUR = {
@@ -162,13 +163,13 @@ class Analysis:
             return None
         return embed.image.url
 
-    def extract_fusion_id_from_filename(self):
+    def extract_fusion_id_from_filename(self) -> (str, IdType):
         fusion_id = None
-        is_custom_base = False
+        id_type = None
         if self.have_attachment() or self.type.is_zigzag_galpost():
             filename = self.get_filename()
-            fusion_id, is_custom_base = utils.get_fusion_id_from_filename(filename)
-        return fusion_id, is_custom_base
+            fusion_id, id_type = utils.get_fusion_id_from_filename(filename)
+        return fusion_id, id_type
 
 
 def get_bonus_embed(discord_colour:Colour):

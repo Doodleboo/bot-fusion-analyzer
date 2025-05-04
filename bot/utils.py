@@ -10,6 +10,7 @@ from discord.member import Member
 from discord.threads import Thread
 
 from analysis import Analysis
+from bot.enums import IdType
 
 MAX_DEX_ID = 565
 MISSING_DEX_ID = 420
@@ -21,20 +22,28 @@ LETTER_AND_PNG_PATTERN = r'[a-z]{0,1}\.png$'
 NUMBER_PATTERN_FUSION_ID = r'([1-9]\d{0,2})\.([1-9]\d{0,2})'
 # 123
 NUMBER_PATTERN_CUSTOM_ID = r'([1-9]\d{0,2})'
+# 123.456.789
+NUMBER_PATTERN_TRIPLE_ID = r'([1-9]\d{0,2})\.([1-9]\d{0,2})\.([1-9]\d{0,2})'
 
 # (123.456a)
 TEXT_PATTERN_FUSION_ID = r'\(([1-9]\d{0,2})\.([1-9]\d{0,2})[a-z]{0,1}\)'
 # (123a)
 TEXT_PATTERN_CUSTOM_ID = r'\(([1-9]\d{0,2})[a-z]{0,1}\)'
+# (123.456.789a)
+TEXT_PATTERN_TRIPLE_ID = r'\(([1-9]\d{0,2})\.([1-9]\d{0,2})\.([1-9]\d{0,2})[a-z]{0,1}\)'
 
 FILENAME_FUSION_ID = NUMBER_PATTERN_FUSION_ID + LETTER_AND_PNG_PATTERN
 FILENAME_CUSTOM_ID = NUMBER_PATTERN_CUSTOM_ID + LETTER_AND_PNG_PATTERN
+FILENAME_TRIPLE_ID = NUMBER_PATTERN_TRIPLE_ID + LETTER_AND_PNG_PATTERN
 
 REGULAR_PATTERN_FUSION_ID = rf'^{FILENAME_FUSION_ID}'
 SPOILER_PATTERN_FUSION_ID = rf'^SPOILER_{FILENAME_FUSION_ID}'
 
 REGULAR_PATTERN_CUSTOM_ID = rf'^{FILENAME_CUSTOM_ID}'
 SPOILER_PATTERN_CUSTOM_ID = rf'^SPOILER_{FILENAME_CUSTOM_ID}'
+
+REGULAR_PATTERN_TRIPLE_ID = rf'^{FILENAME_TRIPLE_ID}'
+SPOILER_PATTERN_TRIPLE_ID = rf'^SPOILER_{FILENAME_TRIPLE_ID}'
 
 RAW_GITHUB = "https://raw.githubusercontent.com"
 RAW_GITLAB = "https://gitlab.com"
@@ -127,9 +136,12 @@ def get_autogen_url(fusion_id: str):
 
 
 def is_invalid_fusion_id(fusion_id: str):
-    head, body = fusion_id.split(".")
-    head_id, body_id = int(head), int(body)
-    return head_id > MAX_DEX_ID or body_id > MAX_DEX_ID
+    fusion_id_list = fusion_id.split(".")
+    for id in fusion_id_list:
+        id_int = int(id)
+        if id_int > MAX_DEX_ID:
+            return True
+    return False
 
 
 def is_invalid_base_id(base_id: str):
@@ -141,46 +153,62 @@ def get_display_avatar(user: User | Member | ClientUser) -> Asset:
     return user.display_avatar.with_format("png").with_size(256)
 
 
-def get_fusion_id_from_filename(filename: str):
+def get_fusion_id_from_filename(filename: str) -> (str, IdType):
+
+    # Search for fusion pattern
     result = re.match(REGULAR_PATTERN_FUSION_ID, filename)
     if result is not None:
-        return get_clean_id_from_result(result[0], False), False
+        return get_clean_id_from_result(result[0], IdType.fusion), IdType.fusion
 
     result = re.match(SPOILER_PATTERN_FUSION_ID, filename)
     if result is not None:
-        return get_clean_id_from_result(result[0], False), False
+        return get_clean_id_from_result(result[0], IdType.fusion), IdType.fusion
 
+    # Search for custom base or egg pattern
     result = re.match(REGULAR_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return get_clean_id_from_result(result[0], True), True
+        return get_clean_id_from_result(result[0], IdType.base_or_egg), IdType.base_or_egg
 
     result = re.match(SPOILER_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return get_clean_id_from_result(result[0], True), True
+        return get_clean_id_from_result(result[0], IdType.base_or_egg), IdType.base_or_egg
+
+    # Search for triple fusion pattern
+    result = re.match(REGULAR_PATTERN_TRIPLE_ID, filename)
+    if result is not None:
+        return get_clean_id_from_result(result[0], IdType.triple), IdType.triple
+
+    result = re.match(SPOILER_PATTERN_TRIPLE_ID, filename)
+    if result is not None:
+        return get_clean_id_from_result(result[0], IdType.triple), IdType.triple
     else:
         return None, False
 
 
-def extract_fusion_ids_from_content(message: Message, custom_base: bool = False):
+def extract_fusion_ids_from_content(message: Message, id_type: IdType):
     content = message.content
     id_list = []
-    if custom_base:
+    if id_type == IdType.base_or_egg:
         search_pattern = TEXT_PATTERN_CUSTOM_ID
+    elif id_type == IdType.triple:
+        search_pattern = TEXT_PATTERN_TRIPLE_ID
     else:
         search_pattern = TEXT_PATTERN_FUSION_ID
 
     iterator = re.finditer(search_pattern, content)
     for result in iterator:
-        clean_id = get_clean_id_from_result(result[0], custom_base)
+        clean_id = get_clean_id_from_result(result[0], id_type)
         id_list.append(clean_id)
 
     return id_list
 
 
-def get_clean_id_from_result(text: str, custom_base: bool = False):
+def get_clean_id_from_result(text: str, id_type: IdType):
     fusion_id = None
-    if custom_base:
+    if id_type == IdType.base_or_egg:
         search_pattern = NUMBER_PATTERN_CUSTOM_ID
+    elif id_type == IdType.triple:
+        search_pattern = NUMBER_PATTERN_TRIPLE_ID
     else:
         search_pattern = NUMBER_PATTERN_FUSION_ID
     result = re.search(search_pattern, text)
