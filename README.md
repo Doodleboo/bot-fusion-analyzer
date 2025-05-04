@@ -9,6 +9,9 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - **Greystorm** for giving permission to use various utilities from spritebot
 
 # Changelog
+## Version 2.2
+- **Triple** fusion and **Egg** sprite support
+
 ## Version 2.1
 - New Hoenn dex numbers
 - **Spriter application checks:** it will do an auto-analysis of the 3 sprites and check if their spritework threads have been created over a day ago
