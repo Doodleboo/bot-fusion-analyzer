@@ -9,7 +9,6 @@ from discord.user import User, ClientUser
 from discord.member import Member
 from discord.threads import Thread
 
-from analysis import Analysis
 from bot.enums import IdType
 
 MAX_DEX_ID = 565

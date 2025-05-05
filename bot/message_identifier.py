@@ -3,8 +3,8 @@ import discord
 from discord import Message, Thread
 
 from bot import setup
-from bot.bot_context import id_channel_gallery_pif, id_channel_assets_pif, id_channel_gallery_doodledoo, \
-    id_spriter_apps_pif
+from bot.bot_context import (id_channel_gallery_pif, id_channel_assets_pif,
+                             id_channel_gallery_doodledoo, id_spriter_apps_pif)
 from bot.setup import get_bot_id
 
 ZIGZAG_ID = 1185671488611819560 #1185671488611819560

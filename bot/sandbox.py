@@ -4,7 +4,7 @@ import numpy
 from PIL.Image import Image, open # Pillow
 from PIL import UnidentifiedImageError
 
-# Fuck colormath
+
 def patch_asscalar(a):
     return a.item()
 setattr(numpy, "asscalar", patch_asscalar)
