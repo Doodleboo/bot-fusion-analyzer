@@ -1,6 +1,5 @@
 import requests
 from analysis import Analysis
-from bot.issues import NotPng
 from enums import Severity
 from exceptions import TransparencyException
 from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
@@ -8,7 +7,7 @@ from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
                     HalfPixelsAmount, InvalidSize, MissingTransparency,
                     SimilarityAmount, TransparencyAmount, CustomBase,
                     SimilarityExcessControversial, SimilarityExcessRefused,
-                    MisplacedGrid, EggSprite)
+                    MisplacedGrid, EggSprite, NotPng)
 
 # Pillow
 from PIL.Image import open as image_open
@@ -76,13 +75,11 @@ class SpriteContext():
         self.useful_colors: list = []
         self.similar_color_dict: dict = {}
 
-        self.custom_base = analysis.issues.has_issue(CustomBase)
-        self.is_assets = analysis.type.is_assets_gallery() or self.custom_base
         # To both cover:
         # replied custom bases detected in analysis_content
         # and custom bases from assets gallery
 
-        if self.is_assets:
+        if analysis.type.is_assets_gallery() or analysis.issues.has_issue(CustomBase):
             self.refused_color_lim = CUSTOM_BASE_REFUSED_COLOR_LIMIT
             self.controv_color_lim = CUSTOM_BASE_CONTROV_COLOR_LIMIT
             self.refused_sim_lim = CUSTOM_BASE_REFUSED_SIM_LIMIT
