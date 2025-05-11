@@ -11,6 +11,7 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 # Changelog
 ## Version 2.2
 - **Triple** fusion and **Egg** sprite support
+- Detect other image formats "disguised" as PNGs
 
 ## Version 2.1
 - New Hoenn dex numbers
