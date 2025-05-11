@@ -1,5 +1,6 @@
 import requests
 from analysis import Analysis
+from bot.issues import NotPng
 from enums import Severity
 from exceptions import TransparencyException
 from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
@@ -101,6 +102,13 @@ class SpriteContext():
             self.step = STEP
 
         self.valid_size = (self.max_size, self.max_size)
+
+    def handle_sprite_format(self, analysis:Analysis):
+        # Ensures that the image is actually a png
+        file_format = self.image.format
+        if file_format != "PNG":
+            analysis.severity = Severity.refused
+            analysis.issues.add(NotPng(file_format))
 
     def handle_sprite_size(self, analysis: Analysis):
         image_size = self.image.size
@@ -439,6 +447,7 @@ def main(analysis: Analysis):
 
 def handle_valid_sprite(analysis: Analysis):
     context = SpriteContext(analysis)
+    context.handle_sprite_format(analysis)
     context.handle_sprite_size(analysis)
     context.handle_sprite_colors(analysis)
     context.handle_sprite_transparency(analysis)

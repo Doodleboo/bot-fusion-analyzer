@@ -113,6 +113,17 @@ class OutOfDex(Issue):
         return f"{self.description.value} ({self.fusion_id})"
 
 
+class NotPng(Issue):
+    description = Description.not_png
+    severity = Severity.refused
+
+    def __init__(self, file_format: str) -> None:
+        self.file_format = file_format
+
+    def __str__(self) -> str:
+        return f"{self.description.value}: {self.file_format}"
+
+
 class InvalidSize(Issue):
     description = Description.invalid_size
     severity = Severity.refused
