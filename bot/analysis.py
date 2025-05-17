@@ -86,11 +86,11 @@ class Analysis:
             self.half_pixels_embed = get_bonus_embed(DiscordColour.red.value)
 
     def apply_title(self):
-        if (self.severity == Severity.accepted) or (self.severity == Severity.controversial):
+        if self.fusion_id and (self.fusion_id != "DEFAULT_VALUE"):
             title_text = f"__{self.severity.value}: {self.fusion_id}__\n{str(self.issues)}"
         else:
             title_text = f"__{self.severity.value}:__\n{str(self.issues)}"
-        if len(title_text) > 256:   # In case it's too long for the title
+        if len(title_text) >= 256:   # In case it's too long for the title
             self.embed.description = title_text
         else:
             self.embed.title = title_text
