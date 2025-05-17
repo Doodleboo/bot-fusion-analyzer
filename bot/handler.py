@@ -52,10 +52,10 @@ async def handle_gallery(message: Message, is_assets: bool = False):
             except HTTPException:
                 await message.add_reaction("😡")  # Nani failsafe
         try:
-            await send_bot_logs(analysis, message.author.id)
+            await send_bot_logs(analysis, message.author)
         except HTTPException:  # Rate limit
             await asyncio.sleep(300)
-            await send_bot_logs(analysis, message.author.id)
+            await send_bot_logs(analysis, message.author)
 
 
 async def handle_zigzag_galpost(message: Message):

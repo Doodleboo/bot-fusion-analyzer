@@ -12,7 +12,7 @@ from discord.threads import Thread
 from bot.enums import IdType
 
 MAX_DEX_ID = 565
-MISSING_DEX_ID = 420
+AUTOGEN_MAX_ID = 501
 
 
 LETTER_AND_PNG_PATTERN = r'[a-z]{0,1}\.png$'
@@ -102,13 +102,6 @@ def get_channel_name_from_interaction(interaction: Interaction):
     return channel_name
 
 
-def get_thread(message: Message) -> (Thread | None):
-    thread = message.channel
-    if isinstance(thread, Thread):
-        return thread
-    return None
-
-
 def get_filename_from_image_url(url: str):
     url_parts = url.split(".png")  # Getting everything before the ? and url parameters
     url_parts = url_parts[0].split("/")  # Grabbing only the filename: 1.1_by_doodledoo
@@ -116,22 +109,11 @@ def get_filename_from_image_url(url: str):
     return dex_id + ".png"
 
 
-def interesting_results(results: list):
-    return results[1] is not None
-
-
 def is_missing_autogen(fusion_id: str):
     split_fusion_id = fusion_id.split(".")
     head_id = int(split_fusion_id[0])
     body_id = int(split_fusion_id[1])
-    return head_id > MISSING_DEX_ID or body_id > MISSING_DEX_ID
-
-
-def get_autogen_url(fusion_id: str):
-    # If it starts working again, it should adapt to work with custom bases
-    if is_missing_autogen(fusion_id):
-        return QUESTION_URL
-    return AUTOGEN_FUSION_URL + fusion_id.split(".")[0] + "/" + fusion_id + ".png"
+    return head_id > AUTOGEN_MAX_ID or body_id > AUTOGEN_MAX_ID
 
 
 def is_invalid_fusion_id(fusion_id: str):

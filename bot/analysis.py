@@ -8,7 +8,7 @@ from discord.message import Attachment, Message
 from PIL.Image import Image
 
 from enums import DiscordColour, Severity, AnalysisType, IdType
-from issues import Issues
+from issues import Issues, PokemonNames
 
 
 DICT_SEVERITY_COLOUR = {
@@ -28,7 +28,7 @@ class Analysis:
     embed: Embed
     fusion_id: str = "DEFAULT_VALUE"
 
-    autogen_url: str|None = None
+    autogen_available: bool = False
     attachment_url: str|None = None
     specific_attachment: Attachment|None = None
 
@@ -116,10 +116,14 @@ class Analysis:
             self.embed.set_footer(text=first_line)
 
     def apply_image(self):
-        # Uncomment this when "get_autogen_url" works
-        # if self.autogen_url is not None:
-        #     self.embed.set_image(url=self.autogen_url)
-        pass
+        if (not self.issues.has_issue(PokemonNames)) or (self.fusion_id == "DEFAULT_VALUE"):
+            return
+
+        if utils.is_missing_autogen(self.fusion_id):
+            return
+
+        self.autogen_available = True
+        self.embed.set_image(url="attachment://image.png")
 
     def apply_thumbnail(self):
         if self.attachment_url is not None:
