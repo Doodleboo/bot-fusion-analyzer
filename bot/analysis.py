@@ -1,4 +1,7 @@
+import os
 from io import BytesIO
+
+import discord
 
 import utils
 from discord.colour import Colour
@@ -174,6 +177,24 @@ class Analysis:
             filename = self.get_filename()
             fusion_id, id_type = utils.get_fusion_id_from_filename(filename)
         return fusion_id, id_type
+
+
+def get_autogen_file(fusion_id: str) -> File|None:
+    ids_list = fusion_id.split(".")
+    if len(ids_list) == 2:
+        head_id = ids_list[0]
+        body_id = ids_list[1]
+    elif len(ids_list) == 1:
+        head_id = ids_list[0]
+        body_id = ids_list[0]
+    else:
+        return None
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    # autogen_dir = os.path.join(current_dir, "..", "token", "discord.txt")
+    autogen_dir = os.path.join(current_dir, "..", "fixtures", "1.56.png")
+
+    return discord.File(autogen_dir, filename="image.png")
 
 
 def get_bonus_embed(discord_colour:Colour):

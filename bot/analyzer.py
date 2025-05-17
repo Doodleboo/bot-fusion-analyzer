@@ -1,6 +1,6 @@
 import analysis_content as analysis_content
 import analysis_sprite as analysis_sprite
-from analysis import Analysis, generate_bonus_file
+from analysis import Analysis, generate_bonus_file, get_autogen_file
 from discord.message import Message, Attachment
 from discord import User
 
@@ -52,9 +52,10 @@ async def send_analysis_in_fusion_bot(analysis: Analysis, author: User | None = 
     else:
         ping_owner = None
 
-    if analysis.fusion_id and (analysis.fusion_id != "DEFAULT_VALUE"):
-        # Create the autogen file
-        pass
-
+    if analysis.autogen_available:
+        autogen_file = get_autogen_file(analysis.fusion_id)
+        if autogen_file:
+            await ctx().pif.logs.send(embed=analysis.embed, content=ping_owner, file=autogen_file)
+            return
 
     await ctx().pif.logs.send(embed=analysis.embed, content=ping_owner)
