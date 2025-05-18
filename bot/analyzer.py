@@ -1,6 +1,6 @@
 import analysis_content as analysis_content
 import analysis_sprite as analysis_sprite
-from analysis import Analysis, generate_bonus_file, get_autogen_file
+from analysis import Analysis, generate_file_from_image, get_autogen_file
 from discord.message import Message, Attachment
 from discord import User
 
@@ -37,12 +37,12 @@ async def send_bonus_content(analysis: Analysis):
     if analysis.transparency_issue:
         await ctx().pif.logs.send(
             embed=analysis.transparency_embed,
-            file=generate_bonus_file(analysis.transparency_image)
+            file=generate_file_from_image(analysis.transparency_image)
         )
     if analysis.half_pixels_issue:
         await ctx().pif.logs.send(
             embed=analysis.half_pixels_embed,
-            file=generate_bonus_file(analysis.half_pixels_image)
+            file=generate_file_from_image(analysis.half_pixels_image)
         )
 
 

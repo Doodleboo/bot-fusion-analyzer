@@ -3,7 +3,7 @@ import asyncio
 import discord
 import utils
 from discord import Message, Thread, HTTPException, PartialEmoji
-from analysis import generate_bonus_file, Analysis, get_autogen_file
+from analysis import generate_file_from_image, Analysis, get_autogen_file
 from analyzer import send_bot_logs, generate_analysis
 from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
 from bot.setup import ctx
@@ -87,12 +87,12 @@ async def handle_reply_message(message: Message):
             if analysis.transparency_issue:
                 await channel.send(
                     embed=analysis.transparency_embed,
-                    file=generate_bonus_file(analysis.transparency_image)
+                    file=generate_file_from_image(analysis.transparency_image)
                 )
             if analysis.half_pixels_issue:
                 await channel.send(
                     embed=analysis.half_pixels_embed,
-                    file=generate_bonus_file(analysis.half_pixels_image)
+                    file=generate_file_from_image(analysis.half_pixels_image)
                 )
         except discord.Forbidden:
             print(f"Reply> Missing permissions in {channel}")
