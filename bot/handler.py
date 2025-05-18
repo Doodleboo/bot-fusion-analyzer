@@ -4,7 +4,7 @@ import discord
 import utils
 from discord import Message, Thread, HTTPException, PartialEmoji
 from analysis import generate_file_from_image, Analysis, get_autogen_file
-from analyzer import send_bot_logs, generate_analysis
+from analyzer import send_full_analysis, generate_analysis
 from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
 from bot.setup import ctx
 from enums import AnalysisType, Severity
@@ -52,10 +52,10 @@ async def handle_gallery(message: Message, is_assets: bool = False):
             except HTTPException:
                 await message.add_reaction("😡")  # Nani failsafe
         try:
-            await send_bot_logs(analysis, message.author)
+            await send_full_analysis(analysis, ctx().pif.logs, message.author)
         except HTTPException:  # Rate limit
             await asyncio.sleep(300)
-            await send_bot_logs(analysis, message.author)
+            await send_full_analysis(analysis, ctx().pif.logs, message.author)
 
 
 async def handle_zigzag_galpost(message: Message):
@@ -79,23 +79,9 @@ async def handle_reply_message(message: Message):
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, AnalysisType.ping_reply)
         try:
-            if analysis.autogen_available:
-                autogen_file = get_autogen_file(analysis.fusion_id)
-                await channel.send(embed=analysis.embed, file=autogen_file)
-            else:
-                await channel.send(embed=analysis.embed)
-            if analysis.transparency_issue:
-                await channel.send(
-                    embed=analysis.transparency_embed,
-                    file=generate_file_from_image(analysis.transparency_image)
-                )
-            if analysis.half_pixels_issue:
-                await channel.send(
-                    embed=analysis.half_pixels_embed,
-                    file=generate_file_from_image(analysis.half_pixels_image)
-                )
+            await send_full_analysis(analysis, message.channel, message.author)
         except discord.Forbidden:
-            print(f"Reply> Missing permissions in {channel}")
+            await ctx().doodledoo.debug.send(f"Missing permissions in {channel.name}: {channel.jump_url}")
 
 
 async def handle_spriter_application(thread: Thread):

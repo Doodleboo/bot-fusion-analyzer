@@ -2,9 +2,8 @@ import analysis_content as analysis_content
 import analysis_sprite as analysis_sprite
 from analysis import Analysis, generate_file_from_image, get_autogen_file
 from discord.message import Message, Attachment
-from discord import User
+from discord import User, TextChannel, Thread, DMChannel
 
-from bot.setup import ctx
 from enums import AnalysisType, Severity
 
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
@@ -25,28 +24,33 @@ def generate_analysis(
 
 # Methods to send messages in #fusion-bot
 
-async def send_bot_logs(analysis: Analysis, author: User):
-    if analysis.severity in MAX_SEVERITY:
-        await send_analysis_in_fusion_bot(analysis, author)
+async def send_full_analysis(analysis: Analysis,
+                             channel: TextChannel|Thread|DMChannel,
+                             author: User):
+    if (analysis.severity in MAX_SEVERITY) and analysis.type.is_gallery():
+        await send_analysis(analysis, channel, author)
     else:
-        await send_analysis_in_fusion_bot(analysis)
-    await send_bonus_content(analysis)
+        await send_analysis(analysis, channel)
+    await send_extra_embeds(analysis, channel)
 
 
-async def send_bonus_content(analysis: Analysis):
+async def send_extra_embeds(analysis: Analysis,
+                            channel: TextChannel|Thread|DMChannel):
     if analysis.transparency_issue:
-        await ctx().pif.logs.send(
+        await channel.send(
             embed=analysis.transparency_embed,
             file=generate_file_from_image(analysis.transparency_image)
         )
     if analysis.half_pixels_issue:
-        await ctx().pif.logs.send(
+        await channel.send(
             embed=analysis.half_pixels_embed,
             file=generate_file_from_image(analysis.half_pixels_image)
         )
 
 
-async def send_analysis_in_fusion_bot(analysis: Analysis, author: User | None = None):
+async def send_analysis(analysis: Analysis,
+                        channel: TextChannel|Thread|DMChannel,
+                        author: User|None = None):
     if author:
         ping_owner = author.mention
     else:
@@ -55,7 +59,7 @@ async def send_analysis_in_fusion_bot(analysis: Analysis, author: User | None = 
     if analysis.autogen_available:
         autogen_file = get_autogen_file(analysis.fusion_id)
         if autogen_file:
-            await ctx().pif.logs.send(embed=analysis.embed, content=ping_owner, file=autogen_file)
+            await channel.send(embed=analysis.embed, content=ping_owner, file=autogen_file)
             return
 
-    await ctx().pif.logs.send(embed=analysis.embed, content=ping_owner)
+    await channel.send(embed=analysis.embed, content=ping_owner)
