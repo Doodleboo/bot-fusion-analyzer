@@ -44,12 +44,6 @@ SPOILER_PATTERN_CUSTOM_ID = rf'^SPOILER_{FILENAME_CUSTOM_ID}'
 REGULAR_PATTERN_TRIPLE_ID = rf'^{FILENAME_TRIPLE_ID}'
 SPOILER_PATTERN_TRIPLE_ID = rf'^SPOILER_{FILENAME_TRIPLE_ID}'
 
-RAW_GITHUB = "https://raw.githubusercontent.com"
-RAW_GITLAB = "https://gitlab.com"
-
-AUTOGEN_FUSION_URL = f"{RAW_GITLAB}/pokemoninfinitefusion/autogen-fusion-sprites/-/raw/master/Battlers/"
-QUESTION_URL = f"{RAW_GITHUB}/Doodleboo/bot-fusion-analyzer/main/bot/question.png"
-
 LCB = "{"
 RCB = "}"
 
