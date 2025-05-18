@@ -1,13 +1,13 @@
 import requests
 from analysis import Analysis
-from enums import Severity, AnalysisType
+from enums import Severity
 from exceptions import TransparencyException
 from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
                     ColorExcessRefused, ColorOverExcess, GraphicsGaleUser,
                     HalfPixelsAmount, InvalidSize, MissingTransparency,
                     SimilarityAmount, TransparencyAmount, CustomBase,
                     SimilarityExcessControversial, SimilarityExcessRefused,
-                    MisplacedGrid)
+                    MisplacedGrid, EggSprite, NotPng)
 
 # Pillow
 from PIL.Image import open as image_open
@@ -33,7 +33,7 @@ colorType = int | tuple
 TIMEOUT = 10
 
 MAX_SIZE = 288
-VALID_SIZE = (MAX_SIZE, MAX_SIZE)
+EGG_SIZE = 160
 
 ALL_COLOR_LIMIT = 256
 REFUSED_COLOR_LIMIT = 64
@@ -50,6 +50,7 @@ CUSTOM_BASE_CONTROV_SIM_LIMIT = 6
 CUSTOM_BASE_REFUSED_SIM_LIMIT = 15
 
 STEP = 3
+EGG_STEP = 2
 ASEPRITE_RATIO = 2
 
 PINK = (255, 0, 255, 255)
@@ -74,13 +75,11 @@ class SpriteContext():
         self.useful_colors: list = []
         self.similar_color_dict: dict = {}
 
-        self.custom_base = analysis.issues.has_issue(CustomBase)
-        self.is_assets = analysis.type.is_assets_gallery() or self.custom_base
         # To both cover:
         # replied custom bases detected in analysis_content
         # and custom bases from assets gallery
 
-        if (self.is_assets):
+        if analysis.type.is_assets_gallery() or analysis.issues.has_issue(CustomBase):
             self.refused_color_lim = CUSTOM_BASE_REFUSED_COLOR_LIMIT
             self.controv_color_lim = CUSTOM_BASE_CONTROV_COLOR_LIMIT
             self.refused_sim_lim = CUSTOM_BASE_REFUSED_SIM_LIMIT
@@ -91,12 +90,29 @@ class SpriteContext():
             self.refused_sim_lim = REFUSED_SIMILARITY_LIMIT
             self.controv_sim_lim = CONTROVERSIAL_SIMILARITY_LIMIT
 
+        self.egg_sprite = analysis.issues.has_issue(EggSprite)
+        if self.egg_sprite:
+            self.max_size = EGG_SIZE
+            self.step =  EGG_STEP
+        else:
+            self.max_size = MAX_SIZE
+            self.step = STEP
+
+        self.valid_size = (self.max_size, self.max_size)
+
+    def handle_sprite_format(self, analysis:Analysis):
+        # Ensures that the image is actually a png
+        file_format = self.image.format
+        if file_format != "PNG":
+            analysis.severity = Severity.refused
+            analysis.issues.add(NotPng(file_format))
+
     def handle_sprite_size(self, analysis: Analysis):
-        size = self.image.size
-        if size != VALID_SIZE:
+        image_size = self.image.size
+        if image_size != self.valid_size:
             analysis.size_issue = True
             analysis.severity = Severity.refused
-            analysis.issues.add(InvalidSize(size))
+            analysis.issues.add(InvalidSize(image_size))
 
     def handle_sprite_colors(self, analysis: Analysis):
         all_colors = self.image.getcolors(ALL_COLOR_LIMIT)
@@ -201,22 +217,20 @@ class SpriteContext():
             analysis.severity = Severity.refused
             analysis.issues.add(HalfPixelsAmount(half_pixels_amount))
         else:
-            if analysis.severity != Severity.refused:
-                analysis.severity = Severity.controversial
             analysis.issues.add(MisplacedGrid())
 
 
     def highlight_transparency(self) -> tuple[int, Image]:
         """# TransparencyException"""
-        local_image = new("RGBA", (MAX_SIZE, MAX_SIZE))
+        local_image = new("RGBA", (self.max_size, self.max_size))
         local_pixels = get_pixels(local_image)
         first_pixel = self.pixels[0, 0]
         transparency_amount = 0
         is_there_transparency = False
         if is_indexed(first_pixel):
             return transparency_amount, local_image
-        for i in range(0, 288):
-            for j in range(0, 288):
+        for i in range(0, self.max_size):
+            for j in range(0, self.max_size):
                 color = self.pixels[i, j]
                 alpha = get_alpha(color)
                 if is_half_transparent(alpha):
@@ -232,22 +246,22 @@ class SpriteContext():
         return transparency_amount, local_image
 
     def highlight_half_pixels(self, strict_grid:bool = False) -> tuple[int, Image]:
-        local_image = new("RGBA", (MAX_SIZE, MAX_SIZE))
+        local_image = new("RGBA", (self.max_size, self.max_size))
         local_pixels = get_pixels(local_image)
         if strict_grid:
             (delta_i, delta_j) = (0,0)
         else:
-            (delta_i, delta_j) = find_first_pixel(self.pixels)
-        max_i = 288 - (STEP - delta_i)
-        max_j = 288 - (STEP - delta_j)
+            (delta_i, delta_j) = find_first_pixel(self.pixels, self.max_size)
+        max_i = self.max_size - (self.step - delta_i)
+        max_j = self.max_size - (self.step - delta_j)
         half_pixels_amount = 0
-        for i in range(delta_i, max_i, STEP):
-            for j in range(delta_j, max_j, STEP):
-                color_set = get_color_set(i, j, self.pixels)
+        for i in range(delta_i, max_i, self.step):
+            for j in range(delta_j, max_j, self.step):
+                color_set = get_color_set(i, j, self.pixels, self.step)
                 color = get_color_from_set(color_set)
-                recolor_pixels(i, j, local_pixels, color)
+                recolor_pixels(i, j, local_pixels, color, self.step)
                 if color == RED:
-                    half_pixels_amount += 9
+                    half_pixels_amount += (self.step * self.step)
         return half_pixels_amount, local_image
 
 
@@ -354,19 +368,19 @@ def is_indexed(color: colorType) -> bool:
     return isinstance(color, int)
 
 
-def find_first_pixel(pixels: PyAccess):
+def find_first_pixel(pixels: PyAccess, max_size: int):
     default_value = pixels[0, 0]
-    for i in range(0, 288):
-        for j in range(0, 288):
+    for i in range(0, max_size):
+        for j in range(0, max_size):
             if default_value != pixels[i, j]:
                 return (i % 3, j % 3)
     return (0, 0)
 
 
-def get_color_set(i: int, j: int, pixels: PyAccess):
+def get_color_set(i: int, j: int, pixels: PyAccess, step: int):
     color_set = set()
-    for increment_i in range(0, STEP):
-        for increment_j in range(0, STEP):
+    for increment_i in range(0, step):
+        for increment_j in range(0, step):
             local_i = i + increment_i
             local_j = j + increment_j
             color_set.add(pixels[local_i, local_j])
@@ -379,9 +393,9 @@ def get_color_from_set(color_set: set):
     return GREEN
 
 
-def recolor_pixels(i: int, j: int, pixels: PyAccess, color: tuple):
-    for increment_i in range(0, STEP):
-        for increment_j in range(0, STEP):
+def recolor_pixels(i: int, j: int, pixels: PyAccess, color: tuple, step: int):
+    for increment_i in range(0, step):
+        for increment_j in range(0, step):
             local_i = i + increment_i
             local_j = j + increment_j
             pixels[local_i, local_j] = color
@@ -415,6 +429,14 @@ def get_color_delta(rgb_a: tuple, rgb_b: tuple):
     return [int(cie2000), int(cmc), max_difference]
 
 
+def detect_egg_size_early(analysis: Analysis) -> bool:
+    raw_data = requests.get(analysis.attachment_url, stream=True, timeout=TIMEOUT).raw
+    image = image_open(raw_data)
+    if not image:
+        return False
+    return image.size == (EGG_SIZE, EGG_SIZE)
+
+
 def main(analysis: Analysis):
     if (analysis.severity == Severity.accepted) or analysis.type.is_reply():
         handle_valid_sprite(analysis)
@@ -422,6 +444,7 @@ def main(analysis: Analysis):
 
 def handle_valid_sprite(analysis: Analysis):
     context = SpriteContext(analysis)
+    context.handle_sprite_format(analysis)
     context.handle_sprite_size(analysis)
     context.handle_sprite_colors(analysis)
     context.handle_sprite_transparency(analysis)

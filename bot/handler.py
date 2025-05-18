@@ -3,7 +3,7 @@ import asyncio
 import discord
 import utils
 from discord import Message, Thread, HTTPException, PartialEmoji
-from analysis import generate_bonus_file, Analysis
+from analysis import generate_bonus_file, Analysis, get_autogen_file
 from analyzer import send_bot_logs, generate_analysis
 from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
 from bot.setup import ctx
@@ -52,14 +52,14 @@ async def handle_gallery(message: Message, is_assets: bool = False):
             except HTTPException:
                 await message.add_reaction("😡")  # Nani failsafe
         try:
-            await send_bot_logs(analysis, message.author.id)
+            await send_bot_logs(analysis, message.author)
         except HTTPException:  # Rate limit
             await asyncio.sleep(300)
-            await send_bot_logs(analysis, message.author.id)
+            await send_bot_logs(analysis, message.author)
 
 
 async def handle_zigzag_galpost(message: Message):
-    utils.log_event("Zigzag>", message.embeds[0].title)
+    print("Zigzag> " + message.embeds[0].title)
 
     if is_assets_gallery(message):
         analysis_type = AnalysisType.zigzag_base
@@ -79,7 +79,11 @@ async def handle_reply_message(message: Message):
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, AnalysisType.ping_reply)
         try:
-            await channel.send(embed=analysis.embed)
+            if analysis.autogen_available:
+                autogen_file = get_autogen_file(analysis.fusion_id)
+                await channel.send(embed=analysis.embed, file=autogen_file)
+            else:
+                await channel.send(embed=analysis.embed)
             if analysis.transparency_issue:
                 await channel.send(
                     embed=analysis.transparency_embed,
@@ -111,7 +115,7 @@ async def handle_spriter_application(thread: Thread):
     if application_message is None:
         await ctx().doodledoo.debug.send("Could not fetch message on thread creation")
         return
-    print("Spriter Application>", application_message.channel)
+    utils.log_event("Spriter Application>", application_message)
     try:
         await handle_reply_message(application_message)
         await handle_spritework_thread_times(application_message)
@@ -134,7 +138,7 @@ async def handle_spritework_thread_times(message: Message):
 
 async def handle_reply(message: Message):
     reply_message = await utils.get_reply_message(message)
-    utils.log_event("Reply>", reply_message.channel)
+    utils.log_event("Reply>", reply_message)
     await handle_reply_message(reply_message)
 
 

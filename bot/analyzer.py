@@ -1,7 +1,8 @@
 import analysis_content as analysis_content
 import analysis_sprite as analysis_sprite
-from analysis import Analysis, generate_bonus_file
+from analysis import Analysis, generate_bonus_file, get_autogen_file
 from discord.message import Message, Attachment
+from discord import User
 
 from bot.setup import ctx
 from enums import AnalysisType, Severity
@@ -24,11 +25,11 @@ def generate_analysis(
 
 # Methods to send messages in #fusion-bot
 
-async def send_bot_logs(analysis: Analysis, author_id: int):
+async def send_bot_logs(analysis: Analysis, author: User):
     if analysis.severity in MAX_SEVERITY:
-        await send_with_content(analysis, author_id)
+        await send_analysis_in_fusion_bot(analysis, author)
     else:
-        await send_without_content(analysis)
+        await send_analysis_in_fusion_bot(analysis)
     await send_bonus_content(analysis)
 
 
@@ -45,10 +46,16 @@ async def send_bonus_content(analysis: Analysis):
         )
 
 
-async def send_with_content(analysis: Analysis, author_id: int):
-    ping_owner = f"<@!{author_id}>"
+async def send_analysis_in_fusion_bot(analysis: Analysis, author: User | None = None):
+    if author:
+        ping_owner = author.mention
+    else:
+        ping_owner = None
+
+    if analysis.autogen_available:
+        autogen_file = get_autogen_file(analysis.fusion_id)
+        if autogen_file:
+            await ctx().pif.logs.send(embed=analysis.embed, content=ping_owner, file=autogen_file)
+            return
+
     await ctx().pif.logs.send(embed=analysis.embed, content=ping_owner)
-
-
-async def send_without_content(analysis: Analysis):
-    await ctx().pif.logs.send(embed=analysis.embed)

@@ -6,7 +6,6 @@ import discord
 class Description(str, Enum):
     missing_file        = "Missing sprite"
     missing_file_name   = "Missing file name"
-    missing_fusion_id   = "Unable to identify fusion sprite"
     different_fusion_id = "Different ID"
     colour_excess       = "Color excess"
     transparency_amount = "Transparency"
@@ -14,20 +13,20 @@ class Description(str, Enum):
     colour_amount       = "Colors"
     file_name           = "Filename"
     invalid_fusion_id   = "Invalid fusion ID"
-    sprite_error        = "Invalid sprite"
+    not_png             = "Invalid image format"
     invalid_size        = "Invalid size"
     icon                = "Icon sprite"
     custom              = "custom base"
-    egg                 = "Egg sprite"
+    egg                 = "egg sprite"
+    triple              = "Triple fusion"
     incomprehensible    = "Incomprehensible name"
-    test                = "Description test"
     no_transparency     = "Missing transparency"
     aseprite_user       = "Aseprite"
     graphics_gale_user  = "GraphicsGale"
     similarity_amount   = "Similarity"
     high_similarity     = "High number of similar color pairs"
     refused_similarity  = "Over maximum limit of similar color pairs"
-    misplaced_grid      = "Not correctly aligned in the grid"
+    misplaced_grid      = "Not aligned in the grid (it's fine)"
 
 
 class Severity(Enum):
@@ -52,7 +51,7 @@ class AnalysisType(Enum):
     zigzag_base     = auto()
 
     def is_gallery(self):
-        return self in (AnalysisType.assets_gallery, AnalysisType.sprite_gallery)
+        return self.is_sprite_gallery() or self.is_assets_gallery()
 
     def is_assets_gallery(self):
         return (self == AnalysisType.assets_gallery) or (self == AnalysisType.zigzag_base)
@@ -65,3 +64,10 @@ class AnalysisType(Enum):
 
     def is_zigzag_galpost(self):
         return (self == AnalysisType.zigzag_fusion) or (self == AnalysisType.zigzag_base)
+
+
+class IdType(Enum):
+    fusion      = auto()
+    base_or_egg = auto()
+    triple      = auto()
+    unknown     = auto()
