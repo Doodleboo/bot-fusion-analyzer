@@ -3,7 +3,7 @@ import asyncio
 import discord
 import utils
 from discord import Message, Thread, HTTPException, PartialEmoji
-from analysis import generate_bonus_file, Analysis
+from analysis import generate_bonus_file, Analysis, get_autogen_file
 from analyzer import send_bot_logs, generate_analysis
 from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
 from bot.setup import ctx
@@ -79,7 +79,11 @@ async def handle_reply_message(message: Message):
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, AnalysisType.ping_reply)
         try:
-            await channel.send(embed=analysis.embed)
+            if analysis.autogen_available:
+                autogen_file = get_autogen_file(analysis.fusion_id)
+                await channel.send(embed=analysis.embed, file=autogen_file)
+            else:
+                await channel.send(embed=analysis.embed)
             if analysis.transparency_issue:
                 await channel.send(
                     embed=analysis.transparency_embed,
