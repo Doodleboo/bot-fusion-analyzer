@@ -315,9 +315,9 @@ def get_useful_indexed_palette(image: Image) -> list:
     # The transparent color index is usually 0 but just in case we grab it from info
     transparent_color_index = image.info.get("transparency") * 3  # Each color is 3 elements of the list
     useful_indexed_palette = image.getpalette("RGB")
-    useful_indexed_palette.remove(transparent_color_index)  # Red
-    useful_indexed_palette.remove(transparent_color_index)  # Green
-    useful_indexed_palette.remove(transparent_color_index)  # Blue
+    useful_indexed_palette.pop(transparent_color_index)  # Red
+    useful_indexed_palette.pop(transparent_color_index)  # Green
+    useful_indexed_palette.pop(transparent_color_index)  # Blue
     return useful_indexed_palette
 
 
