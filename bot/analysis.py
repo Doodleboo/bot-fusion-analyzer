@@ -8,10 +8,11 @@ from discord.colour import Colour
 from discord.embeds import Embed
 from discord.file import File
 from discord.message import Attachment, Message
-from PIL.Image import Image
+from PIL.Image import Image, open as image_open
+from PIL.ImageOps import scale as image_scale
 
 from enums import DiscordColour, Severity, AnalysisType, IdType
-from issues import Issues, PokemonNames
+from issues import Issues, PokemonNames, CustomBase
 
 
 DICT_SEVERITY_COLOUR = {
@@ -22,7 +23,8 @@ DICT_SEVERITY_COLOUR = {
 }
 IMAGE_PNG = "image.png"
 PNG = "PNG"
-
+AUTOGEN_SIZE = 96
+SHEET_COLUMNS = 10
 
 class Analysis:
     message: Message
@@ -94,7 +96,7 @@ class Analysis:
         else:
             title_text = f"__{self.severity.value}:__\n{str(self.issues)}"
         if len(title_text) >= 256:   # In case it's too long for the title
-            self.embed.description = title_text
+            self.embed.description = title_text + f"\n[Link to message]({self.message.jump_url})"
         else:
             self.embed.title = title_text
 
@@ -172,7 +174,7 @@ class Analysis:
 
     def extract_fusion_id_from_filename(self) -> (str, IdType):
         fusion_id = None
-        id_type = None
+        id_type = IdType.unknown
         if self.have_attachment() or self.type.is_zigzag_galpost():
             filename = self.get_filename()
             fusion_id, id_type = utils.get_fusion_id_from_filename(filename)
@@ -184,17 +186,45 @@ def get_autogen_file(fusion_id: str) -> File|None:
     if len(ids_list) == 2:
         head_id = ids_list[0]
         body_id = ids_list[1]
-    elif len(ids_list) == 1:
-        head_id = ids_list[0]
-        body_id = ids_list[0]
     else:
         return None
 
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    # autogen_dir = os.path.join(current_dir, "..", "token", "discord.txt")
-    autogen_dir = os.path.join(current_dir, "..", "fixtures", "1.56.png")
+    return cut_from_spritesheet(head_id, body_id)
 
-    return discord.File(autogen_dir, filename="image.png")
+
+def cut_from_spritesheet(head_id: str, body_id: str) -> File:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    filename = head_id + ".png"
+    head_sheet_dir = os.path.join(current_dir, "..", "data", "spritesheets_autogen", filename)
+    print(f"Filename {filename}")
+    spritesheet = image_open(head_sheet_dir)
+
+    # ------------------- SPRITESHEET FORMAT -------------------
+    # There images have 10 columns. Elements are in 96x96 each.
+    # The first item is empty in all cases.
+    # It follows a left to right, top to bottom order.
+
+    # These are zero-indexed
+    sheet_order = int(body_id)
+    row_number    = sheet_order // SHEET_COLUMNS
+    column_number = sheet_order %  SHEET_COLUMNS
+    print(f"Row {row_number}, column {column_number}")
+    top_left_pos_x = column_number * AUTOGEN_SIZE
+    top_left_pos_y = row_number    * AUTOGEN_SIZE
+    bottom_right_pos_x = top_left_pos_x + AUTOGEN_SIZE
+    bottom_right_pos_y = top_left_pos_y + AUTOGEN_SIZE
+
+    autogen = spritesheet.crop((top_left_pos_x, top_left_pos_y, bottom_right_pos_x, bottom_right_pos_y))
+    scaled_autogen = image_scale(autogen, 3, 0)
+
+    return generate_autogen_file(scaled_autogen)
+
+
+def generate_autogen_file(autogen: Image) -> File:
+    bytes_buffer = BytesIO()
+    autogen.save(bytes_buffer, format=PNG)
+    bytes_buffer.seek(0)
+    return File(bytes_buffer, filename=IMAGE_PNG)
 
 
 def get_bonus_embed(discord_colour:Colour):

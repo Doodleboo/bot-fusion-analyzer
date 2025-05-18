@@ -10,6 +10,7 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 
 # Changelog
 ## Version 2.2
+- **Autogens are back!** Analyzed fusions will have the corresponding autogen sprite in the analysis embed
 - **Triple** fusion and **Egg** sprite support
 - Detect other image formats "disguised" as PNGs
 
