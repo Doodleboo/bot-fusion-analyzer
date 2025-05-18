@@ -7,7 +7,7 @@ from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
                     HalfPixelsAmount, InvalidSize, MissingTransparency,
                     SimilarityAmount, TransparencyAmount, CustomBase,
                     SimilarityExcessControversial, SimilarityExcessRefused,
-                    MisplacedGrid, EggSprite)
+                    MisplacedGrid, EggSprite, NotPng)
 
 # Pillow
 from PIL.Image import open as image_open
@@ -75,13 +75,11 @@ class SpriteContext():
         self.useful_colors: list = []
         self.similar_color_dict: dict = {}
 
-        self.custom_base = analysis.issues.has_issue(CustomBase)
-        self.is_assets = analysis.type.is_assets_gallery() or self.custom_base
         # To both cover:
         # replied custom bases detected in analysis_content
         # and custom bases from assets gallery
 
-        if self.is_assets:
+        if analysis.type.is_assets_gallery() or analysis.issues.has_issue(CustomBase):
             self.refused_color_lim = CUSTOM_BASE_REFUSED_COLOR_LIMIT
             self.controv_color_lim = CUSTOM_BASE_CONTROV_COLOR_LIMIT
             self.refused_sim_lim = CUSTOM_BASE_REFUSED_SIM_LIMIT
@@ -101,6 +99,13 @@ class SpriteContext():
             self.step = STEP
 
         self.valid_size = (self.max_size, self.max_size)
+
+    def handle_sprite_format(self, analysis:Analysis):
+        # Ensures that the image is actually a png
+        file_format = self.image.format
+        if file_format != "PNG":
+            analysis.severity = Severity.refused
+            analysis.issues.add(NotPng(file_format))
 
     def handle_sprite_size(self, analysis: Analysis):
         image_size = self.image.size
@@ -439,6 +444,7 @@ def main(analysis: Analysis):
 
 def handle_valid_sprite(analysis: Analysis):
     context = SpriteContext(analysis)
+    context.handle_sprite_format(analysis)
     context.handle_sprite_size(analysis)
     context.handle_sprite_colors(analysis)
     context.handle_sprite_transparency(analysis)
