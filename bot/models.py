@@ -1,4 +1,4 @@
-from discord import Guild, ForumChannel
+from discord import Guild
 from discord.channel import TextChannel as Channel
 
 

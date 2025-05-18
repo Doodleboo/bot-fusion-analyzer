@@ -42,7 +42,6 @@ class ContentContext():
             analysis.issues.add(FileName(filename))
         elif self.filename_fusion_id is not None:
             analysis.fusion_id = self.filename_fusion_id
-            # analysis.autogen_url = utils.get_autogen_url(analysis.fusion_id)
             self.handle_dex_verification(analysis, self.filename_fusion_id)
 
     def handle_two_values(self, analysis: Analysis):
@@ -67,8 +66,6 @@ class ContentContext():
     def handle_two_same_values(self, analysis: Analysis):
         if self.filename_fusion_id is not None:
             analysis.fusion_id = self.filename_fusion_id
-        # if analysis.fusion_id is not None:
-        # analysis.autogen_url = utils.get_autogen_url(analysis.fusion_id)
 
     def handle_dex_verification(self, analysis: Analysis, fusion_id: str):
         if ((self.is_custom_base and utils.is_invalid_base_id(fusion_id))
@@ -82,6 +79,7 @@ class ContentContext():
         elif self.id_type.name == "triple":
             analysis.issues.add(TripleFusionSprite())
         else:
+            # Regular fusions
             handle_pokemon_names(analysis, fusion_id)
 
 

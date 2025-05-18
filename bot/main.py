@@ -1,5 +1,4 @@
 # coding: utf-8
-import asyncio
 import os
 
 import discord
@@ -11,10 +10,10 @@ from discord.message import Message
 from discord.user import User
 
 from bot.setup import set_bot_up, ctx
-from bot.handler import handle_zigzag_galpost, handle_sprite_gallery, handle_assets_gallery, handle_spriter_application, \
-    handle_reply
-from bot.message_identifier import is_zigzag_galpost, is_sprite_gallery, is_assets_custom_base, is_mentioning_reply, \
-    is_spriter_application, is_message_from_ignored_bots
+from bot.handler import (handle_zigzag_galpost, handle_sprite_gallery, handle_assets_gallery,
+                         handle_spriter_application, handle_reply)
+from bot.message_identifier import (is_zigzag_galpost, is_sprite_gallery, is_assets_custom_base,
+                                    is_mentioning_reply, is_spriter_application, is_message_from_ignored_bots)
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
