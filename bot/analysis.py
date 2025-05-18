@@ -196,7 +196,6 @@ def cut_from_spritesheet(head_id: str, body_id: str) -> File:
     current_dir = os.path.dirname(os.path.abspath(__file__))
     filename = head_id + ".png"
     head_sheet_dir = os.path.join(current_dir, "..", "data", "spritesheets_autogen", filename)
-    print(f"Filename {filename}")
     spritesheet = image_open(head_sheet_dir)
 
     # ------------------- SPRITESHEET FORMAT -------------------
@@ -208,7 +207,6 @@ def cut_from_spritesheet(head_id: str, body_id: str) -> File:
     sheet_order = int(body_id)
     row_number    = sheet_order // SHEET_COLUMNS
     column_number = sheet_order %  SHEET_COLUMNS
-    print(f"Row {row_number}, column {column_number}")
     top_left_pos_x = column_number * AUTOGEN_SIZE
     top_left_pos_y = row_number    * AUTOGEN_SIZE
     bottom_right_pos_x = top_left_pos_x + AUTOGEN_SIZE
