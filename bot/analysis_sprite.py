@@ -189,14 +189,13 @@ class SpriteContext():
             pass
 
     def get_similarity_amount(self):
-        similarity_amount = 0
         try:
             rgb_color_list = get_rgb_color_list(self.useful_colors)
             self.similar_color_dict = get_similar_color_dict(rgb_color_list)
             self.similar_color_dict = sort_color_dict(self.similar_color_dict)
             similarity_amount = len(self.similar_color_dict)
         except ValueError:
-            print("Similarity error: Could not calculate similarity")
+            similarity_amount = -1
         return similarity_amount
 
     def handle_sprite_half_pixels(self, analysis: Analysis):
