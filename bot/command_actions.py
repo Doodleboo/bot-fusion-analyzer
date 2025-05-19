@@ -7,6 +7,7 @@ from discord import Interaction
 from discord.embeds import Embed
 
 import analysis_sprite
+from bot.utils import fancy_print
 
 HELP_RESPONSE = ("Do you need help using the Fusion Bot to analyze sprites?\n"
             "You can use it by **mentioning the bot** (using @) **while replying to a sprite**!\n"
@@ -110,7 +111,7 @@ async def error_embed(interaction: discord.Interaction, message: str):
 
 def log_command(interaction: Interaction, command: str):
     channel_name = get_channel_name_from_interaction(interaction)
-    print(f"Command> [{interaction.user.name}] {{{channel_name}}} {command}")
+    fancy_print("Command >", interaction.user.name, channel_name, command)
 
 
 def get_channel_name_from_interaction(interaction: Interaction):

@@ -4,6 +4,7 @@ import discord
 from discord import Message, Thread, HTTPException, PartialEmoji
 from analysis import Analysis
 from analyzer import send_full_analysis, generate_analysis
+from bot.utils import fancy_print
 from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
 from bot.setup import ctx
 from enums import AnalysisType, Severity
@@ -16,9 +17,6 @@ ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
 
-BLUE_TEXT    = '\033[94m'
-MAGENTA_TEXT = '\033[35m'
-COLOR_END    = '\033[0m'
 ESCAPE_TEXT  = '\033[<N>CUP'
 
 
@@ -170,13 +168,6 @@ def _log_message(decorator: str, message: Message):
         first_line = ""
 
     fancy_print(decorator, message.author.name, channel_name, first_line)
-
-
-def fancy_print(decorator: str, author: str, channel: str, text: str):
-    if len(text) > 100:
-        text = text[:100]
-    print(f"{BLUE_TEXT}{decorator}{COLOR_END} [{author}] "
-          f"{MAGENTA_TEXT}{{{channel}}}{COLOR_END} {text}")
 
 
 def get_channel_name_from_message(message: Message):

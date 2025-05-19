@@ -149,3 +149,14 @@ def id_to_name_map():  # Thanks Greystorm for the util and file
         data = json.loads(f.read())
         return {element["id"]: element["display_name"] for element in data["pokemon"]}
 
+
+BLUE_TEXT    = '\033[94m'
+MAGENTA_TEXT = '\033[35m'
+COLOR_END    = '\033[0m'
+
+
+def fancy_print(decorator: str, author: str, channel: str, text: str):
+    if len(text) > 100:
+        text = text[:100]
+    print(f"{BLUE_TEXT}{decorator}{COLOR_END} [{author}] "
+          f"{MAGENTA_TEXT}{{{channel}}}{COLOR_END} {text}")
