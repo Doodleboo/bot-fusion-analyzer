@@ -37,7 +37,7 @@ async def similar_action(interaction: discord.Interaction, attachment: discord.A
 
     raw_data = requests.get(attachment.url, stream = True, timeout = TIMEOUT).raw
     try:
-        image = image_open(raw_data)
+        image = image_open(raw_data).convert("RGBA")
     except UnidentifiedImageError:
         await error_embed(interaction, WRONG_ATTACHMENT)
         return
@@ -72,15 +72,11 @@ async def similar_action(interaction: discord.Interaction, attachment: discord.A
 
 
 def get_sorted_color_dict(image) -> frozenset[frozenset[tuple]]:
-    if "P" == image.mode:  # Indexed mode
-        useful_indexed_palette = analysis_sprite.get_useful_indexed_palette(image)
-        rgb_color_list = analysis_sprite.get_indexed_to_rgb_color_list(useful_indexed_palette)
-    else:
-        all_colors = image.getcolors(ALL_COLOR_LIMIT)
-        if not all_colors:  # Color count higher than 256
-            raise ValueError
-        useful_colors = analysis_sprite.remove_useless_colors(all_colors)
-        rgb_color_list = analysis_sprite.get_rgb_color_list(useful_colors)
+    all_colors = image.getcolors(ALL_COLOR_LIMIT)
+    if not all_colors:  # Color count higher than 256
+        raise ValueError
+    useful_colors = analysis_sprite.remove_useless_colors(all_colors)
+    rgb_color_list = analysis_sprite.get_rgb_color_list(useful_colors)
 
     similar_color_dict = analysis_sprite.get_similar_color_dict(rgb_color_list)
     sorted_color_dict = analysis_sprite.sort_color_dict(similar_color_dict)
