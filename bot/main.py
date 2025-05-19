@@ -2,7 +2,6 @@
 import os
 
 import discord
-import utils
 import command_actions
 
 from discord import app_commands, Thread
@@ -29,13 +28,11 @@ tree = app_commands.CommandTree(bot)
 
 @tree.command(name="help", description="Fusion bot help")
 async def help_command(interaction: discord.Interaction):
-    utils.log_command("Command>", interaction, "/help")
     await command_actions.help_action(interaction)
 
 
 @tree.command(name="similar", description="Get the list of similar colors")
 async def similar_command(interaction: discord.Interaction, sprite: discord.Attachment):
-    utils.log_command("Command>", interaction, "/similar")
     await command_actions.similar_action(interaction, sprite)
 
 

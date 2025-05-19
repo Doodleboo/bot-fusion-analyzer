@@ -1,9 +1,8 @@
 import asyncio
 
 import discord
-import utils
 from discord import Message, Thread, HTTPException, PartialEmoji
-from analysis import generate_file_from_image, Analysis, get_autogen_file
+from analysis import Analysis
 from analyzer import send_full_analysis, generate_analysis
 from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
 from bot.setup import ctx
@@ -16,6 +15,11 @@ ERROR_EMOJI_NAME = "NANI"
 ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
+
+BLUE_TEXT    = '\033[94m'
+MAGENTA_TEXT = '\033[35m'
+COLOR_END    = '\033[0m'
+ESCAPE_TEXT  = '\033[<N>CUP'
 
 
 # Handler methods
@@ -30,9 +34,9 @@ async def handle_assets_gallery(message: Message):
 
 async def handle_gallery(message: Message, is_assets: bool = False):
     if is_assets:
-        utils.log_event("Assets Gallery>", message)
+        log_event("Assets  >", message)
     else:
-        utils.log_event("Sprite Gallery>", message)
+        log_event("Gallery >", message)
 
     for specific_attachment in message.attachments:
         if is_assets:
@@ -59,7 +63,8 @@ async def handle_gallery(message: Message, is_assets: bool = False):
 
 
 async def handle_zigzag_galpost(message: Message):
-    print("Zigzag> " + message.embeds[0].title)
+    embed = message.embeds[0]
+    fancy_print("Zigzag  >", embed.author.name, message.channel.name, embed.title)
 
     if is_assets_gallery(message):
         analysis_type = AnalysisType.zigzag_base
@@ -101,7 +106,7 @@ async def handle_spriter_application(thread: Thread):
     if application_message is None:
         await ctx().doodledoo.debug.send("Could not fetch message on thread creation")
         return
-    utils.log_event("Spriter Application>", application_message)
+    log_event("Spr App >", application_message)
     try:
         await handle_reply_message(application_message)
         await handle_spritework_thread_times(application_message)
@@ -119,12 +124,12 @@ async def handle_spritework_thread_times(message: Message):
     try:
         await message.channel.send(embed=times_embed)
     except discord.Forbidden:
-        print(f"Spriter Application> Missing permissions in {message.channel}")
+        await ctx().doodledoo.debug.send(f"Spriter Application: Missing permissions in {message.channel}")
 
 
 async def handle_reply(message: Message):
-    reply_message = await utils.get_reply_message(message)
-    utils.log_event("Reply>", reply_message)
+    reply_message = await get_reply_message(message)
+    log_event("Reply   >", reply_message)
     await handle_reply_message(reply_message)
 
 
@@ -149,3 +154,49 @@ async def handle_misnumbered_in_gallery(message: Message, analysis: Analysis):
                                f"so that you can fix the issue and post it here again.\n\nThank you!",
                                delete_after=20)
     await message.delete()
+
+
+def log_event(decorator: str, event: Message | Thread):
+    if isinstance(event, Message):
+        _log_message(decorator, event)
+
+
+def _log_message(decorator: str, message: Message):
+    channel_name = get_channel_name_from_message(message)
+    split_lines = message.content.splitlines()
+    if split_lines:
+        first_line = split_lines[0]
+    else:
+        first_line = ""
+
+    fancy_print(decorator, message.author.name, channel_name, first_line)
+
+
+def fancy_print(decorator: str, author: str, channel: str, text: str):
+    if len(text) > 100:
+        text = text[:100]
+    print(f"{BLUE_TEXT}{decorator}{COLOR_END} [{author}] "
+          f"{MAGENTA_TEXT}{{{channel}}}{COLOR_END} {text}")
+
+
+def get_channel_name_from_message(message: Message):
+    try:
+        channel_name = message.channel.name  # type: ignore
+        if not isinstance(channel_name, str):
+            channel_name = "INVALID"
+    except SystemExit:
+        raise
+    except BaseException:
+        channel_name = "INVALID"
+    return channel_name
+
+
+async def get_reply_message(message: Message):
+    if message.reference is None:
+        raise RuntimeError(message)
+
+    reply_id = message.reference.message_id
+    if reply_id is None:
+        raise RuntimeError(message)
+
+    return await message.channel.fetch_message(reply_id)

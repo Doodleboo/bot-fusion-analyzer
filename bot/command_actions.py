@@ -1,12 +1,12 @@
 import discord
 import requests
 from PIL import UnidentifiedImageError
+from PIL.Image import open as image_open
 from colormath.color_objects import sRGBColor
+from discord import Interaction
 from discord.embeds import Embed
 
 import analysis_sprite
-
-from PIL.Image import open as image_open
 
 HELP_RESPONSE = ("Do you need help using the Fusion Bot to analyze sprites?\n"
             "You can use it by **mentioning the bot** (using @) **while replying to a sprite**!\n"
@@ -27,10 +27,12 @@ PAIR_LIST_LIMIT = 20
 
 
 async def help_action(interaction: discord.Interaction):
+    log_command(interaction, "/help")
     await interaction.response.send_message(HELP_RESPONSE)
 
 
 async def similar_action(interaction: discord.Interaction, attachment: discord.Attachment):
+    log_command(interaction, "/similar")
     if attachment is None:
         await error_embed(interaction, NO_ATTACHMENT)
         return
@@ -105,3 +107,19 @@ async def error_embed(interaction: discord.Interaction, message: str):
     error_description =  message + ERROR_ADDENUM
     new_error_embed = Embed(title = ERROR_TITLE, description = error_description)
     await interaction.response.send_message(embed = new_error_embed)
+
+def log_command(interaction: Interaction, command: str):
+    channel_name = get_channel_name_from_interaction(interaction)
+    print(f"Command> [{interaction.user.name}] {{{channel_name}}} {command}")
+
+
+def get_channel_name_from_interaction(interaction: Interaction):
+    try:
+        channel_name = interaction.channel.name  # type: ignore
+        if not isinstance(channel_name, str):
+            channel_name = "INVALID"
+    except SystemExit:
+        raise
+    except BaseException:
+        channel_name = "INVALID"
+    return channel_name

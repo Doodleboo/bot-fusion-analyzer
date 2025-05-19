@@ -1,7 +1,6 @@
-from discord import Client
+from discord import Client, Guild, TextChannel
 
 from bot.models import ServerContext, GlobalContext
-from bot.utils import get_server_from_id, get_channel_from_id
 
 # Doodledoo test server
 id_server_doodledoo          = 446241769462562827
@@ -68,3 +67,19 @@ class BotContext:
             doodledoo=doodledoo_context,
             pif=pif_context
         )
+
+
+def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
+    channel = server.get_channel(channel_id)
+    if channel is None:
+        raise KeyError(channel_id)
+    if not isinstance(channel, TextChannel):
+        raise TypeError(channel)
+    return channel
+
+
+def get_server_from_id(client: Client, server_id) -> Guild:
+    server = client.get_guild(server_id)
+    if server is None:
+        raise KeyError(server_id)
+    return server

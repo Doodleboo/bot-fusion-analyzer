@@ -13,8 +13,7 @@ def generate_analysis(
         message: Message,
         specific_attachment: Attachment|None = None,
         analysis_type: AnalysisType|None = None):
-    # TODO: Use is_assets and is_reply to detect
-    # custom bases in sprite gallery
+
     analysis = Analysis(message, specific_attachment, analysis_type)
     analysis_content.main(analysis)
     analysis_sprite.main(analysis)
