@@ -108,7 +108,9 @@ class SpriteContext():
             analysis.issues.add(NotPng(file_format))
 
     def turn_image_into_rgb(self):
-        self.image = self.image.convert(mode="RGBA")
+        # Avoids having to deal with indexed palette quirks
+        if self.image.mode != "RGBA":
+            self.image = self.image.convert(mode="RGBA")
 
     def handle_sprite_size(self, analysis: Analysis):
         image_size = self.image.size
@@ -423,7 +425,7 @@ def main(analysis: Analysis):
 def handle_valid_sprite(analysis: Analysis):
     context = SpriteContext(analysis)
     context.handle_sprite_format(analysis)
-    context.turn_image_into_rgb()   # Avoids having to deal with indexed palette quirks
+    context.turn_image_into_rgb()
     context.handle_sprite_size(analysis)
     context.handle_sprite_colors(analysis)
     context.handle_sprite_transparency(analysis)
