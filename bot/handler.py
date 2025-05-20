@@ -4,6 +4,7 @@ import discord
 from discord import Message, Thread, HTTPException, PartialEmoji
 from analysis import Analysis
 from analyzer import send_full_analysis, generate_analysis
+from bot.tutorial_mode import send_tutorial_mode_prompt, user_is_potential_spriter
 from bot.utils import fancy_print
 from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
 from bot.setup import ctx
@@ -83,6 +84,8 @@ async def handle_reply_message(message: Message):
             await send_full_analysis(analysis, message.channel, message.author)
         except discord.Forbidden:
             await ctx().doodledoo.debug.send(f"Missing permissions in {channel.name}: {channel.jump_url}")
+    if user_is_potential_spriter(message.author):
+        await send_tutorial_mode_prompt(message.author, channel)
 
 
 async def handle_spriter_application(thread: Thread):
@@ -106,6 +109,7 @@ async def handle_spriter_application(thread: Thread):
     try:
         await handle_reply_message(application_message)
         await handle_spritework_thread_times(application_message)
+        await send_tutorial_mode_prompt(application_message.author, thread)
     except Exception as message_exception:
         print(" ")
         print(application_message)
