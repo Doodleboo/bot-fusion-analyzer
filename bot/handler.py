@@ -17,8 +17,6 @@ ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
 
-ESCAPE_TEXT  = '\033[<N>CUP'
-
 
 # Handler methods
 
