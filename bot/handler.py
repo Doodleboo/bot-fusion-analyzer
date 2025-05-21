@@ -1,7 +1,7 @@
 import asyncio
 
 import discord
-from discord import Message, Thread, HTTPException, PartialEmoji
+from discord import Message, Thread, HTTPException, PartialEmoji, Member, User
 from analysis import Analysis
 from analyzer import send_full_analysis, generate_analysis
 from bot.tutorial_mode import send_tutorial_mode_prompt, user_is_potential_spriter
@@ -17,6 +17,7 @@ ERROR_EMOJI_NAME = "NANI"
 ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
+IMMUNITY_ROLE_ID = 1063920098370400468
 
 
 # Handler methods
@@ -87,21 +88,8 @@ async def handle_reply_message(message: Message):
 
 
 async def handle_spriter_application(thread: Thread):
-    await asyncio.sleep(10)
-    try:
-        application_message = await thread.fetch_message(thread.id)
-    except discord.errors.NotFound:
-        last_message_id = thread.last_message_id
-        try:
-            application_message = await thread.fetch_message(last_message_id)
-        except discord.errors.NotFound:
-            await ctx().doodledoo.debug.send("Discord returned Not Found twice")
-            return
-    except discord.errors.Forbidden:
-        await ctx().doodledoo.debug.send("Discord returned Forbidden while fetching thread message")
-        return
-    if application_message is None:
-        await ctx().doodledoo.debug.send("Could not fetch message on thread creation")
+    application_message = await fetch_thread_message(thread)
+    if not application_message:
         return
     log_event("Spr App >", application_message)
     try:
@@ -126,15 +114,17 @@ async def handle_spritework_thread_times(message: Message):
 
 
 async def handle_spritework_post(thread: Thread):
-    await asyncio.sleep(10)
-    try:
-        spritework_message = await thread.fetch_message(thread.id)
-    except discord.errors.NotFound:
-        last_message_id = thread.last_message_id
-        spritework_message = await thread.fetch_message(last_message_id)
+    spritework_message = await fetch_thread_message(thread)
+    if not spritework_message:
+        return
+
+    author = spritework_message.author
+    if bot_immune_user(author):
+        return
+
     log_event("SprWork >", spritework_message)
     await handle_reply_message(spritework_message)
-    author = spritework_message.author
+
     if user_is_potential_spriter(author):
         await send_tutorial_mode_prompt(author, thread)
 
@@ -205,3 +195,33 @@ async def get_reply_message(message: Message):
         raise RuntimeError(message)
 
     return await message.channel.fetch_message(reply_id)
+
+
+async def bot_immune_user(user: User | Member) -> bool:
+    if not isinstance(user, Member):
+        return True
+    for role in user.roles:
+        if role.id == IMMUNITY_ROLE_ID:
+            return True
+    return False
+
+
+async def fetch_thread_message(thread: Thread) -> Message|None:
+    await asyncio.sleep(10)     # If it's too soon after thread creation, Discord returns errors
+    try:
+        caught_message = await thread.fetch_message(thread.id)
+    except discord.errors.NotFound:
+        last_message_id = thread.last_message_id
+        try:
+            caught_message = await thread.fetch_message(last_message_id)
+        except discord.errors.NotFound:
+            await ctx().doodledoo.debug.send("Discord returned Not Found twice")
+            return None
+    except discord.errors.Forbidden:
+        await ctx().doodledoo.debug.send("Discord returned Forbidden while fetching thread message")
+        return None
+    if caught_message is None:
+        await ctx().doodledoo.debug.send("Could not fetch message on thread creation")
+        return None
+
+    return caught_message
