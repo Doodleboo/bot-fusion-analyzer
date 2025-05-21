@@ -95,8 +95,6 @@ async def handle_spriter_application(thread: Thread):
     try:
         await handle_reply_message(application_message)
         await handle_spritework_thread_times(application_message)
-        await asyncio.sleep(1)
-        await send_tutorial_mode_prompt(application_message.author, thread)
     except Exception as message_exception:
         print(" ")
         print(application_message)
