@@ -84,8 +84,6 @@ async def handle_reply_message(message: Message):
             await send_full_analysis(analysis, message.channel, message.author)
         except discord.Forbidden:
             await ctx().doodledoo.debug.send(f"Missing permissions in {channel.name}: {channel.jump_url}")
-    if user_is_potential_spriter(message.author):
-        await send_tutorial_mode_prompt(message.author, channel)
 
 
 async def handle_spriter_application(thread: Thread):
@@ -125,6 +123,20 @@ async def handle_spritework_thread_times(message: Message):
         await message.channel.send(embed=times_embed)
     except discord.Forbidden:
         await ctx().doodledoo.debug.send(f"Spriter Application: Missing permissions in {message.channel}")
+
+
+async def handle_spritework_post(thread: Thread):
+    await asyncio.sleep(10)
+    try:
+        spritework_message = await thread.fetch_message(thread.id)
+    except discord.errors.NotFound:
+        last_message_id = thread.last_message_id
+        spritework_message = await thread.fetch_message(last_message_id)
+    log_event("SprWork >", spritework_message)
+    await handle_reply_message(spritework_message)
+    author = spritework_message.author
+    if user_is_potential_spriter(author):
+        await send_tutorial_mode_prompt(author, thread)
 
 
 async def handle_reply(message: Message):

@@ -19,7 +19,9 @@ async def user_is_potential_spriter(user: User|Member) -> bool:
 
 
 async def send_tutorial_mode_prompt(user: Member, channel: TextChannel|Thread|DMChannel):
-    await channel.send(f"Placeholder, {user.display_name}")
+    prompt_text = (f"**Hi {user.display_name}!** If you're unsure what some of that means (for instance, "
+                   f"similarity is probably not what you think!), press the **Tutorial Mode** button below.")
+    await channel.send(prompt_text)
 
 
 

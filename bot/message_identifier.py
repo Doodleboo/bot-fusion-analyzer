@@ -9,6 +9,7 @@ from bot.setup import get_bot_id
 
 ZIGZAG_ID = 1185671488611819560 #1185671488611819560
 YANMEGA_ID = 204255221017214977
+spritework_id = 1050404143807873157
 
 PATTERN_ICON = r'[iI]con'
 PATTERN_CUSTOM = r'[cC]ustom'
@@ -69,6 +70,12 @@ def is_spriter_application(thread: Thread):
     if thread.parent.type != discord.ChannelType.forum:
         return False
     return thread.parent_id == id_spriter_apps_pif
+
+
+def is_spritework_post(thread: Thread):
+    if thread.parent.type != discord.ChannelType.forum:
+        return False
+    return thread.parent_id == spritework_id
 
 
 def have_icon_in_message(message: Message):
