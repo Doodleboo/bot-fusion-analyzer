@@ -95,6 +95,7 @@ async def handle_spriter_application(thread: Thread):
     try:
         await handle_reply_message(application_message)
         await handle_spritework_thread_times(application_message)
+        await asyncio.sleep(1)
         await send_tutorial_mode_prompt(application_message.author, thread)
     except Exception as message_exception:
         print(" ")
@@ -119,13 +120,14 @@ async def handle_spritework_post(thread: Thread):
         return
 
     author = spritework_message.author
-    if bot_immune_user(author):
+    if await bot_immune_user(author):
         return
 
     log_event("SprWork >", spritework_message)
     await handle_reply_message(spritework_message)
 
-    if user_is_potential_spriter(author):
+    if await user_is_potential_spriter(author):
+        await asyncio.sleep(1)
         await send_tutorial_mode_prompt(author, thread)
 
 
