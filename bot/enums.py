@@ -49,6 +49,7 @@ class AnalysisType(Enum):
     ping_reply      = auto()
     zigzag_fusion   = auto()
     zigzag_base     = auto()
+    auto_spritework = auto()
 
     def is_gallery(self):
         return self.is_sprite_gallery() or self.is_assets_gallery()
@@ -60,10 +61,13 @@ class AnalysisType(Enum):
         return (self == AnalysisType.sprite_gallery) or (self == AnalysisType.zigzag_fusion)
 
     def is_reply(self):
-        return self == AnalysisType.ping_reply
+        return (self == AnalysisType.ping_reply) or (self == AnalysisType.auto_spritework)
 
     def is_zigzag_galpost(self):
         return (self == AnalysisType.zigzag_fusion) or (self == AnalysisType.zigzag_base)
+
+    def is_automatic_spritework_analysis(self):
+        return self == AnalysisType.auto_spritework
 
 
 class IdType(Enum):

@@ -76,10 +76,14 @@ async def handle_zigzag_galpost(message: Message):
         await ctx().pif.logs.send(embed=analysis.embed)
 
 
-async def handle_reply_message(message: Message):
+async def handle_reply_message(message: Message, auto_spritework: bool = False):
     channel = message.channel
+    if auto_spritework:
+        analysis_type = AnalysisType.auto_spritework
+    else:
+        analysis_type = AnalysisType.ping_reply
     for specific_attachment in message.attachments:
-        analysis = generate_analysis(message, specific_attachment, AnalysisType.ping_reply)
+        analysis = generate_analysis(message, specific_attachment, analysis_type)
         try:
             await send_full_analysis(analysis, message.channel, message.author)
         except discord.Forbidden:
@@ -119,7 +123,7 @@ async def handle_spritework_post(thread: Thread):
     author = spritework_message.author
 
     log_event("SprWork >", spritework_message)
-    await handle_reply_message(spritework_message)
+    await handle_reply_message(message=spritework_message, auto_spritework=True)
 
     if await user_is_potential_spriter(author):
         await asyncio.sleep(1)
