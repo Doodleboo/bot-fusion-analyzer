@@ -38,16 +38,16 @@ class PromptButtonsView(View):
 
     @discord.ui.button(label="Tutorial Mode", style=ButtonStyle.primary, emoji="✏")
     async def engage_tutorial_mode(self, interaction: Interaction, button: Button):
-        #if interaction.user.id == self.original_caller.id:
-        #    await interaction.response.edit_message(content="New state")
-        #else:
+        if interaction.user.id == self.original_caller.id:
+            await interaction.response.edit_message(content="New state")
+        else:
             await different_user_response(interaction, self.original_caller)
 
     @discord.ui.button(label="Discard", style=ButtonStyle.secondary)
     async def discard_tutorial_prompt(self, interaction: Interaction, button: Button):
-        #if interaction.user.id == self.original_caller.id:
-        #    await interaction.message.delete()
-        #else:
+        if interaction.user.id == self.original_caller.id:
+            await interaction.message.delete()
+        else:
             await different_user_response(interaction, self.original_caller)
 
 
