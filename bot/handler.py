@@ -4,6 +4,7 @@ import discord
 from discord import Message, Thread, HTTPException, PartialEmoji, Member, User
 from analysis import Analysis
 from analyzer import send_full_analysis, generate_analysis
+from bot.opt_out_options import is_opted_out_user
 from bot.tutorial_mode import send_tutorial_mode_prompt, user_is_potential_spriter
 from bot.utils import fancy_print
 from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
@@ -121,6 +122,8 @@ async def handle_spritework_post(thread: Thread):
         return
 
     author = spritework_message.author
+    if await is_opted_out_user(author):
+        return
 
     log_event("SprWork >", spritework_message)
     await handle_reply_message(message=spritework_message, auto_spritework=True)

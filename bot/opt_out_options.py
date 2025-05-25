@@ -1,6 +1,13 @@
+import json
+import os
+
 import discord
 from discord import Member, ButtonStyle, Interaction, User
 from discord.ui import View, Button
+
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+OPT_OUT_FILE = os.path.join(CURRENT_DIR, "..", "data", "OptedOutUsers.json")
 
 
 class HideAutoAnalysis(View):
@@ -39,7 +46,7 @@ class OptOutConfirmation(View):
     @discord.ui.button(label="Confirm opt out", style=ButtonStyle.danger)
     async def opt_user_out(self, interaction: Interaction, button: Button):
         if interaction.user.id == self.original_caller.id:
-            # TODO: Add to opt out list
+            await add_to_opt_out_list(interaction.user)
             await interaction.response.edit_message(content="Opted out successfully.", view=None, delete_after=20)
         else:
             await different_user_response(interaction, self.original_caller)
@@ -58,3 +65,23 @@ class OptOutConfirmation(View):
 async def different_user_response(interaction: Interaction, og_user: Member):
     response_text = f"Hi {interaction.user.mention}! That's meant for {og_user.name}."
     await interaction.response.send_message(content=response_text, ephemeral=True, delete_after=60)
+
+
+async def is_opted_out_user(user: Member|User) -> bool:
+    user_list = await grab_user_list()
+    return user.id in user_list
+
+
+async def add_to_opt_out_list(user: Member|User):
+    user_list = await grab_user_list()
+    user_list.append(user.id)
+    with open(OPT_OUT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(user_list, f)
+
+
+async def grab_user_list() -> list:
+    with open(OPT_OUT_FILE, 'r', encoding='utf-8') as f:
+        user_list = json.load(f)
+        if not isinstance(user_list, list):
+            return []
+        return user_list
