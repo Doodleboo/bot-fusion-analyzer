@@ -17,7 +17,6 @@ ERROR_EMOJI_NAME = "NANI"
 ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
-IMMUNITY_ROLE_ID = 1063920098370400468
 
 
 # Handler methods
@@ -118,8 +117,6 @@ async def handle_spritework_post(thread: Thread):
         return
 
     author = spritework_message.author
-    if await bot_immune_user(author):
-        return
 
     log_event("SprWork >", spritework_message)
     await handle_reply_message(spritework_message)
@@ -195,15 +192,6 @@ async def get_reply_message(message: Message):
         raise RuntimeError(message)
 
     return await message.channel.fetch_message(reply_id)
-
-
-async def bot_immune_user(user: User | Member) -> bool:
-    if not isinstance(user, Member):
-        return True
-    for role in user.roles:
-        if role.id == IMMUNITY_ROLE_ID:
-            return True
-    return False
 
 
 async def fetch_thread_message(thread: Thread) -> Message|None:
