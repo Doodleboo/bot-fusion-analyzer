@@ -45,9 +45,9 @@ class PromptButtonsView(View):
 
     @discord.ui.button(label="Discard", style=ButtonStyle.secondary)
     async def discard_tutorial_prompt(self, interaction: Interaction, button: Button):
-        #if interaction.user.id == self.original_caller.id:
-        #    await interaction.message.delete()
-        #else:
+        if interaction.user.id == self.original_caller.id:
+            await interaction.message.delete()
+        else:
             await different_user_response(interaction, self.original_caller)
 
 
