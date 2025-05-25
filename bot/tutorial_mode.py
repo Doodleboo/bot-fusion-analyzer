@@ -45,9 +45,9 @@ class PromptButtonsView(View):
 
     @discord.ui.button(label="Discard", style=ButtonStyle.secondary)
     async def discard_tutorial_prompt(self, interaction: Interaction, button: Button):
-        if interaction.user.id == self.original_caller.id:
-            await interaction.message.delete()
-        else:
+        #if interaction.user.id == self.original_caller.id:
+        #    await interaction.message.delete()
+        #else:
             await different_user_response(interaction, self.original_caller)
 
 
@@ -56,7 +56,8 @@ class PromptButtonsView(View):
 
 async def different_user_response(interaction: Interaction, og_user: Member):
     response_text = (f"Hi {interaction.user.mention}! That's meant for {og_user.name}, but if you want to use "
-                     f"the Tutorial Mode yourself, you can use /help in a channel such as #ask_a_bot to do so.")
+                     f"the Tutorial Mode yourself, you can use /help in a channel such as "
+                     f"<#1031005766359982190> to do so.")
     await interaction.response.send_message(content=response_text, ephemeral=True, delete_after=60)
 
 
