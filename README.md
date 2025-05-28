@@ -9,6 +9,10 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - **Greystorm** for giving permission to use various utilities from spritebot
 
 # Changelog
+## Version 2.3
+- Fix: pixels with "color" but full transparency now won't count towards half pixels
+- Fix: Necrozma body autogens are now hidden as it turns out the sheets show Ultra Necrozma instead
+
 ## Version 2.2
 - **Autogens are back!** Analyzed fusions will have the corresponding autogen sprite in the analysis embed
 - **Triple** fusion and **Egg** sprite support

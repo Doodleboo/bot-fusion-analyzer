@@ -58,6 +58,9 @@ def is_missing_autogen(fusion_id: str):
     split_fusion_id = fusion_id.split(".")
     head_id = int(split_fusion_id[0])
     body_id = int(split_fusion_id[1])
+    # Special case: Necrozma bodies (450) are just Ultra Necrozma again
+    if body_id == 450:
+        return True
     return head_id > AUTOGEN_MAX_ID or body_id > AUTOGEN_MAX_ID
 
 
