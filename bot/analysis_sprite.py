@@ -363,7 +363,11 @@ def get_color_set(i: int, j: int, pixels: PyAccess, step: int):
         for increment_j in range(0, step):
             local_i = i + increment_i
             local_j = j + increment_j
-            color_set.add(pixels[local_i, local_j])
+            pixel = pixels[local_i, local_j]
+            # Equalize all colored fully transparent pixels
+            if pixel[3] == 0:
+                pixel = (0, 0, 0, 0)
+            color_set.add(pixel)
     return color_set
 
 
