@@ -3,6 +3,9 @@ from discord import Member, User, Thread, TextChannel, DMChannel, SelectOption
 from discord.ui import View, Button, Select
 from discord import ButtonStyle, Interaction
 
+from bot.tutorial_sections import sections
+from bot.utils import fancy_print
+
 SPRITER_ROLE_ID = 392803830900850688
 MANAGER_ROLE_ID = 900867033175040101
 WATCHOG_ROLE_ID = 1100903960476385350
@@ -38,6 +41,7 @@ class PromptButtonsView(View):
 
     @discord.ui.button(label="Tutorial Mode", style=ButtonStyle.primary, emoji="✏")
     async def engage_tutorial_mode(self, interaction: Interaction, _button: Button):
+        fancy_print("TutMode >", interaction.user.name, interaction.channel.name, "Tutorial Mode engaged")
         if interaction.user.id == self.original_caller.id:
             await interaction.response.edit_message(content="Tutorial Mode engaged",
                                                     view=TutorialMode(self.original_caller))
@@ -56,27 +60,36 @@ class TutorialMode(View):
     def __init__(self, caller: Member):
         self.original_caller = caller
         super().__init__()
-        self.add_item(TutorialSelect())
+        self.add_item(TutorialSelect(self.original_caller))
 
     @discord.ui.button(label="Exit Tutorial Mode", style=ButtonStyle.secondary)
     async def exit_tutorial_mode(self, interaction: Interaction, _button: Button):
         if interaction.user.id == self.original_caller.id:
-            await interaction.response.edit_message(content="New state")
+            await interaction.response.edit_message(content="Thanks for using Tutorial Mode!",view=None)
         else:
             await different_user_response(interaction, self.original_caller)
 
 
 class TutorialSelect(Select):
-    def __init__(self):
-        options = [
-            SelectOption(label="Color count", description="What's the color count? How many colors can I use", value="colors"),
-            SelectOption(label="Similarity", description="Description", value="similarity"),
-            SelectOption(label="Half pixels", description="Description", value="half_pixels")
-        ]
+    def __init__(self, caller: Member):
+        self.original_caller = caller
+        options = []
+        for section_name in sections:
+            section = sections[section_name]
+            option = SelectOption(label=section.title, description=section.description, value=section_name)
+            options.append(option)
         super().__init__(placeholder="Choose a tutorial section", options=options)
 
     async def callback(self, interaction: Interaction):
-        await interaction.response.send_message(f"You picked {self.values[0]}")
+        if interaction.user.id != self.original_caller.id:
+            await different_user_response(interaction, self.original_caller)
+            return
+
+        section = sections[self.values[0]]
+        if not section:
+            print(f"ERROR: No section found for element: {self.values[0]}")
+        full_section = f"**Tutorial Mode: {section.title}**\n\n{section.content}"
+        await interaction.response.edit_message(content=full_section)
 
 
 
