@@ -365,7 +365,9 @@ def get_color_set(i: int, j: int, pixels: PyAccess, step: int):
             local_j = j + increment_j
             pixel = pixels[local_i, local_j]
             # Equalize all colored fully transparent pixels
-            if isinstance(pixel, tuple) and pixel[3] == 0:
+            if (isinstance(pixel, tuple)
+                    and len(pixel) == 4
+                    and pixel[3] == 0):
                 pixel = (0, 0, 0, 0)
             color_set.add(pixel)
     return color_set
