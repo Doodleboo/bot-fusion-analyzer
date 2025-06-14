@@ -1,5 +1,7 @@
+import os
+
 import discord
-from discord import Member, User, Thread, TextChannel, DMChannel, SelectOption
+from discord import Member, User, Thread, TextChannel, DMChannel, SelectOption, File
 from discord.ui import View, Button, Select
 from discord import ButtonStyle, Interaction
 
@@ -13,6 +15,9 @@ MOD_ROLE_ID     = 306953740651462656
 UNOWN_ROLE_ID   = 1210701164426039366
 NON_TUTORIAL_ROLES = [SPRITER_ROLE_ID, MANAGER_ROLE_ID, WATCHOG_ROLE_ID,
                       MOD_ROLE_ID, UNOWN_ROLE_ID]
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGES_PATH = os.path.join(CURRENT_DIR, "..", "resources")
 
 
 async def user_is_potential_spriter(user: User|Member) -> bool:
@@ -65,7 +70,8 @@ class TutorialMode(View):
     @discord.ui.button(label="Exit Tutorial Mode", style=ButtonStyle.secondary)
     async def exit_tutorial_mode(self, interaction: Interaction, _button: Button):
         if interaction.user.id == self.original_caller.id:
-            await interaction.response.edit_message(content="Thanks for using Tutorial Mode!",view=None)
+            await interaction.response.edit_message(content="Thanks for using Tutorial Mode!",
+                                                    view=None, attachments=[])
         else:
             await different_user_response(interaction, self.original_caller)
 
@@ -89,7 +95,12 @@ class TutorialSelect(Select):
         if not section:
             print(f"ERROR: No section found for element: {self.values[0]}")
         full_section = f"**Tutorial Mode: {section.title}**\n\n{section.content}"
-        await interaction.response.edit_message(content=full_section)
+        attachments = []
+        section_image = section.image
+        if section_image:
+            attachment_file = File(os.path.join(IMAGES_PATH, section_image))
+            attachments.append(attachment_file)
+        await interaction.response.edit_message(content=full_section, attachments=attachments)
 
 
 
