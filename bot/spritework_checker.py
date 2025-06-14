@@ -8,6 +8,7 @@ from discord import Embed, Message, Thread, Forbidden, NotFound, HTTPException
 from bot.setup import get_bot_client, ctx
 
 CHANNEL_URL_PATTERN = r"discord\.com/channels/(\d+)/(\d+)"
+CHANNEL_ALT_PATTERN = r"discordapp\.com/channels/(\d+)/(\d+)"
 
 async def get_spritework_thread_times(message: Message) -> Embed:
     description = ""
@@ -37,25 +38,43 @@ async def get_spritework_thread_times(message: Message) -> Embed:
 
 
 async def get_threads_from_urls_in_message(message: Message) -> list[Thread]:
-    urls = re.finditer(CHANNEL_URL_PATTERN, message.content)
+    threads = await find_threads_with_pattern(CHANNEL_URL_PATTERN, message.content)
+    if threads:
+        return threads
+
+    # Alternate format:discordapp.com instead
+    threads = await find_threads_with_pattern(CHANNEL_ALT_PATTERN, message.content)
+    return threads
+
+
+async def find_threads_with_pattern(pattern: str, content: str) -> list[Thread]:
+    urls = re.finditer(pattern, content)
     threads = []
     # Format: discord.com/channels/SERVER_ID/THREAD_ID
     for url_match in urls:
         url_string = url_match.group(0)
-        url_parts = url_string.split("/")
-        if len(url_parts) < 4:
-            continue
-        client = get_bot_client()
-        thread_id = url_parts[3]
-        try:
-            linked_thread = await client.fetch_channel(thread_id)
-        except (HTTPException, NotFound, Forbidden) as exception:
-            error_message = f"Exception {exception} retrieving linked thread {thread_id}"
-            print(error_message)
-            await ctx().doodledoo.debug.send(error_message)
-            continue
-
-        if isinstance(linked_thread, Thread):
+        linked_thread = await grab_thread_from_url(url_string)
+        if linked_thread:
             threads.append(linked_thread)
-
     return threads
+
+
+async def grab_thread_from_url(url_string: str) -> Thread|None:
+    url_parts = url_string.split("/")
+    if len(url_parts) < 4:
+        return None
+    client = get_bot_client()
+    thread_id = int(url_parts[3])
+    try:
+        thread_id = int(url_parts[3])
+        yee = client.get_channel(thread_id)
+        return yee
+    except ValueError:
+        print(f"Value Error trying to cast {thread_id} into an int")
+        return None
+    except (HTTPException, NotFound, Forbidden) as exception:
+        error_message = f"Exception {exception} retrieving linked thread {thread_id}"
+        print(error_message)
+        await ctx().doodledoo.debug.send(error_message)
+        return None
+
