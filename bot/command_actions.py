@@ -7,12 +7,15 @@ from discord import Interaction
 from discord.embeds import Embed
 
 import analysis_sprite
+from bot.tutorial_mode import PromptButtonsView
 from bot.utils import fancy_print
 
 HELP_RESPONSE = ("Do you need help using the Fusion Bot to analyze sprites?\n"
             "You can use it by **mentioning the bot** (using @) **while replying to a sprite**!\n"
             "You can contact Doodledoo if you need help with anything related to the fusion bot. "
-            "Let me know if you've got suggestions or ideas too!")
+            "Let me know if you've got suggestions or ideas too!\n\n"
+            "And if you want to start Tutorial Mode, with more info about Fusion Bot, "
+            "press the Tutorial Mode button down below.")
 SIMILAR_TITLE = "**Similar pairs of colors:**"
 ERROR_TITLE = "**An error has occurred processing your command:**"
 ERROR_ADDENUM = ("\n\nIf you believe this is incorrect, notify the error either to Doodledoo or here:\n"
@@ -29,7 +32,9 @@ PAIR_LIST_LIMIT = 20
 
 async def help_action(interaction: discord.Interaction):
     log_command(interaction, "/help")
-    await interaction.response.send_message(HELP_RESPONSE)
+    prompt_view = PromptButtonsView(interaction.user)
+    await interaction.response.send_message(content=HELP_RESPONSE, view=prompt_view)
+    prompt_view.message = await interaction.original_response()
 
 
 async def similar_action(interaction: discord.Interaction, attachment: discord.Attachment):

@@ -1,9 +1,11 @@
 import asyncio
 
 import discord
-from discord import Message, Thread, HTTPException, PartialEmoji
+from discord import Message, Thread, HTTPException, PartialEmoji, Member, User
 from analysis import Analysis
 from analyzer import send_full_analysis, generate_analysis
+from bot.opt_out_options import is_opted_out_user
+from bot.tutorial_mode import send_tutorial_mode_prompt, user_is_potential_spriter
 from bot.utils import fancy_print
 from issues import DifferentSprite # If the package is named bot.issues, Python thinks they're different types
 from bot.setup import ctx
@@ -75,10 +77,14 @@ async def handle_zigzag_galpost(message: Message):
         await ctx().pif.logs.send(embed=analysis.embed)
 
 
-async def handle_reply_message(message: Message):
+async def handle_reply_message(message: Message, auto_spritework: bool = False):
     channel = message.channel
+    if auto_spritework:
+        analysis_type = AnalysisType.auto_spritework
+    else:
+        analysis_type = AnalysisType.ping_reply
     for specific_attachment in message.attachments:
-        analysis = generate_analysis(message, specific_attachment, AnalysisType.ping_reply)
+        analysis = generate_analysis(message, specific_attachment, analysis_type)
         try:
             await send_full_analysis(analysis, message.channel, message.author)
         except discord.Forbidden:
@@ -86,21 +92,8 @@ async def handle_reply_message(message: Message):
 
 
 async def handle_spriter_application(thread: Thread):
-    await asyncio.sleep(10)
-    try:
-        application_message = await thread.fetch_message(thread.id)
-    except discord.errors.NotFound:
-        last_message_id = thread.last_message_id
-        try:
-            application_message = await thread.fetch_message(last_message_id)
-        except discord.errors.NotFound:
-            await ctx().doodledoo.debug.send("Discord returned Not Found twice")
-            return
-    except discord.errors.Forbidden:
-        await ctx().doodledoo.debug.send("Discord returned Forbidden while fetching thread message")
-        return
-    if application_message is None:
-        await ctx().doodledoo.debug.send("Could not fetch message on thread creation")
+    application_message = await fetch_thread_message(thread)
+    if not application_message:
         return
     log_event("Spr App >", application_message)
     try:
@@ -121,6 +114,23 @@ async def handle_spritework_thread_times(message: Message):
         await message.channel.send(embed=times_embed)
     except discord.Forbidden:
         await ctx().doodledoo.debug.send(f"Spriter Application: Missing permissions in {message.channel}")
+
+
+async def handle_spritework_post(thread: Thread):
+    spritework_message = await fetch_thread_message(thread)
+    if not spritework_message:
+        return
+
+    author = spritework_message.author
+    if await is_opted_out_user(author):
+        return
+
+    log_event("SprWork >", spritework_message)
+    await handle_reply_message(message=spritework_message, auto_spritework=True)
+
+    if await user_is_potential_spriter(author):
+        await asyncio.sleep(1)
+        await send_tutorial_mode_prompt(author, thread)
 
 
 async def handle_reply(message: Message):
@@ -189,3 +199,24 @@ async def get_reply_message(message: Message):
         raise RuntimeError(message)
 
     return await message.channel.fetch_message(reply_id)
+
+
+async def fetch_thread_message(thread: Thread) -> Message|None:
+    await asyncio.sleep(10)     # If it's too soon after thread creation, Discord returns errors
+    try:
+        caught_message = await thread.fetch_message(thread.id)
+    except discord.errors.NotFound:
+        last_message_id = thread.last_message_id
+        try:
+            caught_message = await thread.fetch_message(last_message_id)
+        except discord.errors.NotFound:
+            await ctx().doodledoo.debug.send("Discord returned Not Found twice")
+            return None
+    except discord.errors.Forbidden:
+        await ctx().doodledoo.debug.send("Discord returned Forbidden while fetching thread message")
+        return None
+    if caught_message is None:
+        await ctx().doodledoo.debug.send("Could not fetch message on thread creation")
+        return None
+
+    return caught_message

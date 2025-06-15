@@ -4,7 +4,7 @@ from discord import Message, Thread
 
 from bot import setup
 from bot.bot_context import (id_channel_gallery_pif, id_channel_assets_pif,
-                             id_channel_gallery_doodledoo, id_spriter_apps_pif)
+                             id_channel_gallery_doodledoo, id_spriter_apps_pif, id_spritework)
 from bot.setup import get_bot_id
 
 ZIGZAG_ID = 1185671488611819560 #1185671488611819560
@@ -69,6 +69,12 @@ def is_spriter_application(thread: Thread):
     if thread.parent.type != discord.ChannelType.forum:
         return False
     return thread.parent_id == id_spriter_apps_pif
+
+
+def is_spritework_post(thread: Thread):
+    if thread.parent.type != discord.ChannelType.forum:
+        return False
+    return thread.parent_id == id_spritework
 
 
 def have_icon_in_message(message: Message):

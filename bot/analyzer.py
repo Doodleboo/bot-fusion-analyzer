@@ -4,6 +4,7 @@ from analysis import Analysis, generate_file_from_image, get_autogen_file
 from discord.message import Message, Attachment
 from discord import User, TextChannel, Thread, DMChannel
 
+from bot.opt_out_options import HideAutoAnalysis
 from enums import AnalysisType, Severity
 
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
@@ -55,10 +56,20 @@ async def send_analysis(analysis: Analysis,
     else:
         ping_owner = None
 
+    if analysis.type.is_automatic_spritework_analysis():
+        buttons_view = HideAutoAnalysis(analysis.message.author)
+    else:
+        buttons_view = None
+
     if analysis.autogen_available:
         autogen_file = get_autogen_file(analysis.fusion_id)
-        if autogen_file:
-            await channel.send(embed=analysis.embed, content=ping_owner, file=autogen_file)
-            return
+    else:
+        autogen_file = None
 
-    await channel.send(embed=analysis.embed, content=ping_owner)
+    if autogen_file:
+        sent_message = await channel.send(embed=analysis.embed, content=ping_owner, file=autogen_file, view=buttons_view)
+    else:
+        sent_message = await channel.send(embed=analysis.embed, content=ping_owner, view=buttons_view)
+
+    if buttons_view:
+        buttons_view.message = sent_message
