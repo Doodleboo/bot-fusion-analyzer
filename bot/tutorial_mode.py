@@ -64,6 +64,7 @@ class PromptButtonsView(View):
     @discord.ui.button(label="Discard", style=ButtonStyle.secondary)
     async def discard_tutorial_prompt(self, interaction: Interaction, _button: Button):
         if interaction.user.id == self.original_caller.id:
+            self.stop()
             await interaction.message.delete()
         else:
             await different_user_response(interaction, self.original_caller)
@@ -76,7 +77,8 @@ class PromptButtonsView(View):
             button.disabled = True
         og_message = self.message
         if og_message:
-            await og_message.edit(content=og_message.content, view=self)
+            extra_msg = "\nButtons disabled. If you still want to use Tutorial Mode, you can do so with /help"
+            await og_message.edit(content=og_message.content + extra_msg, view=self)
         self.stop()
 
 
