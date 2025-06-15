@@ -1,17 +1,21 @@
 import discord
 import requests
 from PIL import UnidentifiedImageError
+from PIL.Image import open as image_open
 from colormath.color_objects import sRGBColor
+from discord import Interaction
 from discord.embeds import Embed
 
 import analysis_sprite
-
-from PIL.Image import open as image_open
+from bot.tutorial_mode import PromptButtonsView
+from bot.utils import fancy_print
 
 HELP_RESPONSE = ("Do you need help using the Fusion Bot to analyze sprites?\n"
             "You can use it by **mentioning the bot** (using @) **while replying to a sprite**!\n"
             "You can contact Doodledoo if you need help with anything related to the fusion bot. "
-            "Let me know if you've got suggestions or ideas too!")
+            "Let me know if you've got suggestions or ideas too!\n\n"
+            "And if you want to start Tutorial Mode, with more info about Fusion Bot, "
+            "press the Tutorial Mode button down below.")
 SIMILAR_TITLE = "**Similar pairs of colors:**"
 ERROR_TITLE = "**An error has occurred processing your command:**"
 ERROR_ADDENUM = ("\n\nIf you believe this is incorrect, notify the error either to Doodledoo or here:\n"
@@ -27,17 +31,21 @@ PAIR_LIST_LIMIT = 20
 
 
 async def help_action(interaction: discord.Interaction):
-    await interaction.response.send_message(HELP_RESPONSE)
+    log_command(interaction, "/help")
+    prompt_view = PromptButtonsView(interaction.user)
+    await interaction.response.send_message(content=HELP_RESPONSE, view=prompt_view)
+    prompt_view.message = await interaction.original_response()
 
 
 async def similar_action(interaction: discord.Interaction, attachment: discord.Attachment):
+    log_command(interaction, "/similar")
     if attachment is None:
         await error_embed(interaction, NO_ATTACHMENT)
         return
 
     raw_data = requests.get(attachment.url, stream = True, timeout = TIMEOUT).raw
     try:
-        image = image_open(raw_data)
+        image = image_open(raw_data).convert("RGBA")
     except UnidentifiedImageError:
         await error_embed(interaction, WRONG_ATTACHMENT)
         return
@@ -72,15 +80,11 @@ async def similar_action(interaction: discord.Interaction, attachment: discord.A
 
 
 def get_sorted_color_dict(image) -> frozenset[frozenset[tuple]]:
-    if "P" == image.mode:  # Indexed mode
-        useful_indexed_palette = analysis_sprite.get_useful_indexed_palette(image)
-        rgb_color_list = analysis_sprite.get_indexed_to_rgb_color_list(useful_indexed_palette)
-    else:
-        all_colors = image.getcolors(ALL_COLOR_LIMIT)
-        if not all_colors:  # Color count higher than 256
-            raise ValueError
-        useful_colors = analysis_sprite.remove_useless_colors(all_colors)
-        rgb_color_list = analysis_sprite.get_rgb_color_list(useful_colors)
+    all_colors = image.getcolors(ALL_COLOR_LIMIT)
+    if not all_colors:  # Color count higher than 256
+        raise ValueError
+    useful_colors = analysis_sprite.remove_useless_colors(all_colors)
+    rgb_color_list = analysis_sprite.get_rgb_color_list(useful_colors)
 
     similar_color_dict = analysis_sprite.get_similar_color_dict(rgb_color_list)
     sorted_color_dict = analysis_sprite.sort_color_dict(similar_color_dict)
@@ -109,3 +113,19 @@ async def error_embed(interaction: discord.Interaction, message: str):
     error_description =  message + ERROR_ADDENUM
     new_error_embed = Embed(title = ERROR_TITLE, description = error_description)
     await interaction.response.send_message(embed = new_error_embed)
+
+def log_command(interaction: Interaction, command: str):
+    channel_name = get_channel_name_from_interaction(interaction)
+    fancy_print("Command >", interaction.user.name, channel_name, command)
+
+
+def get_channel_name_from_interaction(interaction: Interaction):
+    try:
+        channel_name = interaction.channel.name  # type: ignore
+        if not isinstance(channel_name, str):
+            channel_name = "INVALID"
+    except SystemExit:
+        raise
+    except BaseException:
+        channel_name = "INVALID"
+    return channel_name

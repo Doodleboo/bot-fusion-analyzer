@@ -2,7 +2,6 @@
 import os
 
 import discord
-import utils
 import command_actions
 
 from discord import app_commands, Thread
@@ -11,9 +10,10 @@ from discord.user import User
 
 from bot.setup import set_bot_up, ctx
 from bot.handler import (handle_zigzag_galpost, handle_sprite_gallery, handle_assets_gallery,
-                         handle_spriter_application, handle_reply)
+                         handle_spriter_application, handle_reply, handle_spritework_post)
 from bot.message_identifier import (is_zigzag_galpost, is_sprite_gallery, is_assets_custom_base,
-                                    is_mentioning_reply, is_spriter_application, is_message_from_ignored_bots)
+                                    is_mentioning_reply, is_spriter_application, is_message_from_ignored_bots,
+                                    is_spritework_post)
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -29,13 +29,11 @@ tree = app_commands.CommandTree(bot)
 
 @tree.command(name="help", description="Fusion bot help")
 async def help_command(interaction: discord.Interaction):
-    utils.log_command("Command>", interaction, "/help")
     await command_actions.help_action(interaction)
 
 
 @tree.command(name="similar", description="Get the list of similar colors")
 async def similar_command(interaction: discord.Interaction, sprite: discord.Attachment):
-    utils.log_command("Command>", interaction, "/similar")
     await command_actions.similar_action(interaction, sprite)
 
 
@@ -73,10 +71,10 @@ async def on_message(message: Message):
 @bot.event
 async def on_thread_create(thread: Thread):
     try:
-        if not is_spriter_application(thread):
-            return
-
-        await handle_spriter_application(thread)
+        if is_spriter_application(thread):
+            await handle_spriter_application(thread)
+        elif is_spritework_post(thread):
+            await handle_spritework_post(thread)
     except Exception as message_exception:
         await ctx().doodledoo.debug.send(
             f"ERROR in #{thread} ({thread.jump_url})")

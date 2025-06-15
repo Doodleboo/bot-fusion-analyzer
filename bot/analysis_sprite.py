@@ -107,6 +107,11 @@ class SpriteContext():
             analysis.severity = Severity.refused
             analysis.issues.add(NotPng(file_format))
 
+    def turn_image_into_rgb(self):
+        # Avoids having to deal with indexed palette quirks
+        if self.image.mode != "RGBA":
+            self.image = self.image.convert(mode="RGBA")
+
     def handle_sprite_size(self, analysis: Analysis):
         image_size = self.image.size
         if image_size != self.valid_size:
@@ -186,18 +191,13 @@ class SpriteContext():
             pass
 
     def get_similarity_amount(self):
-        similarity_amount = 0
         try:
-            if "P" == self.image.mode:  # Indexed mode
-                useful_indexed_palette = get_useful_indexed_palette(self.image)
-                rgb_color_list = get_indexed_to_rgb_color_list(useful_indexed_palette)
-            else:
-                rgb_color_list = get_rgb_color_list(self.useful_colors)
+            rgb_color_list = get_rgb_color_list(self.useful_colors)
             self.similar_color_dict = get_similar_color_dict(rgb_color_list)
             self.similar_color_dict = sort_color_dict(self.similar_color_dict)
             similarity_amount = len(self.similar_color_dict)
         except ValueError:
-            pass
+            similarity_amount = -1
         return similarity_amount
 
     def handle_sprite_half_pixels(self, analysis: Analysis):
@@ -301,26 +301,6 @@ def get_rgb_color_list(color_data_list: list) -> list[tuple[int, int, int]]:
     return rgb_color_list
 
 
-def get_indexed_to_rgb_color_list(color_data_list: list) -> list[tuple[int, int, int]]:
-    rgb_color_list = []
-    i = 0
-    while i < len(color_data_list):
-        rgb_color = (color_data_list[i], color_data_list[i + 1], color_data_list[i + 2])
-        rgb_color_list.append(rgb_color)
-        i = i + 3
-    return rgb_color_list
-
-
-def get_useful_indexed_palette(image: Image) -> list:
-    # The transparent color index is usually 0 but just in case we grab it from info
-    transparent_color_index = image.info.get("transparency") * 3  # Each color is 3 elements of the list
-    useful_indexed_palette = image.getpalette("RGB")
-    useful_indexed_palette.remove(transparent_color_index)  # Red
-    useful_indexed_palette.remove(transparent_color_index)  # Green
-    useful_indexed_palette.remove(transparent_color_index)  # Blue
-    return useful_indexed_palette
-
-
 # Maximum number of colors. If this number is exceeded, this method returns None.
 def is_color_excess(color_list: list | None):
     return color_list is None
@@ -383,7 +363,13 @@ def get_color_set(i: int, j: int, pixels: PyAccess, step: int):
         for increment_j in range(0, step):
             local_i = i + increment_i
             local_j = j + increment_j
-            color_set.add(pixels[local_i, local_j])
+            pixel = pixels[local_i, local_j]
+            # Equalize all colored fully transparent pixels
+            if (isinstance(pixel, tuple)
+                    and len(pixel) == 4
+                    and pixel[3] == 0):
+                pixel = (0, 0, 0, 0)
+            color_set.add(pixel)
     return color_set
 
 
@@ -445,6 +431,7 @@ def main(analysis: Analysis):
 def handle_valid_sprite(analysis: Analysis):
     context = SpriteContext(analysis)
     context.handle_sprite_format(analysis)
+    context.turn_image_into_rgb()
     context.handle_sprite_size(analysis)
     context.handle_sprite_colors(analysis)
     context.handle_sprite_transparency(analysis)

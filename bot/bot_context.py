@@ -1,7 +1,6 @@
-from discord import Client
+from discord import Client, Guild, TextChannel
 
 from bot.models import ServerContext, GlobalContext
-from bot.utils import get_server_from_id, get_channel_from_id
 
 # Doodledoo test server
 id_server_doodledoo          = 446241769462562827
@@ -21,6 +20,7 @@ if bot_environment == "local":
     id_channel_debug_pif    = id_channel_debug_doodledoo
     id_spriter_apps_pif     = 1365804567127916655
     id_channel_zigzagoon    = id_channel_debug_doodledoo
+    id_spritework           = 1374857028509503538
 elif bot_environment == "pif":
     id_server_pif           = 302153478556352513
     id_channel_gallery_pif  = 543958354377179176
@@ -29,6 +29,7 @@ elif bot_environment == "pif":
     id_channel_debug_pif    = 703351286019653762
     id_spriter_apps_pif     = 1134483288703119361
     id_channel_zigzagoon    = 1234176742957121607
+    id_spritework           = 1050404143807873157
 else:
     id_server_pif           = 756264475102937199
     id_channel_gallery_pif  = 1185991301645209610
@@ -37,6 +38,7 @@ else:
     id_channel_debug_pif    = 1367184071389614091
     id_spriter_apps_pif     = 1193291636457865266 # sprite-errors
     id_channel_zigzagoon    = 1332162874931413104 # zigzag-chatter
+    id_spritework           = 1185685268133593118
 
 
 class BotContext:
@@ -68,3 +70,19 @@ class BotContext:
             doodledoo=doodledoo_context,
             pif=pif_context
         )
+
+
+def get_channel_from_id(server: Guild, channel_id) -> TextChannel:
+    channel = server.get_channel(channel_id)
+    if channel is None:
+        raise KeyError(channel_id)
+    if not isinstance(channel, TextChannel):
+        raise TypeError(channel)
+    return channel
+
+
+def get_server_from_id(client: Client, server_id) -> Guild:
+    server = client.get_guild(server_id)
+    if server is None:
+        raise KeyError(server_id)
+    return server
