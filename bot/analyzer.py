@@ -63,8 +63,13 @@ async def send_analysis(analysis: Analysis,
 
     if analysis.autogen_available:
         autogen_file = get_autogen_file(analysis.fusion_id)
-        if autogen_file:
-            await channel.send(embed=analysis.embed, content=ping_owner, file=autogen_file, view=buttons_view)
-            return
+    else:
+        autogen_file = None
 
-    await channel.send(embed=analysis.embed, content=ping_owner, view=buttons_view)
+    if autogen_file:
+        sent_message = await channel.send(embed=analysis.embed, content=ping_owner, file=autogen_file, view=buttons_view)
+    else:
+        sent_message = await channel.send(embed=analysis.embed, content=ping_owner, view=buttons_view)
+
+    if buttons_view:
+        buttons_view.message = sent_message

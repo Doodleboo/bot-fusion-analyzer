@@ -2,19 +2,21 @@ import json
 import os
 
 import discord
-from discord import Member, ButtonStyle, Interaction, User
+from discord import Member, ButtonStyle, Interaction, User, Message
 from discord.ui import View, Button
 
+from bot.utils import fancy_print
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 OPT_OUT_FILE = os.path.join(CURRENT_DIR, "..", "data", "OptedOutUsers.json")
 
 
 class HideAutoAnalysis(View):
+    message: Message
 
     def __init__(self, caller: Member|User):
         self.original_caller = caller
-        super().__init__()
+        super().__init__(timeout=600)   # After 10 mins it won't show the remove/opt out buttons anymore
 
     @discord.ui.button(label="Hide analysis", style=ButtonStyle.secondary)
     async def discard_tutorial_prompt(self, interaction: Interaction, button: Button):
@@ -35,6 +37,15 @@ class HideAutoAnalysis(View):
         else:
             await different_user_response(interaction, self.original_caller)
 
+    async def on_timeout(self) -> None:
+        if not self.message:
+            return
+        if not self.message.embeds:
+            return
+        embed = self.message.embeds[0]
+        await self.message.edit(embed=embed, view=None, attachments=[])
+        self.stop()
+
 
 
 class OptOutConfirmation(View):
@@ -47,6 +58,7 @@ class OptOutConfirmation(View):
     async def opt_user_out(self, interaction: Interaction, button: Button):
         if interaction.user.id == self.original_caller.id:
             await add_to_opt_out_list(interaction.user)
+            fancy_print("Opt Out >",interaction.user.name,interaction.channel.name,"")
             await interaction.response.edit_message(content="Opted out successfully.", view=None, delete_after=20)
         else:
             await different_user_response(interaction, self.original_caller)
