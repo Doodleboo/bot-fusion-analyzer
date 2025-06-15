@@ -34,6 +34,7 @@ async def help_action(interaction: discord.Interaction):
     log_command(interaction, "/help")
     prompt_view = PromptButtonsView(interaction.user)
     await interaction.response.send_message(content=HELP_RESPONSE, view=prompt_view)
+    prompt_view.message = await interaction.original_response()
 
 
 async def similar_action(interaction: discord.Interaction, attachment: discord.Attachment):

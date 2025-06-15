@@ -1,10 +1,12 @@
 import os
+from typing import Any
 
 import discord
-from discord import Member, User, Thread, TextChannel, DMChannel, SelectOption, File
-from discord.ui import View, Button, Select
+from discord import Member, User, Thread, TextChannel, DMChannel, SelectOption, File, Message, PartialMessage
+from discord.ui import View, Button, Select, Item
 from discord import ButtonStyle, Interaction
 
+from bot.setup import ctx
 from bot.tutorial_sections import sections
 from bot.utils import fancy_print
 
@@ -18,6 +20,7 @@ NON_TUTORIAL_ROLES = [SPRITER_ROLE_ID, MANAGER_ROLE_ID, WATCHOG_ROLE_ID,
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 IMAGES_PATH = os.path.join(CURRENT_DIR, "..", "resources")
+FINISH_TUTORIAL = "Thanks for using Tutorial Mode!\nIf you'd like to use it again, use the /help command."
 
 
 async def user_is_potential_spriter(user: User|Member) -> bool:
@@ -33,23 +36,26 @@ async def send_tutorial_mode_prompt(user: Member, channel: TextChannel|Thread|DM
     prompt_text = (f"**Hi {user.display_name}!** If you're unsure what some of that means (for instance, "
                    f"similarity is probably not what you think!), press the **Tutorial Mode** button below.")
     prompt_view = PromptButtonsView(user)
-    await channel.send(content=prompt_text, view=prompt_view)
+    view_message = await channel.send(content=prompt_text, view=prompt_view)
+    prompt_view.message = view_message
 
 
 # Views
 
 class PromptButtonsView(View):
+    message: Message
 
     def __init__(self, caller: Member):
         self.original_caller = caller
-        super().__init__()
+        super().__init__(timeout=3600)   # Prompt gets disabled after an hour
 
     @discord.ui.button(label="Tutorial Mode", style=ButtonStyle.primary, emoji="✏")
     async def engage_tutorial_mode(self, interaction: Interaction, _button: Button):
         fancy_print("TutMode >", interaction.user.name, interaction.channel.name, "Tutorial Mode engaged")
         if interaction.user.id == self.original_caller.id:
-            await interaction.response.edit_message(content="Tutorial Mode engaged",
-                                                    view=TutorialMode(self.original_caller))
+            tutorial_mode = TutorialMode(self.original_caller)
+            await interaction.response.edit_message(content="Tutorial Mode engaged", view=tutorial_mode)
+            tutorial_mode.message = await interaction.original_response()
         else:
             await different_user_response(interaction, self.original_caller)
 
@@ -60,20 +66,40 @@ class PromptButtonsView(View):
         else:
             await different_user_response(interaction, self.original_caller)
 
+    async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any], /) -> None:
+        await view_error(interaction, error)
+
+    async def on_timeout(self) -> None:
+        for button in self.children:
+            button.disabled = True
+        og_message = self.message
+        if og_message:
+            await og_message.edit(content=og_message.content, view=self)
+        self.stop()
+
 
 class TutorialMode(View):
+    message: Message
+
     def __init__(self, caller: Member):
         self.original_caller = caller
-        super().__init__()
+        super().__init__(timeout=86400)  # Tutorial becomes unresponsive after a day
         self.add_item(TutorialSelect(self.original_caller))
 
     @discord.ui.button(label="Exit Tutorial Mode", style=ButtonStyle.secondary)
     async def exit_tutorial_mode(self, interaction: Interaction, _button: Button):
         if interaction.user.id == self.original_caller.id:
-            await interaction.response.edit_message(content="Thanks for using Tutorial Mode!",
-                                                    view=None, attachments=[])
+            await interaction.response.edit_message(content=FINISH_TUTORIAL, view=None, attachments=[])
         else:
             await different_user_response(interaction, self.original_caller)
+
+    async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any], /) -> None:
+        await view_error(interaction, error)
+
+    async def on_timeout(self) -> None:
+        if self.message:
+            await self.message.edit(content=FINISH_TUTORIAL, view=None, attachments=[])
+        self.stop()
 
 
 class TutorialSelect(Select):
@@ -112,5 +138,8 @@ async def different_user_response(interaction: Interaction, og_user: Member):
                      f"<#1031005766359982190> to do so.")
     await interaction.response.send_message(content=response_text, ephemeral=True, delete_after=60)
 
+async def view_error(interaction: Interaction, error: Exception):
+    await ctx().doodledoo.debug.send(f"VIEW ERROR in {interaction.channel} ({interaction.channel.jump_url})\n")
+    raise RuntimeError from error
 
 
