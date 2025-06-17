@@ -103,6 +103,7 @@ class TutorialMode(View):
             fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name,
                         interaction.channel.name, "Tutorial Mode finished")
             await interaction.response.edit_message(content=FINISH_TUTORIAL, view=None, attachments=[])
+            self.stop()
         else:
             await different_user_response(interaction, self.original_caller)
 
