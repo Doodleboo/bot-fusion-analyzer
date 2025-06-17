@@ -22,6 +22,7 @@ class HideAutoAnalysis(View):
     async def discard_tutorial_prompt(self, interaction: Interaction, button: Button):
         if interaction.user.id == self.original_caller.id:
             await interaction.message.delete()
+            self.stop()
         else:
             await different_user_response(interaction, self.original_caller)
 
@@ -42,8 +43,7 @@ class HideAutoAnalysis(View):
             return
         if not self.message.embeds:
             return
-        embed = self.message.embeds[0]
-        await self.message.edit(embed=embed, view=None, attachments=[])
+        await self.message.edit(view=None)
         self.stop()
 
 

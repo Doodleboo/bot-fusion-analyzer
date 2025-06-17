@@ -2,7 +2,8 @@ import os
 from typing import Any
 
 import discord
-from discord import Member, User, Thread, TextChannel, DMChannel, SelectOption, File, Message, PartialMessage
+from discord import Member, User, Thread, TextChannel, DMChannel, SelectOption, File, Message, PartialMessage, \
+    HTTPException, Forbidden, NotFound
 from discord.ui import View, Button, Select, Item
 from discord import ButtonStyle, Interaction
 
@@ -58,7 +59,9 @@ class PromptButtonsView(View):
             fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name, interaction.channel.name,
                         "Tutorial Mode engaged")
             tutorial_mode = TutorialMode(self.original_caller)
-            await interaction.response.edit_message(content="Tutorial Mode engaged", view=tutorial_mode)
+            await interaction.response.edit_message(
+                content="**Tutorial Mode**\nSelect a tutorial section from the dropdown below.",
+                view=tutorial_mode)
             tutorial_mode.message = await interaction.original_response()
         else:
             await different_user_response(interaction, self.original_caller)
@@ -91,7 +94,7 @@ class TutorialMode(View):
 
     def __init__(self, caller: Member):
         self.original_caller = caller
-        super().__init__(timeout=86400)  # Tutorial becomes unresponsive after a day
+        super().__init__(timeout=86400)  # Tutorial auto-finishes after a day
         self.add_item(TutorialSelect(self.original_caller))
 
     @discord.ui.button(label="Exit Tutorial Mode", style=ButtonStyle.secondary)
@@ -108,7 +111,11 @@ class TutorialMode(View):
 
     async def on_timeout(self) -> None:
         if self.message:
-            await self.message.edit(content=FINISH_TUTORIAL, view=None, attachments=[])
+            try:
+                await self.message.edit(content=FINISH_TUTORIAL, view=None, attachments=[])
+            except (HTTPException, Forbidden, NotFound, TypeError) as error:
+                print(f"Exception {error} while trying to timeout Tutorial Mode")
+
         self.stop()
 
 

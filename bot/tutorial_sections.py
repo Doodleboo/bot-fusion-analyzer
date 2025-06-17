@@ -44,7 +44,7 @@ similarity = TutorialSection(
             "It's grabbing the colors you used on your sprite, and comparing them against eachother. This is to ensure "
             "that your colors are distinct enough.\nIf it's for a fusion, try to keep your similarity to 7 or below. "
             "Anything over 10 most of the time means that you have some unaccounted colors in there that are *almost "
-            "identical* to others you used, yet not quite the same shade.\nWrite ?tag analyser for a link to a website"
+            "identical* to others you used, yet not quite the same shade.\nWrite ?tag analyser for a link to a website "
             "that will show you which color pairs are the most similar, so that you can convert them into a single "
             "color.\nYou can use the /similar command to check the color pairs too!"
 )
