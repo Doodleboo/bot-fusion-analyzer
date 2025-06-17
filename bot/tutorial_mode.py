@@ -23,6 +23,7 @@ NON_TUTORIAL_ROLES = [SPRITER_ROLE_ID, MANAGER_ROLE_ID, WATCHOG_ROLE_ID,
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 IMAGES_PATH = os.path.join(CURRENT_DIR, "..", "resources")
 FINISH_TUTORIAL = "Thanks for using Tutorial Mode!\nIf you'd like to use it again, use the /help command."
+TUTORIAL_LOG_DECORATOR = "TutMode >"
 
 
 async def user_is_potential_spriter(user: User|Member) -> bool:
@@ -53,8 +54,9 @@ class PromptButtonsView(View):
 
     @discord.ui.button(label="Tutorial Mode", style=ButtonStyle.primary, emoji="✏")
     async def engage_tutorial_mode(self, interaction: Interaction, _button: Button):
-        fancy_print("TutMode >", interaction.user.name, interaction.channel.name, "Tutorial Mode engaged")
         if interaction.user.id == self.original_caller.id:
+            fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name, interaction.channel.name,
+                        "Tutorial Mode engaged")
             tutorial_mode = TutorialMode(self.original_caller)
             await interaction.response.edit_message(content="Tutorial Mode engaged", view=tutorial_mode)
             tutorial_mode.message = await interaction.original_response()
@@ -64,6 +66,8 @@ class PromptButtonsView(View):
     @discord.ui.button(label="Discard", style=ButtonStyle.secondary)
     async def discard_tutorial_prompt(self, interaction: Interaction, _button: Button):
         if interaction.user.id == self.original_caller.id:
+            fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name, interaction.channel.name,
+                        "Tutorial prompt discarded")
             self.stop()
             await interaction.message.delete()
         else:
@@ -93,6 +97,8 @@ class TutorialMode(View):
     @discord.ui.button(label="Exit Tutorial Mode", style=ButtonStyle.secondary)
     async def exit_tutorial_mode(self, interaction: Interaction, _button: Button):
         if interaction.user.id == self.original_caller.id:
+            fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name,
+                        interaction.channel.name, "Tutorial Mode finished")
             await interaction.response.edit_message(content=FINISH_TUTORIAL, view=None, attachments=[])
         else:
             await different_user_response(interaction, self.original_caller)
@@ -124,6 +130,8 @@ class TutorialSelect(Select):
         section = sections[self.values[0]]
         if not section:
             print(f"ERROR: No section found for element: {self.values[0]}")
+        fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name, interaction.channel.name,
+                    f"Section: {section.title}")
         full_section = f"**Tutorial Mode: {section.title}**\n\n{section.content}"
         attachments = []
         section_image = section.image
