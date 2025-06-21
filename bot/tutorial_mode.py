@@ -63,6 +63,7 @@ class PromptButtonsView(View):
                 content="**Tutorial Mode**\nSelect a tutorial section from the dropdown below.",
                 view=tutorial_mode)
             tutorial_mode.message = await interaction.original_response()
+            self.stop()
         else:
             await different_user_response(interaction, self.original_caller)
 
