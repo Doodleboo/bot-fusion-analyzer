@@ -85,8 +85,11 @@ class PromptButtonsView(View):
             button.disabled = True
         og_message = self.message
         if og_message:
-            extra_msg = "\nButtons disabled. If you still want to use Tutorial Mode, you can do so with /help"
-            await og_message.edit(content=og_message.content + extra_msg, view=self)
+            try:
+                extra_msg = "\nButtons disabled. If you still want to use Tutorial Mode, you can do so with /help"
+                await og_message.edit(content=og_message.content + extra_msg, view=self)
+            except (HTTPException, Forbidden, NotFound, TypeError) as error:
+                print(f"Exception {error} while trying to timeout Tutorial prompt in {self.message.thread.name}")
         self.stop()
 
 
@@ -116,7 +119,7 @@ class TutorialMode(View):
             try:
                 await self.message.edit(content=FINISH_TUTORIAL, view=None, attachments=[])
             except (HTTPException, Forbidden, NotFound, TypeError) as error:
-                print(f"Exception {error} while trying to timeout Tutorial Mode")
+                print(f"Exception {error} while trying to timeout Tutorial Mode in {self.message.thread.name}")
 
         self.stop()
 
