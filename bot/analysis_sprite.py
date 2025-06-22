@@ -4,8 +4,8 @@ from enums import Severity
 from exceptions import TransparencyException
 from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
                     ColorExcessRefused, ColorOverExcess, GraphicsGaleUser,
-                    HalfPixelsAmount, InvalidSize, MissingTransparency,
-                    SimilarityAmount, TransparencyAmount, CustomBase,
+                    HalfPixels, InvalidSize, MissingTransparency,
+                    SimilarityAmount, SemiTransparency, CustomBase,
                     SimilarityExcessControversial, SimilarityExcessRefused,
                     MisplacedGrid, EggSprite, NotPng)
 
@@ -186,7 +186,7 @@ class SpriteContext():
                     analysis.transparency_image = image
                     if analysis.severity is not Severity.refused:
                         analysis.severity = Severity.controversial
-                    analysis.issues.add(TransparencyAmount(transparency_amount))
+                    analysis.issues.add(SemiTransparency())
         except TransparencyException:
             pass
 
@@ -215,7 +215,7 @@ class SpriteContext():
             analysis.half_pixels_issue = True
             analysis.half_pixels_image = image
             analysis.severity = Severity.refused
-            analysis.issues.add(HalfPixelsAmount(half_pixels_amount))
+            analysis.issues.add(HalfPixels())
         else:
             analysis.issues.add(MisplacedGrid())
 

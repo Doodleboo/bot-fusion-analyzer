@@ -233,15 +233,9 @@ class GraphicsGaleUser(Issue):
     severity = Severity.accepted
 
 
-class TransparencyAmount(Issue):
+class SemiTransparency(Issue):
     description = Description.transparency_amount
     severity = Severity.controversial
-
-    def __init__(self, amount: int) -> None:
-        self.amount = amount
-
-    def __str__(self) -> str:
-        return f"{self.description.value}: {self.amount}"
 
 
 class SimilarityAmount(Issue):
@@ -255,15 +249,9 @@ class SimilarityAmount(Issue):
         return f"{self.description.value}: {self.amount}"
 
 
-class HalfPixelsAmount(Issue):
-    description = Description.half_pixels_amount
+class HalfPixels(Issue):
+    description = Description.half_pixels
     severity = Severity.refused
-
-    def __init__(self, amount: int) -> None:
-        self.amount = amount
-
-    def __str__(self) -> str:
-        return f"{self.description.value}: {self.amount}"
 
 
 class MisplacedGrid(Issue):

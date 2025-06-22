@@ -67,9 +67,9 @@ class Analysis:
 
     def handle_bonus_embed(self):
         if self.transparency_issue is True:
-            self.transparency_embed = get_bonus_embed(DiscordColour.pink.value)
+            self.transparency_embed = get_bonus_embed(DiscordColour.pink.value, "Semi transparent pixel location:")
         if self.half_pixels_issue is True:
-            self.half_pixels_embed = get_bonus_embed(DiscordColour.red.value)
+            self.half_pixels_embed = get_bonus_embed(DiscordColour.red.value, "Half pixel location:")
 
     def apply_title(self):
         if self.fusion_id and (self.fusion_id != "DEFAULT_VALUE"):
@@ -201,8 +201,10 @@ def cut_from_spritesheet(head_id: str, body_id: str) -> File:
     return generate_file_from_image(scaled_autogen)
 
 
-def get_bonus_embed(discord_colour:Colour) -> Embed:
+def get_bonus_embed(discord_colour:Colour, title: str|None = None) -> Embed:
     bonus_embed = Embed()
+    if title:
+        bonus_embed.title = title
     bonus_embed.colour = discord_colour
     bonus_embed.set_image(url="attachment://image.png")
     return bonus_embed
