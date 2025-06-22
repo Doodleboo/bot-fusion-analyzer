@@ -43,6 +43,7 @@ class DiscordColour(Enum):
     gray    = discord.Colour(0xcdcdcd)
     pink    = discord.Colour(0xff00ff)
 
+
 class AnalysisType(Enum):
     sprite_gallery  = auto()
     assets_gallery  = auto()

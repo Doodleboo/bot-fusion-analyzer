@@ -179,7 +179,7 @@ class SpriteContext():
 
     def handle_sprite_transparency(self, analysis: Analysis):
         try:
-            if analysis.size_issue is False:
+            if not analysis.size_issue:
                 transparency_amount, image = self.highlight_transparency()
                 if transparency_amount > 0:
                     analysis.transparency_issue = True
@@ -353,8 +353,8 @@ def find_first_pixel(pixels: PyAccess, max_size: int):
     for i in range(0, max_size):
         for j in range(0, max_size):
             if default_value != pixels[i, j]:
-                return (i % 3, j % 3)
-    return (0, 0)
+                return i % 3, j % 3
+    return 0, 0
 
 
 def get_color_set(i: int, j: int, pixels: PyAccess, step: int):

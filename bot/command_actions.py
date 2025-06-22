@@ -101,7 +101,7 @@ def get_rgb_pair(color_pair: frozenset[tuple]) -> tuple[str, str]:
     return first_color.get_rgb_hex(), second_color.get_rgb_hex()
 
 
-def format_list(pair_list: [[str, str]]):
+def format_list(pair_list: list[tuple[str, str]]):
     formatted_list = ""
     for pair in pair_list:
         temp_str = "- **" + pair[0] + "** and **" + pair[1] + "**\n"

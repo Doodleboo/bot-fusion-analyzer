@@ -1,5 +1,3 @@
-from discord import File
-
 class TutorialSection:
     title: str
     description: str

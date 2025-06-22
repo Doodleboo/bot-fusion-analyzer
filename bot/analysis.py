@@ -66,9 +66,9 @@ class Analysis:
         self.handle_bonus_embed()
 
     def handle_bonus_embed(self):
-        if self.transparency_issue is True:
+        if self.transparency_issue:
             self.transparency_embed = get_bonus_embed(DiscordColour.pink.value, "Semi transparent pixel location:")
-        if self.half_pixels_issue is True:
+        if self.half_pixels_issue:
             self.half_pixels_embed = get_bonus_embed(DiscordColour.red.value, "Half pixel location:")
 
     def apply_title(self):

@@ -1,7 +1,7 @@
 import asyncio
 
 import discord
-from discord import Message, Thread, HTTPException, PartialEmoji, Member, User
+from discord import Message, Thread, HTTPException, PartialEmoji
 from analysis import Analysis
 from analyzer import send_full_analysis, generate_analysis
 from bot.opt_out_options import is_opted_out_user
