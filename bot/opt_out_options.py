@@ -48,9 +48,9 @@ class HideAutoAnalysis(View):
         except (HTTPException, Forbidden, NotFound, TypeError) as error:
             error_log = f"Exception {error} while trying to timeout auto analysis"
             if self.message.thread:
-                error_log = error_log + f"in {self.message.thread.name}"
+                error_log = error_log + f" in {self.message.thread.name}"
             elif self.message.channel:
-                error_log = error_log + f"in {self.message.channel.name}"
+                error_log = error_log + f" in {self.message.channel.name}"
             print(error_log)
         self.stop()
 
