@@ -1,7 +1,7 @@
 import asyncio
 
 import discord
-from discord import Message, Thread, HTTPException, PartialEmoji
+from discord import Message, Thread, HTTPException, PartialEmoji, DMChannel
 from analysis import Analysis
 from analyzer import send_full_analysis, generate_analysis
 from bot.opt_out_options import is_opted_out_user
@@ -178,15 +178,18 @@ def _log_message(decorator: str, message: Message):
     fancy_print(decorator, message.author.name, channel_name, first_line)
 
 
-def get_channel_name_from_message(message: Message):
+def get_channel_name_from_message(message: Message) -> str:
     try:
-        channel_name = message.channel.name  # type: ignore
+        channel = message.channel
+        if isinstance(channel, DMChannel):
+            return "DIRECT MESSAGE"
+        channel_name = channel.name  # type: ignore
         if not isinstance(channel_name, str):
-            channel_name = "INVALID"
+            return "INVALID"
     except SystemExit:
         raise
     except BaseException:
-        channel_name = "INVALID"
+        channel_name = "UNKNOWN"
     return channel_name
 
 
