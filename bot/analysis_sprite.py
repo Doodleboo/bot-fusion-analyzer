@@ -415,14 +415,6 @@ def get_color_delta(rgb_a: tuple, rgb_b: tuple):
     return [int(cie2000), int(cmc), max_difference]
 
 
-def detect_egg_size_early(analysis: Analysis) -> bool:
-    raw_data = requests.get(analysis.attachment_url, stream=True, timeout=TIMEOUT).raw
-    image = image_open(raw_data)
-    if not image:
-        return False
-    return image.size == (EGG_SIZE, EGG_SIZE)
-
-
 def main(analysis: Analysis):
     if (analysis.severity == Severity.accepted) or analysis.type.is_reply():
         handle_valid_sprite(analysis)

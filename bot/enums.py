@@ -73,6 +73,22 @@ class AnalysisType(Enum):
 
 class IdType(Enum):
     fusion      = auto()
-    base_or_egg = auto()
+    custom_base = auto()
+    egg         = auto()
     triple      = auto()
     unknown     = auto()
+
+    def is_fusion(self):
+        return self == IdType.fusion
+
+    def is_custom_base(self):
+        return self == IdType.custom_base
+
+    def is_egg(self):
+        return self == IdType.egg
+
+    def is_triple_fusion(self):
+        return self == IdType.triple
+
+    def is_unknown(self):
+        return self == IdType.unknown

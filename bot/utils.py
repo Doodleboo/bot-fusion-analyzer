@@ -21,6 +21,8 @@ NUMBER_PATTERN_FUSION_ID = r'([1-9]\d{0,2})\.([1-9]\d{0,2})'
 NUMBER_PATTERN_CUSTOM_ID = r'([1-9]\d{0,2})'
 # 123.456.789
 NUMBER_PATTERN_TRIPLE_ID = r'([1-9]\d{0,2})\.([1-9]\d{0,2})\.([1-9]\d{0,2})'
+# 123_egg
+NUMBER_PATTERN_EGG_ID = r'([1-9]\d{0,2}_egg)'
 
 # (123.456a)
 TEXT_PATTERN_FUSION_ID = r'\(([1-9]\d{0,2})\.([1-9]\d{0,2})[a-z]{0,1}\)'
@@ -32,6 +34,7 @@ TEXT_PATTERN_TRIPLE_ID = r'\(([1-9]\d{0,2})\.([1-9]\d{0,2})\.([1-9]\d{0,2})[a-z]
 FILENAME_FUSION_ID = NUMBER_PATTERN_FUSION_ID + LETTER_AND_PNG_PATTERN
 FILENAME_CUSTOM_ID = NUMBER_PATTERN_CUSTOM_ID + LETTER_AND_PNG_PATTERN
 FILENAME_TRIPLE_ID = NUMBER_PATTERN_TRIPLE_ID + LETTER_AND_PNG_PATTERN
+FILENAME_EGG_ID    = NUMBER_PATTERN_EGG_ID    + LETTER_AND_PNG_PATTERN
 
 REGULAR_PATTERN_FUSION_ID = rf'^{FILENAME_FUSION_ID}'
 SPOILER_PATTERN_FUSION_ID = rf'^SPOILER_{FILENAME_FUSION_ID}'
@@ -41,6 +44,9 @@ SPOILER_PATTERN_CUSTOM_ID = rf'^SPOILER_{FILENAME_CUSTOM_ID}'
 
 REGULAR_PATTERN_TRIPLE_ID = rf'^{FILENAME_TRIPLE_ID}'
 SPOILER_PATTERN_TRIPLE_ID = rf'^SPOILER_{FILENAME_TRIPLE_ID}'
+
+REGULAR_PATTERN_EGG_ID = rf'^{FILENAME_EGG_ID}'
+SPOILER_PATTERN_EGG_ID = rf'^SPOILER_{FILENAME_EGG_ID}'
 
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -96,11 +102,11 @@ def get_fusion_id_from_filename(filename: str) -> (str, IdType):
     # Search for custom base or egg pattern
     result = re.match(REGULAR_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return get_clean_id_from_result(result[0], IdType.base_or_egg), IdType.base_or_egg
+        return get_clean_id_from_result(result[0], IdType.custom_base), IdType.custom_base
 
     result = re.match(SPOILER_PATTERN_CUSTOM_ID, filename)
     if result is not None:
-        return get_clean_id_from_result(result[0], IdType.base_or_egg), IdType.base_or_egg
+        return get_clean_id_from_result(result[0], IdType.custom_base), IdType.custom_base
 
     # Search for triple fusion pattern
     result = re.match(REGULAR_PATTERN_TRIPLE_ID, filename)
@@ -110,6 +116,15 @@ def get_fusion_id_from_filename(filename: str) -> (str, IdType):
     result = re.match(SPOILER_PATTERN_TRIPLE_ID, filename)
     if result is not None:
         return get_clean_id_from_result(result[0], IdType.triple), IdType.triple
+
+    # Search for new egg pattern
+    result = re.match(REGULAR_PATTERN_EGG_ID, filename)
+    if result is not None:
+        return get_clean_id_from_result(result[0], IdType.egg), IdType.egg
+
+    result = re.match(SPOILER_PATTERN_EGG_ID, filename)
+    if result is not None:
+        return get_clean_id_from_result(result[0], IdType.egg), IdType.egg
     else:
         return None, IdType.unknown
 
@@ -117,12 +132,15 @@ def get_fusion_id_from_filename(filename: str) -> (str, IdType):
 def extract_fusion_ids_from_content(message: Message, id_type: IdType):
     content = message.content
     id_list = []
-    if id_type == IdType.base_or_egg:
+    if id_type.is_custom_base() or id_type.is_egg():
+        # Eggs use the same id type as custom bases in the gallery message
         search_pattern = TEXT_PATTERN_CUSTOM_ID
-    elif id_type == IdType.triple:
+    elif id_type.is_triple_fusion():
         search_pattern = TEXT_PATTERN_TRIPLE_ID
-    else:
+    elif id_type.is_fusion():
         search_pattern = TEXT_PATTERN_FUSION_ID
+    else:
+        return id_list
 
     iterator = re.finditer(search_pattern, content)
     for result in iterator:
@@ -134,7 +152,8 @@ def extract_fusion_ids_from_content(message: Message, id_type: IdType):
 
 def get_clean_id_from_result(text: str, id_type: IdType):
     fusion_id = None
-    if id_type == IdType.base_or_egg:
+    if id_type.is_custom_base() or id_type.is_egg():
+        # With eggs, we also use the base pattern to grab only the number without the "_egg"
         search_pattern = NUMBER_PATTERN_CUSTOM_ID
     elif id_type == IdType.triple:
         search_pattern = NUMBER_PATTERN_TRIPLE_ID
