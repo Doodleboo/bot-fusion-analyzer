@@ -213,7 +213,7 @@ async def fetch_thread_message(thread: Thread) -> Message|None:
         try:
             caught_message = await thread.fetch_message(last_message_id)
         except discord.errors.NotFound:
-            await ctx().doodledoo.debug.send("Discord returned Not Found twice")
+            await ctx().doodledoo.debug.send(f"Could not fetch messages from thread {thread.name}: {thread.jump_url}")
             return None
     except discord.errors.Forbidden:
         await ctx().doodledoo.debug.send("Discord returned Forbidden while fetching thread message")
