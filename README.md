@@ -9,6 +9,9 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - **Greystorm** for giving permission to use various utilities from spritebot
 
 # Changelog
+## Version 2.4
+- Support for the new egg sprite filename format (it's now 123_egg.png)
+
 ## Version 2.3
 - **Automatic analysis in #spritework.** There's an option to opt out of it.
 - **Tutorial Mode** with some information on Fusion Bot messages! Non-spriters will get a prompt for it with their automatic analysis. Other way to use it is through the /help command.
