@@ -28,7 +28,7 @@ FINISH_TUTORIAL = "Thanks for using Tutorial Mode!\nIf you'd like to use it agai
 TUTORIAL_LOG_DECORATOR = "TutMode >"
 
 
-async def user_is_potential_spriter(user: User|Member) -> bool:
+def user_is_potential_spriter(user: User|Member) -> bool:
     if not isinstance(user, Member):
         return False
     for role in user.roles:
@@ -71,8 +71,6 @@ class PromptButtonsView(View):
     @discord.ui.button(label="Discard", style=ButtonStyle.secondary)
     async def discard_tutorial_prompt(self, interaction: Interaction, _button: Button):
         if interaction.user.id == self.original_caller.id:
-            fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name, interaction.channel.name,
-                        "Tutorial prompt discarded")
             self.stop()
             await interaction.message.delete()
         else:
@@ -104,7 +102,7 @@ class TutorialMode(View):
 
     def __init__(self, caller: Member):
         self.original_caller = caller
-        super().__init__(timeout=86400)  # Tutorial auto-finishes after a day
+        super().__init__(timeout=36000)  # Tutorial auto-finishes after 10 hours
         self.add_item(TutorialSelect(self.original_caller))
 
     @discord.ui.button(label="Exit Tutorial Mode", style=ButtonStyle.secondary)

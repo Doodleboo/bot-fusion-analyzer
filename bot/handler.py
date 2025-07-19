@@ -128,7 +128,7 @@ async def handle_spritework_post(thread: Thread):
     log_event("SprWork >", spritework_message)
     await handle_reply_message(message=spritework_message, auto_spritework=True)
 
-    if await user_is_potential_spriter(author):
+    if user_is_potential_spriter(author):
         await asyncio.sleep(1)
         await send_tutorial_mode_prompt(author, thread)
 
