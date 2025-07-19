@@ -28,7 +28,7 @@ FINISH_TUTORIAL = "Thanks for using Tutorial Mode!\nIf you'd like to use it agai
 TUTORIAL_LOG_DECORATOR = "TutMode >"
 
 
-async def user_is_potential_spriter(user: User|Member) -> bool:
+def user_is_potential_spriter(user: User|Member) -> bool:
     if not isinstance(user, Member):
         return False
     for role in user.roles:
@@ -39,7 +39,10 @@ async def user_is_potential_spriter(user: User|Member) -> bool:
 
 async def send_tutorial_mode_prompt(user: Member, channel: TextChannel|Thread|DMChannel):
     prompt_text = (f"**Hi {user.display_name}!** If you're unsure what some of that means (for instance, "
-                   f"similarity is probably not what you think!), press the **Tutorial Mode** button below.")
+                   f"similarity is probably not what you think!), press the **Tutorial Mode** button below.\n"
+                   f"Also, make sure that if you edit your sprite, post updates in this same thread, don't "
+                   f"create a new one please! Even if the analysis says 'controversial' or 'invalid', you can "
+                   f"just edit it to make it valid.")
     prompt_view = PromptButtonsView(user)
     view_message = await channel.send(content=prompt_text, view=prompt_view)
     prompt_view.message = view_message
@@ -71,8 +74,6 @@ class PromptButtonsView(View):
     @discord.ui.button(label="Discard", style=ButtonStyle.secondary)
     async def discard_tutorial_prompt(self, interaction: Interaction, _button: Button):
         if interaction.user.id == self.original_caller.id:
-            fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name, interaction.channel.name,
-                        "Tutorial prompt discarded")
             self.stop()
             await interaction.message.delete()
         else:
@@ -104,7 +105,7 @@ class TutorialMode(View):
 
     def __init__(self, caller: Member):
         self.original_caller = caller
-        super().__init__(timeout=86400)  # Tutorial auto-finishes after a day
+        super().__init__(timeout=36000)  # Tutorial auto-finishes after 10 hours
         self.add_item(TutorialSelect(self.original_caller))
 
     @discord.ui.button(label="Exit Tutorial Mode", style=ButtonStyle.secondary)
