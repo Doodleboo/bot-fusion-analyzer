@@ -39,7 +39,10 @@ def user_is_potential_spriter(user: User|Member) -> bool:
 
 async def send_tutorial_mode_prompt(user: Member, channel: TextChannel|Thread|DMChannel):
     prompt_text = (f"**Hi {user.display_name}!** If you're unsure what some of that means (for instance, "
-                   f"similarity is probably not what you think!), press the **Tutorial Mode** button below.")
+                   f"similarity is probably not what you think!), press the **Tutorial Mode** button below.\n"
+                   f"Also, make sure that if you edit your sprite, post updates in this same thread, don't "
+                   f"create a new one please! Even if the analysis says 'controversial' or 'invalid', you can "
+                   f"just edit it to make it valid.")
     prompt_view = PromptButtonsView(user)
     view_message = await channel.send(content=prompt_text, view=prompt_view)
     prompt_view.message = view_message
