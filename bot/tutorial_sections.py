@@ -98,7 +98,7 @@ how_to_use = TutorialSection(
     description="How can I make Fusion Bot analyze my sprite again?",
     content="If your sprite had some issues when you first posted it to spritework, don't worry! The spritework "
             "thread is where you can get feedback and improve on it to fix issues. If you want to check if the ones "
-            "the bot detects have been fixed, **reply to your new image while pinging (using @) the Fusion Bot!\n"
+            "the bot detects have been fixed, **reply to your new image while pinging (using @) the Fusion Bot!**\n"
             "If you want to see how your sprite would look in the game (for instance, to check that it's correctly "
             "placed in the canvas) you can reply to the image writing `!battle` in your message."
 )
