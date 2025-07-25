@@ -95,7 +95,7 @@ async def handle_reply_message(message: Message, auto_spritework: bool = False):
             elif analysis.might_be_ai and new_user_in_spritework:
                 await channel.send(content="Thanks for posting to spritework!\n"
                                            "As a general reminder to new users, sprites here are meant to be made by "
-                                           "the users who submit them, made by conventional image editing tools.\n"
+                                           "the users who submit them, without the use of AI at any stage.\n"
                                            "Welcome to the community!")
                 await asyncio.sleep(5)
             await send_full_analysis(analysis, message.channel, message.author)
