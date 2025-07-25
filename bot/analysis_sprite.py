@@ -130,8 +130,8 @@ class SpriteContext():
         else:
             self.handle_color_count(analysis, all_colors)
             self.handle_color_limit(analysis)
-            if analysis.severity is not Severity.refused:
-                self.handle_color_similarity(analysis)  # It would return 0 sim if the colors don't have alpha channel anyway
+            if self.useful_amount <= self.refused_color_lim:
+                self.handle_color_similarity(analysis)
             self.handle_aseprite(analysis)
             self.handle_graphics_gale(analysis)
 
