@@ -29,6 +29,7 @@ class Analysis:
     severity: Severity
     embed: Embed
     fusion_id: str = "DEFAULT_VALUE"
+    id_type: IdType = IdType.unknown
 
     autogen_available: bool = False
     attachment_url: str|None = None

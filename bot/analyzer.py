@@ -1,5 +1,6 @@
 import analysis_content as analysis_content
 import analysis_sprite as analysis_sprite
+import gallery_analysis
 from analysis import Analysis, generate_file_from_image, get_autogen_file
 from discord.message import Message, Attachment
 from discord import User, TextChannel, Thread, DMChannel
@@ -16,6 +17,8 @@ def generate_analysis(
     analysis = Analysis(message, specific_attachment, analysis_type)
     analysis_content.main(analysis)
     analysis_sprite.main(analysis)
+    if analysis_type.is_gallery():
+        gallery_analysis.main()
     analysis.generate_embed()
     return analysis
 
