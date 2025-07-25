@@ -3,7 +3,7 @@ import asyncio
 import discord
 from discord import Message, Thread, HTTPException, PartialEmoji, DMChannel
 from analysis import Analysis
-from analyzer import send_full_analysis, generate_analysis
+from analyzer import send_full_analysis, generate_analysis, send_analysis
 from bot.opt_out_options import is_opted_out_user
 from bot.tutorial_mode import send_tutorial_mode_prompt, user_is_potential_spriter
 from bot.utils import fancy_print
@@ -75,7 +75,7 @@ async def handle_zigzag_galpost(message: Message):
         zigzagoon_message = "This Zigzag galpost seems to have issues. If this is incorrect, contact Doodledoo."
         await ctx().pif.zigzagoon.send(embed=analysis.embed, content=zigzagoon_message)
     else:
-        await ctx().pif.logs.send(embed=analysis.embed)
+        await send_analysis(analysis, ctx().pif.logs)
 
 
 async def handle_reply_message(message: Message, auto_spritework: bool = False):
@@ -83,7 +83,7 @@ async def handle_reply_message(message: Message, auto_spritework: bool = False):
     if auto_spritework:
         analysis_type = AnalysisType.auto_spritework
     else:
-        analysis_type = AnalysisType.ping_reply
+        analysis_type = AnalysisType.zigzag_fusion
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, analysis_type)
         try:
@@ -148,7 +148,7 @@ async def handle_spritework_post(thread: Thread):
 async def handle_reply(message: Message):
     reply_message = await get_reply_message(message)
     log_event("Reply   >", reply_message)
-    await handle_reply_message(reply_message)
+    await handle_zigzag_galpost(reply_message)
 
 
 async def handle_misnumbered_in_gallery(message: Message, analysis: Analysis):
