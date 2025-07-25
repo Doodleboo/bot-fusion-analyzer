@@ -1,5 +1,6 @@
 import requests
 from analysis import Analysis
+from utils import is_intended_transparency
 from enums import Severity
 from exceptions import TransparencyException
 from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
@@ -7,7 +8,7 @@ from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
                     HalfPixels, InvalidSize, MissingTransparency,
                     SimilarityAmount, SemiTransparency, CustomBase,
                     SimilarityExcessControversial, SimilarityExcessRefused,
-                    MisplacedGrid, EggSprite, NotPng)
+                    MisplacedGrid, EggSprite, NotPng, IntendedTransparency)
 
 # Pillow
 from PIL.Image import open as image_open
@@ -181,17 +182,26 @@ class SpriteContext():
             analysis.issues.add(GraphicsGaleUser())
 
     def handle_sprite_transparency(self, analysis: Analysis):
+        if analysis.size_issue:
+            return
+
         try:
-            if not analysis.size_issue:
-                transparency_amount, image = self.highlight_transparency()
-                if transparency_amount > 0:
-                    analysis.transparency_issue = True
-                    analysis.transparency_image = image
-                    if analysis.severity is not Severity.refused:
-                        analysis.severity = Severity.controversial
-                    analysis.issues.add(SemiTransparency())
+            transparency_amount, image = self.highlight_transparency()
         except TransparencyException:
-            pass
+            return
+
+        if transparency_amount == 0:
+            return
+
+        if is_intended_transparency(analysis.message):
+            analysis.issues.add(IntendedTransparency())
+            return
+        analysis.transparency_issue = True
+        analysis.transparency_image = image
+        if analysis.severity is not Severity.refused:
+            analysis.severity = Severity.controversial
+        analysis.issues.add(SemiTransparency())
+
 
     def get_similarity_amount(self):
         try:

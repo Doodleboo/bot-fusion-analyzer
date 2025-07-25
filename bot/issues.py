@@ -234,8 +234,13 @@ class GraphicsGaleUser(Issue):
 
 
 class SemiTransparency(Issue):
-    description = Description.transparency_amount
+    description = Description.semi_transparent
     severity = Severity.controversial
+
+
+class IntendedTransparency(Issue):
+    description = Description.intended_trans
+    severity = Severity.accepted
 
 
 class SimilarityAmount(Issue):

@@ -177,6 +177,14 @@ def id_to_name_map():  # Thanks Greystorm for the util and file
         return {element["id"]: element["display_name"] for element in data["pokemon"]}
 
 
+def is_intended_transparency(message: Message) -> bool:
+    content = message.content
+    if not content:
+        return False
+    result = re.search(r'[Ii]ntended [Tt]ransparency', content)
+    return result is not None
+
+
 BLUE_TEXT    = '\033[94m'
 MAGENTA_TEXT = '\033[35m'
 COLOR_END    = '\033[0m'
