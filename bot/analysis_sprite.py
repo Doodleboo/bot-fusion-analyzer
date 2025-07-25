@@ -278,7 +278,7 @@ def get_similar_color_dict(rgb_color_list):
 
 
 def sort_color_dict(some_dict: dict):
-    return {k: v for k, v in sorted(some_dict.items(), key=sort_element)}
+    return dict(sorted(some_dict.items(), key=sort_element))
 
 
 def sort_element(x):
