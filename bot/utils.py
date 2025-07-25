@@ -129,6 +129,11 @@ def get_fusion_id_from_filename(filename: str) -> (str, IdType):
         return None, IdType.unknown
 
 
+def is_chat_gpt_in_filename(filename: str) -> bool:
+    result = re.match("ChatGPT", filename)
+    return result is not None
+
+
 def extract_fusion_ids_from_content(message: Message, id_type: IdType):
     content = message.content
     id_list = []

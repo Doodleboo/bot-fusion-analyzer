@@ -44,6 +44,9 @@ class Analysis:
     half_pixels_image: Image
     half_pixels_embed: Embed
 
+    might_be_ai: bool = False
+    is_ai: bool = False
+
     def __init__(self,
                  message:Message,
                  specific_attachment:Attachment|None,
@@ -161,6 +164,8 @@ class Analysis:
         if self.have_attachment() or self.type.is_zigzag_galpost():
             filename = self.get_filename()
             fusion_id, id_type = utils.get_fusion_id_from_filename(filename)
+            if id_type.is_unknown() and utils.is_chat_gpt_in_filename(filename):
+                self.is_ai = True
         return fusion_id, id_type
 
 

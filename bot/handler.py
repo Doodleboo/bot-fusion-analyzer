@@ -16,6 +16,7 @@ from spritework_checker import get_spritework_thread_times
 
 ERROR_EMOJI_NAME = "NANI"
 ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
+SPRITE_MANAGER_PING = "<@&900867033175040101> Potential AI Sprite"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
 
@@ -86,6 +87,17 @@ async def handle_reply_message(message: Message, auto_spritework: bool = False):
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, analysis_type)
         try:
+            new_user_in_spritework = (user_is_potential_spriter(message.author)
+                                      and analysis_type.is_automatic_spritework_analysis())
+            if analysis.is_ai and new_user_in_spritework:
+                await channel.send(content=SPRITE_MANAGER_PING, embed=analysis.embed)
+                return
+            elif analysis.might_be_ai and new_user_in_spritework:
+                await channel.send(content="Thanks for posting to spritework!\n"
+                                           "As a general reminder to new users, sprites here are meant to be made by "
+                                           "the users who submit them, made by conventional image editing tools.\n"
+                                           "Welcome to the community!")
+                await asyncio.sleep(5)
             await send_full_analysis(analysis, message.channel, message.author)
         except discord.Forbidden:
             await ctx().doodledoo.debug.send(f"Missing permissions in {channel.name}: {channel.jump_url}")
@@ -205,7 +217,7 @@ async def get_reply_message(message: Message):
 
 
 async def fetch_thread_message(thread: Thread) -> Message|None:
-    await asyncio.sleep(10)     # If it's too soon after thread creation, Discord returns errors
+    await asyncio.sleep(5)     # If it's too soon after thread creation, Discord returns errors
     try:
         caught_message = await thread.fetch_message(thread.id)
     except discord.errors.NotFound:

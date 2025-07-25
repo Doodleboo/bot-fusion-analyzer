@@ -118,12 +118,15 @@ class SpriteContext():
             analysis.size_issue = True
             analysis.severity = Severity.refused
             analysis.issues.add(InvalidSize(image_size))
+            if image_size == (1024, 1024):
+                analysis.might_be_ai = True
 
     def handle_sprite_colors(self, analysis: Analysis):
         all_colors = self.image.getcolors(ALL_COLOR_LIMIT)
         if is_color_excess(all_colors):
             analysis.severity = Severity.refused
             analysis.issues.add(ColorOverExcess(ALL_COLOR_LIMIT))
+            analysis.might_be_ai = True
         else:
             self.handle_color_count(analysis, all_colors)
             self.handle_color_limit(analysis)
@@ -139,6 +142,7 @@ class SpriteContext():
         except TransparencyException:
             analysis.severity = Severity.refused
             analysis.issues.add(MissingTransparency())
+            analysis.might_be_ai = True
 
     def handle_color_amount(self, analysis: Analysis, all_colors):
         all_amount = len(all_colors)

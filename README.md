@@ -12,6 +12,7 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 ## Version 2.4
 - Support for the new egg sprite filename format (it's now 123_egg.png)
 - Tutorial Mode improvements and new sections
+- Basic AI detection and warnings
 
 ## Version 2.3
 - **Automatic analysis in #spritework.** There's an option to opt out of it.
