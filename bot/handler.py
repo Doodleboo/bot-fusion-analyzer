@@ -83,7 +83,7 @@ async def handle_reply_message(message: Message, auto_spritework: bool = False):
     if auto_spritework:
         analysis_type = AnalysisType.auto_spritework
     else:
-        analysis_type = AnalysisType.zigzag_fusion
+        analysis_type = AnalysisType.ping_reply
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, analysis_type)
         try:
@@ -148,7 +148,7 @@ async def handle_spritework_post(thread: Thread):
 async def handle_reply(message: Message):
     reply_message = await get_reply_message(message)
     log_event("Reply   >", reply_message)
-    await handle_zigzag_galpost(reply_message)
+    await handle_reply_message(reply_message)
 
 
 async def handle_misnumbered_in_gallery(message: Message, analysis: Analysis):
