@@ -1,7 +1,7 @@
 import asyncio
 
 import discord
-from discord import Message, Thread, HTTPException, PartialEmoji, DMChannel
+from discord import Message, Thread, HTTPException, PartialEmoji, DMChannel, TextChannel
 from analysis import Analysis
 from analyzer import send_full_analysis, generate_analysis, send_analysis
 from bot.opt_out_options import is_opted_out_user
@@ -87,18 +87,8 @@ async def handle_reply_message(message: Message, auto_spritework: bool = False):
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, analysis_type)
         try:
-            new_user_in_spritework = (user_is_potential_spriter(message.author)
-                                      and analysis_type.is_automatic_spritework_analysis())
-            if analysis.is_ai and new_user_in_spritework:
-                await channel.send(content=SPRITE_MANAGER_PING, embed=analysis.embed)
-                return
-            elif analysis.might_be_ai and new_user_in_spritework:
-                await channel.send(content="Thanks for posting to spritework!\n"
-                                           "As a general reminder to new users, sprites here are meant to be made by "
-                                           "the users who submit them, without the use of AI at any stage.\n"
-                                           "Welcome to the community!")
-                await asyncio.sleep(5)
-            await send_full_analysis(analysis, message.channel, message.author)
+            await notify_if_ai(analysis, message, analysis_type, channel)
+            await send_full_analysis(analysis, channel, message.author)
         except discord.Forbidden:
             await ctx().doodledoo.debug.send(f"Missing permissions in {channel.name}: {channel.jump_url}")
 
@@ -235,3 +225,18 @@ async def fetch_thread_message(thread: Thread) -> Message|None:
         return None
 
     return caught_message
+
+
+async def notify_if_ai(analysis: Analysis, message: Message, analysis_type: AnalysisType,
+                       channel: TextChannel | Thread | DMChannel):
+    new_user_in_spritework = (user_is_potential_spriter(message.author)
+                              and analysis_type.is_automatic_spritework_analysis())
+    if analysis.ai_suspicion >= 5 and new_user_in_spritework:
+        await channel.send(content=SPRITE_MANAGER_PING, embed=analysis.embed)
+        return
+    if analysis.ai_suspicion >= 10 and new_user_in_spritework:
+        await channel.send(content="Thanks for posting to spritework!\n"
+                                   "As a general reminder to new users, sprites here are meant to be made by "
+                                   "the users who submit them, without the use of AI at any stage.\n"
+                                   "Welcome to the community!")
+        await asyncio.sleep(5)
