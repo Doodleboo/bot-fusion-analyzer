@@ -16,7 +16,7 @@ from spritework_checker import get_spritework_thread_times
 
 ERROR_EMOJI_NAME = "NANI"
 ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
-SPRITE_MANAGER_PING = "<@&900867033175040101> Potential AI Sprite"
+SPRITE_MANAGER_PING = "<@&900867033175040101>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
 
@@ -231,10 +231,9 @@ async def notify_if_ai(analysis: Analysis, message: Message, analysis_type: Anal
                        channel: TextChannel | Thread | DMChannel):
     new_user_in_spritework = (user_is_potential_spriter(message.author)
                               and analysis_type.is_automatic_spritework_analysis())
-    if analysis.ai_suspicion >= 5 and new_user_in_spritework:
-        await channel.send(content=SPRITE_MANAGER_PING, embed=analysis.embed)
-        return
     if analysis.ai_suspicion >= 10 and new_user_in_spritework:
+        await channel.send(content=SPRITE_MANAGER_PING)
+    if analysis.ai_suspicion >= 5 and new_user_in_spritework:
         await channel.send(content="Thanks for posting to spritework!\n"
                                    "As a general reminder to new users, sprites here are meant to be made by "
                                    "the users who submit them, without the use of AI at any stage.\n"
