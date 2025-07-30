@@ -3,7 +3,7 @@ import requests
 from PIL import UnidentifiedImageError
 from PIL.Image import open as image_open
 from colormath.color_objects import sRGBColor
-from discord import Interaction
+from discord import Interaction, DMChannel
 from discord.embeds import Embed
 
 import analysis_sprite
@@ -101,7 +101,7 @@ def get_rgb_pair(color_pair: frozenset[tuple]) -> tuple[str, str]:
     return first_color.get_rgb_hex(), second_color.get_rgb_hex()
 
 
-def format_list(pair_list: [[str, str]]):
+def format_list(pair_list: list[tuple[str, str]]):
     formatted_list = ""
     for pair in pair_list:
         temp_str = "- **" + pair[0] + "** and **" + pair[1] + "**\n"
@@ -121,11 +121,14 @@ def log_command(interaction: Interaction, command: str):
 
 def get_channel_name_from_interaction(interaction: Interaction):
     try:
-        channel_name = interaction.channel.name  # type: ignore
+        channel = interaction.channel
+        if isinstance(channel, DMChannel):
+            return "DIRECT MESSAGE"
+        channel_name = channel.name  # type: ignore
         if not isinstance(channel_name, str):
-            channel_name = "INVALID"
+            return "INVALID"
     except SystemExit:
         raise
     except BaseException:
-        channel_name = "INVALID"
+        channel_name = "UNKNOWN"
     return channel_name

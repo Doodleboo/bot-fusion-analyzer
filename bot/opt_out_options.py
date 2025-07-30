@@ -2,7 +2,7 @@ import json
 import os
 
 import discord
-from discord import Member, ButtonStyle, Interaction, User, Message
+from discord import Member, ButtonStyle, Interaction, User, Message, HTTPException, Forbidden, NotFound
 from discord.ui import View, Button
 
 from bot.utils import fancy_print
@@ -19,14 +19,15 @@ class HideAutoAnalysis(View):
         super().__init__(timeout=600)   # After 10 mins it won't show the remove/opt out buttons anymore
 
     @discord.ui.button(label="Hide analysis", style=ButtonStyle.secondary)
-    async def discard_tutorial_prompt(self, interaction: Interaction, button: Button):
+    async def hide_auto_analysis(self, interaction: Interaction, button: Button):
         if interaction.user.id == self.original_caller.id:
             await interaction.message.delete()
+            self.stop()
         else:
             await different_user_response(interaction, self.original_caller)
 
     @discord.ui.button(label="Opt out", style=ButtonStyle.secondary)
-    async def engage_tutorial_mode(self, interaction: Interaction, button: Button):
+    async def auto_analysis_opt_out(self, interaction: Interaction, button: Button):
         if interaction.user.id == self.original_caller.id:
             await interaction.message.edit(view=None)
             opt_out_view = OptOutConfirmation(self.original_caller)
@@ -42,8 +43,15 @@ class HideAutoAnalysis(View):
             return
         if not self.message.embeds:
             return
-        embed = self.message.embeds[0]
-        await self.message.edit(embed=embed, view=None, attachments=[])
+        try:
+            await self.message.edit(view=None)
+        except (HTTPException, Forbidden, NotFound, TypeError) as error:
+            error_log = f"Exception {error} while trying to timeout auto analysis"
+            if self.message.thread:
+                error_log = error_log + f" in {self.message.thread.name}"
+            elif self.message.channel:
+                error_log = error_log + f" in {self.message.channel.name}"
+            print(error_log)
         self.stop()
 
 

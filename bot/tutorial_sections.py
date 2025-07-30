@@ -1,5 +1,3 @@
-from discord import File
-
 class TutorialSection:
     title: str
     description: str
@@ -19,8 +17,8 @@ filename = TutorialSection(
     content="With fusion sprites, your filename should be 2 numbers, with a dot in between.\n"
             "For instance: **102.463.png** (most likely, your program will add the png part on its own)\n"
             "The numbers represent the pokedex numbers of the pokemon in your fusion. "
-            "**Warning:** Infinite Fusion uses different pokedex numbers, so don't take them from the main games!"
-            "Instead, use the **dex command** to know the filenames. For example, write: `dex Ludicolo/Probopass`"
+            "**Warning:** Infinite Fusion uses different pokedex numbers, so don't take them from the main games! "
+            "Instead, use the **dex command** to know the filenames. For example, write: `dex Ludicolo/Probopass` "
             "in a message, and you will trigger the command.\n"
             "For triple fusions, it'd be 3 numbers, and for custom bases, only one.\n"
             "**For more info:** https://discord.com/channels/302153478556352513/873571372981452830/909609434316177419",
@@ -44,7 +42,7 @@ similarity = TutorialSection(
             "It's grabbing the colors you used on your sprite, and comparing them against eachother. This is to ensure "
             "that your colors are distinct enough.\nIf it's for a fusion, try to keep your similarity to 7 or below. "
             "Anything over 10 most of the time means that you have some unaccounted colors in there that are *almost "
-            "identical* to others you used, yet not quite the same shade.\nWrite ?tag analyser for a link to a website"
+            "identical* to others you used, yet not quite the same shade.\nWrite ?tag analyser for a link to a website "
             "that will show you which color pairs are the most similar, so that you can convert them into a single "
             "color.\nYou can use the /similar command to check the color pairs too!"
 )
@@ -83,13 +81,37 @@ half_pixels = TutorialSection(
     image="half_pixels.png"
 )
 
+transparency = TutorialSection(
+    title="Semi transparent pixels",
+    description="What is semi transparency and how can it be avoided?",
+    content="If you see **semi transparent pixels** in the analysis, an additional embed will appear. They are "
+            "highlighted in pink against the silhouette of your sprite. This kind of pixel is neither fully opaque "
+            "or fully transparent, and may be caused by how certain programs upscale images. Another cause can be "
+            "tools that are not at full transparency (such as a brush tool instead of using a pixel art pencil).\n"
+            "Using semi transparent pixels *is* allowed if it's done intentionally though, such as for stuff like "
+            "water bubbles or insect wings. The warning is there so that people are aware the sprite has them "
+            "in case they're not intentional."
+)
+
+how_to_use = TutorialSection(
+    title="How to use Fusion Bot",
+    description="How can I make Fusion Bot analyze my sprite again?",
+    content="If your sprite had some issues when you first posted it to spritework, don't worry! The spritework "
+            "thread is where you can get feedback and improve on it to fix issues. If you want to check if the ones "
+            "the bot detects have been fixed, **reply to your new image while pinging (using @) the Fusion Bot!**\n"
+            "If you want to see how your sprite would look in the game (for instance, to check that it's correctly "
+            "placed in the canvas) you can reply to the image writing `!battle` in your message."
+)
+
 
 sections = {
+    "how_to_use": how_to_use,
     "filename" : filename,
     "colors" : colors,
     "similarity" : similarity,
     "half_pixels": half_pixels,
     "size": size,
+    "transparency": transparency,
     "grid": grid
 }
 

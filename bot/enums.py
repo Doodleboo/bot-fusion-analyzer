@@ -8,8 +8,9 @@ class Description(str, Enum):
     missing_file_name   = "Missing file name"
     different_fusion_id = "Different ID"
     colour_excess       = "Color excess"
-    transparency_amount = "Transparency"
-    half_pixels_amount  = "Half-pixels"
+    semi_transparent    = "Semi transparent pixels"
+    intentional_transp  = "Intentional transparency"
+    half_pixels         = "Half pixels detected"
     colour_amount       = "Colors"
     file_name           = "Filename"
     invalid_fusion_id   = "Invalid fusion ID"
@@ -43,6 +44,7 @@ class DiscordColour(Enum):
     gray    = discord.Colour(0xcdcdcd)
     pink    = discord.Colour(0xff00ff)
 
+
 class AnalysisType(Enum):
     sprite_gallery  = auto()
     assets_gallery  = auto()
@@ -72,6 +74,22 @@ class AnalysisType(Enum):
 
 class IdType(Enum):
     fusion      = auto()
-    base_or_egg = auto()
+    custom_base = auto()
+    egg         = auto()
     triple      = auto()
     unknown     = auto()
+
+    def is_fusion(self):
+        return self == IdType.fusion
+
+    def is_custom_base(self):
+        return self == IdType.custom_base
+
+    def is_egg(self):
+        return self == IdType.egg
+
+    def is_triple_fusion(self):
+        return self == IdType.triple
+
+    def is_unknown(self):
+        return self == IdType.unknown

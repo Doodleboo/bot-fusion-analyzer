@@ -1,9 +1,9 @@
 import asyncio
 
 import discord
-from discord import Message, Thread, HTTPException, PartialEmoji, Member, User
+from discord import Message, Thread, HTTPException, PartialEmoji, DMChannel, TextChannel
 from analysis import Analysis
-from analyzer import send_full_analysis, generate_analysis
+from analyzer import send_full_analysis, generate_analysis, send_analysis
 from bot.opt_out_options import is_opted_out_user
 from bot.tutorial_mode import send_tutorial_mode_prompt, user_is_potential_spriter
 from bot.utils import fancy_print
@@ -16,6 +16,7 @@ from spritework_checker import get_spritework_thread_times
 
 ERROR_EMOJI_NAME = "NANI"
 ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
+SPRITE_MANAGER_PING = "<@&900867033175040101>"
 ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 MAX_SEVERITY = [Severity.refused, Severity.controversial]
 
@@ -74,7 +75,7 @@ async def handle_zigzag_galpost(message: Message):
         zigzagoon_message = "This Zigzag galpost seems to have issues. If this is incorrect, contact Doodledoo."
         await ctx().pif.zigzagoon.send(embed=analysis.embed, content=zigzagoon_message)
     else:
-        await ctx().pif.logs.send(embed=analysis.embed)
+        await send_analysis(analysis, ctx().pif.logs)
 
 
 async def handle_reply_message(message: Message, auto_spritework: bool = False):
@@ -86,7 +87,8 @@ async def handle_reply_message(message: Message, auto_spritework: bool = False):
     for specific_attachment in message.attachments:
         analysis = generate_analysis(message, specific_attachment, analysis_type)
         try:
-            await send_full_analysis(analysis, message.channel, message.author)
+            await notify_if_ai(analysis, message, analysis_type, channel)
+            await send_full_analysis(analysis, channel, message.author)
         except discord.Forbidden:
             await ctx().doodledoo.debug.send(f"Missing permissions in {channel.name}: {channel.jump_url}")
 
@@ -128,7 +130,7 @@ async def handle_spritework_post(thread: Thread):
     log_event("SprWork >", spritework_message)
     await handle_reply_message(message=spritework_message, auto_spritework=True)
 
-    if await user_is_potential_spriter(author):
+    if user_is_potential_spriter(author):
         await asyncio.sleep(1)
         await send_tutorial_mode_prompt(author, thread)
 
@@ -178,15 +180,18 @@ def _log_message(decorator: str, message: Message):
     fancy_print(decorator, message.author.name, channel_name, first_line)
 
 
-def get_channel_name_from_message(message: Message):
+def get_channel_name_from_message(message: Message) -> str:
     try:
-        channel_name = message.channel.name  # type: ignore
+        channel = message.channel
+        if isinstance(channel, DMChannel):
+            return "DIRECT MESSAGE"
+        channel_name = channel.name  # type: ignore
         if not isinstance(channel_name, str):
-            channel_name = "INVALID"
+            return "INVALID"
     except SystemExit:
         raise
     except BaseException:
-        channel_name = "INVALID"
+        channel_name = "UNKNOWN"
     return channel_name
 
 
@@ -202,7 +207,7 @@ async def get_reply_message(message: Message):
 
 
 async def fetch_thread_message(thread: Thread) -> Message|None:
-    await asyncio.sleep(10)     # If it's too soon after thread creation, Discord returns errors
+    await asyncio.sleep(5)     # If it's too soon after thread creation, Discord returns errors
     try:
         caught_message = await thread.fetch_message(thread.id)
     except discord.errors.NotFound:
@@ -210,7 +215,7 @@ async def fetch_thread_message(thread: Thread) -> Message|None:
         try:
             caught_message = await thread.fetch_message(last_message_id)
         except discord.errors.NotFound:
-            await ctx().doodledoo.debug.send("Discord returned Not Found twice")
+            await ctx().doodledoo.debug.send(f"Could not fetch messages from thread {thread.name}: {thread.jump_url}")
             return None
     except discord.errors.Forbidden:
         await ctx().doodledoo.debug.send("Discord returned Forbidden while fetching thread message")
@@ -220,3 +225,17 @@ async def fetch_thread_message(thread: Thread) -> Message|None:
         return None
 
     return caught_message
+
+
+async def notify_if_ai(analysis: Analysis, message: Message, analysis_type: AnalysisType,
+                       channel: TextChannel | Thread | DMChannel):
+    new_user_in_spritework = (user_is_potential_spriter(message.author)
+                              and analysis_type.is_automatic_spritework_analysis())
+    if analysis.ai_suspicion >= 10 and new_user_in_spritework:
+        await channel.send(content=SPRITE_MANAGER_PING)
+    if analysis.ai_suspicion >= 5 and new_user_in_spritework:
+        await channel.send(content="Thanks for posting to spritework!\n"
+                                   "As a general reminder to new users, sprites here are meant to be made by "
+                                   "the users who submit them, without the use of AI at any stage.\n"
+                                   "Welcome to the community!")
+        await asyncio.sleep(5)

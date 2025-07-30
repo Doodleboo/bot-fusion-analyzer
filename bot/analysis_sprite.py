@@ -1,13 +1,14 @@
 import requests
 from analysis import Analysis
+from utils import is_intentional_transparency
 from enums import Severity
 from exceptions import TransparencyException
 from issues import (AsepriteUser, ColorAmount, ColorExcessControversial,
                     ColorExcessRefused, ColorOverExcess, GraphicsGaleUser,
-                    HalfPixelsAmount, InvalidSize, MissingTransparency,
-                    SimilarityAmount, TransparencyAmount, CustomBase,
+                    HalfPixels, InvalidSize, MissingTransparency,
+                    SimilarityAmount, SemiTransparency, CustomBase,
                     SimilarityExcessControversial, SimilarityExcessRefused,
-                    MisplacedGrid, EggSprite, NotPng)
+                    MisplacedGrid, EggSprite, NotPng, IntentionalTransparency)
 
 # Pillow
 from PIL.Image import open as image_open
@@ -118,18 +119,20 @@ class SpriteContext():
             analysis.size_issue = True
             analysis.severity = Severity.refused
             analysis.issues.add(InvalidSize(image_size))
+            if image_size == (1024, 1024):
+                analysis.ai_suspicion += 8
 
     def handle_sprite_colors(self, analysis: Analysis):
         all_colors = self.image.getcolors(ALL_COLOR_LIMIT)
         if is_color_excess(all_colors):
             analysis.severity = Severity.refused
             analysis.issues.add(ColorOverExcess(ALL_COLOR_LIMIT))
+            analysis.ai_suspicion += 6
         else:
             self.handle_color_count(analysis, all_colors)
             self.handle_color_limit(analysis)
-            if not analysis.issues.has_issue(MissingTransparency):
-                self.handle_color_similarity(
-                    analysis)  # It would return 0 sim if the colors don't have alpha channel anyway
+            if self.useful_amount <= self.refused_color_lim:
+                self.handle_color_similarity(analysis)
             self.handle_aseprite(analysis)
             self.handle_graphics_gale(analysis)
 
@@ -140,6 +143,7 @@ class SpriteContext():
         except TransparencyException:
             analysis.severity = Severity.refused
             analysis.issues.add(MissingTransparency())
+            analysis.ai_suspicion += 4
 
     def handle_color_amount(self, analysis: Analysis, all_colors):
         all_amount = len(all_colors)
@@ -178,17 +182,26 @@ class SpriteContext():
             analysis.issues.add(GraphicsGaleUser())
 
     def handle_sprite_transparency(self, analysis: Analysis):
+        if analysis.size_issue:
+            return
+
         try:
-            if analysis.size_issue is False:
-                transparency_amount, image = self.highlight_transparency()
-                if transparency_amount > 0:
-                    analysis.transparency_issue = True
-                    analysis.transparency_image = image
-                    if analysis.severity is not Severity.refused:
-                        analysis.severity = Severity.controversial
-                    analysis.issues.add(TransparencyAmount(transparency_amount))
+            transparency_amount, image = self.highlight_transparency()
         except TransparencyException:
-            pass
+            return
+
+        if transparency_amount == 0:
+            return
+
+        if is_intentional_transparency(analysis.message):
+            analysis.issues.add(IntentionalTransparency())
+            return
+        analysis.transparency_issue = True
+        analysis.transparency_image = image
+        if analysis.severity is not Severity.refused:
+            analysis.severity = Severity.controversial
+        analysis.issues.add(SemiTransparency())
+
 
     def get_similarity_amount(self):
         try:
@@ -215,7 +228,7 @@ class SpriteContext():
             analysis.half_pixels_issue = True
             analysis.half_pixels_image = image
             analysis.severity = Severity.refused
-            analysis.issues.add(HalfPixelsAmount(half_pixels_amount))
+            analysis.issues.add(HalfPixels())
         else:
             analysis.issues.add(MisplacedGrid())
 
@@ -279,7 +292,7 @@ def get_similar_color_dict(rgb_color_list):
 
 
 def sort_color_dict(some_dict: dict):
-    return {k: v for k, v in sorted(some_dict.items(), key=sort_element)}
+    return dict(sorted(some_dict.items(), key=sort_element))
 
 
 def sort_element(x):
@@ -353,8 +366,8 @@ def find_first_pixel(pixels: PyAccess, max_size: int):
     for i in range(0, max_size):
         for j in range(0, max_size):
             if default_value != pixels[i, j]:
-                return (i % 3, j % 3)
-    return (0, 0)
+                return i % 3, j % 3
+    return 0, 0
 
 
 def get_color_set(i: int, j: int, pixels: PyAccess, step: int):
@@ -413,14 +426,6 @@ def get_color_delta(rgb_a: tuple, rgb_b: tuple):
     cmc = delta_e_cmc(color_lab_a, color_lab_b)
     max_difference = get_max_difference(rgb_a, rgb_b)
     return [int(cie2000), int(cmc), max_difference]
-
-
-def detect_egg_size_early(analysis: Analysis) -> bool:
-    raw_data = requests.get(analysis.attachment_url, stream=True, timeout=TIMEOUT).raw
-    image = image_open(raw_data)
-    if not image:
-        return False
-    return image.size == (EGG_SIZE, EGG_SIZE)
 
 
 def main(analysis: Analysis):
