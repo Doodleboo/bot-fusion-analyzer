@@ -9,7 +9,7 @@ class Description(str, Enum):
     different_fusion_id = "Different ID"
     colour_excess       = "Color excess"
     semi_transparent    = "Semi transparent pixels"
-    intended_trans      = "Intended transparency"
+    intentional_transp  = "Intentional transparency"
     half_pixels         = "Half pixels detected"
     colour_amount       = "Colors"
     file_name           = "Filename"

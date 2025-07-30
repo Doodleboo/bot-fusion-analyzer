@@ -177,11 +177,11 @@ def id_to_name_map():  # Thanks Greystorm for the util and file
         return {element["id"]: element["display_name"] for element in data["pokemon"]}
 
 
-def is_intended_transparency(message: Message) -> bool:
+def is_intentional_transparency(message: Message) -> bool:
     content = message.content
     if not content:
         return False
-    result = re.search(r'[Ii]ntended [Tt]ransparency', content)
+    result = re.search(r'(?i)\b(intentional|intended)\s+transparency\b', content)
     return result is not None
 
 

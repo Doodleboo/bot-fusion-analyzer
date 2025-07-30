@@ -238,8 +238,8 @@ class SemiTransparency(Issue):
     severity = Severity.controversial
 
 
-class IntendedTransparency(Issue):
-    description = Description.intended_trans
+class IntentionalTransparency(Issue):
+    description = Description.intentional_transp
     severity = Severity.accepted
 
 
