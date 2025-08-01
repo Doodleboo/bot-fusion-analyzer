@@ -232,7 +232,8 @@ async def notify_if_ai(analysis: Analysis, message: Message, analysis_type: Anal
     new_user_in_spritework = (user_is_potential_spriter(message.author)
                               and analysis_type.is_automatic_spritework_analysis())
     if analysis.ai_suspicion >= 10 and new_user_in_spritework:
-        await channel.send(content=SPRITE_MANAGER_PING)
+        warn_message = f"{SPRITE_MANAGER_PING} Potential AI sprite: {message.jump_url}"
+        await ctx().pif.bot_chat.send(content=warn_message)
     if analysis.ai_suspicion >= 5 and new_user_in_spritework:
         await channel.send(content="Thanks for posting to spritework!\n"
                                    "As a general reminder to new users, sprites here are meant to be made by "

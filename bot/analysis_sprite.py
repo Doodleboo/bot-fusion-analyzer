@@ -115,12 +115,16 @@ class SpriteContext():
 
     def handle_sprite_size(self, analysis: Analysis):
         image_size = self.image.size
-        if image_size != self.valid_size:
-            analysis.size_issue = True
-            analysis.severity = Severity.refused
-            analysis.issues.add(InvalidSize(image_size))
-            if image_size == (1024, 1024):
-                analysis.ai_suspicion += 8
+        if image_size == self.valid_size:
+            return
+
+        analysis.size_issue = True
+        analysis.severity = Severity.refused
+        analysis.issues.add(InvalidSize(image_size))
+        if image_size == (1024, 1024):
+            analysis.ai_suspicion += 8
+        elif image_size == (96, 96):
+            analysis.ai_suspicion -= 2
 
     def handle_sprite_colors(self, analysis: Analysis):
         all_colors = self.image.getcolors(ALL_COLOR_LIMIT)
