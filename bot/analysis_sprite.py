@@ -116,6 +116,7 @@ class SpriteContext():
     def handle_sprite_size(self, analysis: Analysis):
         image_size = self.image.size
         if image_size == self.valid_size:
+            analysis.ai_suspicion -= 4
             return
 
         analysis.size_issue = True
@@ -139,6 +140,7 @@ class SpriteContext():
                 self.handle_color_similarity(analysis)
             self.handle_aseprite(analysis)
             self.handle_graphics_gale(analysis)
+            analysis.ai_suspicion -= 2
 
     def handle_color_count(self, analysis: Analysis, all_colors: list):
         try:
@@ -218,7 +220,7 @@ class SpriteContext():
         return similarity_amount
 
     def handle_sprite_half_pixels(self, analysis: Analysis):
-        if analysis.size_issue is True:
+        if analysis.size_issue:
             return
 
         half_pixels_amount, image = self.highlight_half_pixels(strict_grid=True)

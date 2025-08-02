@@ -164,7 +164,7 @@ class Analysis:
             filename = self.get_filename()
             fusion_id, id_type = utils.get_fusion_id_from_filename(filename)
             if utils.is_chat_gpt_in_filename(filename):
-                self.ai_suspicion = 10
+                self.ai_suspicion += 20
             elif id_type.is_unknown():
                 self.ai_suspicion += 4
         return fusion_id, id_type
