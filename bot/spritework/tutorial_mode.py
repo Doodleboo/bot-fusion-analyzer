@@ -2,10 +2,10 @@ import os
 from typing import Any
 
 import discord
+from discord import ButtonStyle, Interaction
 from discord import (Member, User, Thread, TextChannel, DMChannel, SelectOption,
                      File, Message, HTTPException, Forbidden, NotFound)
 from discord.ui import View, Button, Select, Item
-from discord import ButtonStyle, Interaction
 
 from bot.context.setup import ctx
 from bot.misc.utils import fancy_print

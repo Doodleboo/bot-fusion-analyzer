@@ -8,8 +8,8 @@ from discord.embeds import Embed
 from discord.file import File
 from discord.message import Attachment, Message
 
-from bot.core.filename_analysis import get_filename_from_zigzag_image_url, get_fusion_filename, FusionFilename
 import bot.misc.utils as utils
+from bot.core.filename_analysis import get_filename_from_zigzag_image_url, get_fusion_filename, FusionFilename
 from bot.misc.enums import DiscordColour, Severity, AnalysisType, IdType
 from .issues import Issues, PokemonNames, Issue
 

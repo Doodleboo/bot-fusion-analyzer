@@ -7,8 +7,8 @@ from discord import Interaction, DMChannel
 from discord.embeds import Embed
 
 from bot.core import sprite_analysis
-from bot.spritework.tutorial_mode import PromptButtonsView
 from bot.misc.utils import fancy_print
+from bot.spritework.tutorial_mode import PromptButtonsView
 
 HELP_RESPONSE = ("Do you need help using the Fusion Bot to analyze sprites?\n"
             "You can use it by **mentioning the bot** (using @) **while replying to a sprite**!\n"

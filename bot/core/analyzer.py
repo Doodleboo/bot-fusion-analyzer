@@ -1,8 +1,8 @@
-from discord.message import Message, Attachment
 from discord import User, TextChannel, Thread, DMChannel
+from discord.message import Message, Attachment
 
-from bot.spritework.opt_out_options import HideAutoAnalysis
 from bot.misc.enums import AnalysisType
+from bot.spritework.opt_out_options import HideAutoAnalysis
 from . import content_analysis, sprite_analysis, gallery_analysis
 from .analysis import Analysis, generate_file_from_image, get_autogen_file
 from ..misc.utils import attachment_not_an_image
