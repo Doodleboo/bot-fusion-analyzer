@@ -38,15 +38,28 @@ def same_id_checks(analysis_list: list[Analysis]):
     if first_filename.id_type.is_unknown():
         unknown_sprite(first_analysis)
         return
-    content_ids = utils.extract_fusion_ids_from_content(first_analysis.message, first_filename.id_type)
-    if not content_ids:
-        first_analysis.add_issue(MissingMessageId())
-        return
-    if first_filename.dex_ids not in content_ids:
-        first_analysis.add_issue(DifferentSprite(first_filename.dex_ids, content_ids[0]))
+    if not correct_content_ids(first_analysis, first_filename):
         return
     for analysis in analysis_list:
         compare_with_first_filename(analysis, first_filename)
+
+
+def correct_content_ids(first_analysis: Analysis, first_filename: FusionFilename) -> bool:
+    content_ids = utils.extract_fusion_ids_from_content(first_analysis.message, first_filename.id_type)
+    if not content_ids:
+        return exact_content_id_found(first_analysis, first_filename.dex_ids)
+    if first_filename.dex_ids not in content_ids:
+        first_analysis.add_issue(DifferentSprite(first_filename.dex_ids, content_ids[0]))
+        return False
+    return True
+
+
+def exact_content_id_found(analysis: Analysis, filename_id: str) -> bool:
+    exact_content_id_result = re.search(filename_id, analysis.message.content)
+    if exact_content_id_result is not None:
+        return True
+    analysis.add_issue(MissingMessageId())
+    return False
 
 
 def unknown_sprite(analysis: Analysis):
