@@ -155,7 +155,7 @@ async def search_in_same_month(analysis: Analysis) -> int:
         gallery_channel = ctx().pif.assets
 
     match_count = 0
-    async for message in gallery_channel.history(after=last_day_of_previous_month()):
+    async for message in gallery_channel.history(after=last_day_of_previous_month(), oldest_first=True):
         match_count += same_fusion_and_author_instances(message, analysis.message, analysis.fusion_filename.dex_ids)
     return match_count
 
@@ -189,6 +189,8 @@ async def ensure_correct_letter(analysis: Analysis, past_instances: int):
     else:
         correct_letter = string.ascii_lowercase[past_instances - 1]
     if correct_letter != analysis.fusion_filename.letter:
+        if analysis.fusion_filename.letter == "a":
+          return
         analysis.add_issue(WrongLetter(correct_letter))
 
 
