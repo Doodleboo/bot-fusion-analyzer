@@ -3,7 +3,7 @@ import asyncio
 import discord
 from discord import Message, Thread, HTTPException, PartialEmoji, DMChannel, TextChannel
 
-from bot.context.message_identifier import is_assets_gallery
+from bot.context.message_identifier import is_assets_gallery, has_correct_assets_gallery_keywords
 from bot.context.message_identifier import is_message_from_ignored_bots, has_ignored_spritework_tags
 from bot.context.setup import ctx
 from bot.core.analysis import Analysis
@@ -31,6 +31,8 @@ async def handle_sprite_gallery(message: Message):
 
 async def handle_assets_gallery(message: Message):
     log_event("Assets  >", message)
+    if not has_correct_assets_gallery_keywords(message):
+        return
     await handle_gallery(message, is_assets=True)
 
 

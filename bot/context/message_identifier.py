@@ -80,3 +80,11 @@ def is_intentional_transparency(message: Message) -> bool:
         return False
     result = re.search(r'(?i)\b(intentional|intended)\s+transparency\b', content)
     return result is not None
+
+
+def has_correct_assets_gallery_keywords(message: Message) -> bool:
+    content = message.content
+    if not content:
+        return False
+    result = re.search(r'(custom base|egg)', content.lower())
+    return result is not None
