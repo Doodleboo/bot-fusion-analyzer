@@ -1395,7 +1395,7 @@
     {
         "id": "233",
         "name": "porygon2",
-        "typos": [],
+        "typos": ["porygon 2"],
         "display_name": "Porygon2"
     },
     {
@@ -1935,7 +1935,7 @@
     {
         "id": "323",
         "name": "prinplup",
-        "typos": [],
+        "typos": ["prinlup"],
         "display_name": "Prinplup"
     },
     {
@@ -3172,13 +3172,13 @@
     {
         "id":"529",
         "name": "electrike",
-        "typos": ["electrice"],
+        "typos": ["electrice", "elektrike"],
         "display_name":"Electrike"
     },
     {
         "id":"530",
         "name": "manectric",
-        "typos": ["manectrik"],
+        "typos": ["manectrik", "manetric", "manektric"],
         "display_name":"Manectric"
     },
     {
@@ -3412,7 +3412,7 @@
     {
         "id":"569",
         "name": "eelektrik",
-        "typos": ["eelektric", "elektrik"],
+        "typos": ["eelektric", "elektrik", "eelectric", "eelectrik"],
         "display_name":"Eelektrik"
     },
     {
