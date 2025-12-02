@@ -69,13 +69,13 @@
     {
         "id": "12",
         "name": "butterfree",
-        "typos": ["buterfree "],
+        "typos": ["buterfree"],
         "display_name": "Butterfree"
     },
     {
         "id": "13",
         "name": "weedle",
-        "typos": ["weedel"],
+        "typos": ["weedel", "wedle"],
         "display_name": "Weedle"
     },
     {
@@ -87,7 +87,7 @@
     {
         "id": "15",
         "name": "beedrill",
-        "typos": [],
+        "typos": ["bedril"],
         "display_name": "Beedrill"
     },
     {
@@ -417,7 +417,7 @@
     {
         "id": "70",
         "name": "weepinbell",
-        "typos": ["weepinbel", "weepingbell"],
+        "typos": ["weepinbel", "weepingbell", "wepinbel", "wepingbel"],
         "display_name": "Weepinbell"
     },
     {
@@ -657,7 +657,7 @@
     {
         "id": "110",
         "name": "weezing",
-        "typos": ["wheezing", "weezin"],
+        "typos": ["wheezing", "weezin", "wezin"],
         "display_name": "Weezing"
     },
     {
@@ -705,7 +705,7 @@
     {
         "id": "118",
         "name": "goldeen",
-        "typos": [],
+        "typos": ["golden"],
         "display_name": "Goldeen"
     },
     {
@@ -915,7 +915,7 @@
     {
         "id": "153",
         "name": "bayleef",
-        "typos": ["bayleaf"],
+        "typos": ["bayleaf", "baylef"],
         "display_name": "Bayleef"
     },
     {
@@ -1077,7 +1077,7 @@
     {
         "id": "180",
         "name": "flaaffy",
-        "typos": ["flaffy","flaafy"],
+        "typos": ["flaffy","flaafy", "flafy"],
         "display_name": "Flaaffy"
     },
     {
@@ -1125,13 +1125,13 @@
     {
         "id": "188",
         "name": "skiploom",
-        "typos": [],
+        "typos": ["skiplume"],
         "display_name": "Skiploom"
     },
     {
         "id": "189",
         "name": "jumpluff",
-        "typos": [],
+        "typos": ["jumpluf"],
         "display_name": "Jumpluff"
     },
     {
@@ -1215,7 +1215,7 @@
     {
         "id": "203",
         "name": "girafarig",
-        "typos": ["giraffarig"],
+        "typos": ["giraffarig", "girafarif"],
         "display_name": "Girafarig"
     },
     {
@@ -1245,7 +1245,7 @@
     {
         "id": "208",
         "name": "steelix",
-        "typos": [],
+        "typos": ["stelix"],
         "display_name": "Steelix"
     },
     {
@@ -1425,7 +1425,7 @@
     {
         "id": "238",
         "name": "smoochum",
-        "typos": [],
+        "typos": ["smochum"],
         "display_name": "Smoochum"
     },
     {
@@ -1497,7 +1497,7 @@
     {
         "id": "250",
         "name": "hooh",
-        "typos": [],
+        "typos": ["ho oh", "hooh"],
         "display_name": "Ho-oh"
     },
     {
@@ -1599,7 +1599,7 @@
     {
         "id": "267",
         "name": "electivire",
-        "typos": [],
+        "typos": ["electrivire", "elektivire"],
         "display_name": "Electivire"
     },
     {
@@ -1641,7 +1641,7 @@
     {
         "id": "274",
         "name": "mamoswine",
-        "typos": [],
+        "typos": ["mammoswine"],
         "display_name": "Mamoswine"
     },
     {
@@ -1653,13 +1653,13 @@
     {
         "id": "276",
         "name": "treecko",
-        "typos": [],
+        "typos": ["treeko", "trecko"],
         "display_name": "Treecko"
     },
     {
         "id": "277",
         "name": "grovyle",
-        "typos": [],
+        "typos": ["grovile"],
         "display_name": "Grovyle"
     },
     {
@@ -1761,7 +1761,7 @@
     {
         "id": "294",
         "name": "bidoof",
-        "typos": [],
+        "typos": ["bidof"],
         "display_name": "Bidoof"
     },
     {
@@ -1803,7 +1803,7 @@
     {
         "id": "301",
         "name": "lileep",
-        "typos": [],
+        "typos": ["lilep"],
         "display_name": "Lileep"
     },
     {
@@ -1929,7 +1929,7 @@
     {
         "id": "322",
         "name": "piplup",
-        "typos": [],
+        "typos": ["pinplup"],
         "display_name": "Piplup"
     },
     {
@@ -1947,13 +1947,13 @@
     {
         "id": "325",
         "name": "nosepass",
-        "typos": [],
+        "typos": ["nosepas"],
         "display_name": "Nosepass"
     },
     {
         "id": "326",
         "name": "probopass",
-        "typos": [],
+        "typos": ["probopas"],
         "display_name": "Probopass"
     },
     {
@@ -1965,7 +1965,7 @@
     {
         "id": "328",
         "name": "doublade",
-        "typos": [],
+        "typos": ["doblade"],
         "display_name": "Doublade"
     },
     {
@@ -1977,7 +1977,7 @@
     {
         "id": "330",
         "name": "pawniard",
-        "typos": ["painward"],
+        "typos": ["painward", "painiard"],
         "display_name": "Pawniard"
     },
     {
@@ -2019,7 +2019,7 @@
     {
         "id": "337",
         "name": "klinklang",
-        "typos": ["klingklang"],
+        "typos": ["klingklang", "klinklank"],
         "display_name": "Klinklang"
     },
     {
@@ -2037,7 +2037,7 @@
     {
         "id": "340",
         "name": "kyogre",
-        "typos": [],
+        "typos": ["kyoger"],
         "display_name": "Kyogre"
     },
     {
@@ -2049,7 +2049,7 @@
     {
         "id": "342",
         "name": "rayquaza",
-        "typos": [],
+        "typos": ["rayquasar"],
         "display_name": "Rayquaza"
     },
     {
@@ -2127,7 +2127,7 @@
     {
         "id": "355",
         "name": "breloom",
-        "typos": ["breloon"],
+        "typos": ["breloon", "bellom", "brelloom", "brelom"],
         "display_name": "Breloom"
     },
     {
@@ -2151,7 +2151,7 @@
     {
         "id": "359",
         "name": "reuniclus",
-        "typos": ["runiclus", "reunclus"],
+        "typos": ["runiclus", "reunclus", "runeiclus"],
         "display_name": "Reuniclus"
     },
     {
@@ -2163,7 +2163,7 @@
     {
         "id": "361",
         "name": "krookodile",
-        "typos": ["krookadile"],
+        "typos": ["krookadile", "krokodile", "kroocodile"],
         "display_name": "Krookodile"
     },
     {
@@ -2361,7 +2361,7 @@
     {
         "id": "394",
         "name": "feebas",
-        "typos": ["feebass"],
+        "typos": ["feebass","febas"],
         "display_name": "Feebas"
     },
     {
@@ -2421,7 +2421,7 @@
     {
         "id": "404",
         "name": "shroomish",
-        "typos": [],
+        "typos": ["shroomis"],
         "display_name": "Shroomish"
     },
     {
@@ -2475,7 +2475,7 @@
     {
         "id": "413",
         "name": "ferroseed",
-        "typos": [],
+        "typos": ["feroseed", "ferrosed"],
         "display_name": "Ferroseed"
     },
     {
@@ -2661,7 +2661,7 @@
     {
         "id": "444",
         "name": "goomy",
-        "typos": ["gomy"],
+        "typos": ["gomy", "goomi"],
         "display_name": "Goomy"
     },
     {
@@ -2679,19 +2679,19 @@
     {
         "id": "447",
         "name": "regirock",
-        "typos": [],
+        "typos": ["regi rock"],
         "display_name": "Regirock"
     },
     {
         "id": "448",
         "name": "regice",
-        "typos": ["regiice"],
+        "typos": ["regiice", "regi ice"],
         "display_name": "Regice"
     },
     {
         "id": "449",
         "name": "registeel",
-        "typos": ["registel"],
+        "typos": ["registel", "regi steel"],
         "display_name": "Registeel"
     },
     {
@@ -2715,7 +2715,7 @@
     {
         "id": "453",
         "name": "dhelmise",
-        "typos": ["delmise"],
+        "typos": ["delmise", "dehlmise"],
         "display_name": "Dhelmise"
     },
     {
@@ -2793,7 +2793,7 @@
     {
         "id": "466",
         "name": "meloettaaria",
-        "typos": ["meloetta a", "meloette a", "maloeta a"],
+        "typos": ["meloetta a", "meloette a", "maloeta a", "aria"],
         "display_name": "Meloetta Aria"
     },
     {
@@ -2823,13 +2823,13 @@
     {
         "id": "471",
         "name": "jangmoo",
-        "typos": ["jangmo", "jagmo"],
+        "typos": ["jangmo", "jagmo", "janmo"],
         "display_name": "Jangmo-o"
     },
     {
         "id": "472",
         "name": "hakamoo",
-        "typos": ["hakamoo", "hakmoo", "hakamo"],
+        "typos": ["hakamoo", "hakmoo", "hakamo", "hakomo"],
         "display_name": "Hakamo-o"
     },
     {
@@ -2847,7 +2847,7 @@
     {
         "id": "475",
         "name": "golisopod",
-        "typos": ["golissopod"],
+        "typos": ["golissopod", "golispod"],
         "display_name": "Golisopod"
     },
     {
@@ -2883,7 +2883,7 @@
     {
         "id": "481",
         "name": "chesnaught",
-        "typos": ["chestnut"],
+        "typos": ["chestnut", "chesnaut"],
         "display_name": "Chesnaught"
     },
     {
@@ -3304,7 +3304,7 @@
     {
         "id":"551",
         "name": "claydol",
-        "typos": [],
+        "typos": ["clydol"],
         "display_name":"Claydol"
     },
     {
@@ -3388,13 +3388,13 @@
     {
         "id":"565",
         "name": "relicanth",
-        "typos": [],
+        "typos": ["relicant", "reliant"],
         "display_name":"Relicanth"
     },
     {
         "id":"566",
         "name": "woobat",
-        "typos": [],
+        "typos": ["wobat"],
         "display_name":"Woobat"
     },
     {
