@@ -10,7 +10,7 @@ from bot.core.analysis import Analysis
 from bot.core.content_analysis import handle_dex_verification
 from bot.core.filename_analysis import FusionFilename
 from bot.core.issues import MissingMessageId, UnknownSprite, DifferentFilenameIds, DifferentSprite, IncorrectGallery, \
-    FileName, WrongLetter, OutOfDex, PokemonNameNotFound, MissingLetters
+    FileName, OutOfDex, PokemonNameNotFound
 from bot.misc import utils
 
 NAME_MAP: dict[str, str] = utils.id_to_name_map()
@@ -29,6 +29,7 @@ async def main(analysis_list: list[Analysis]):
         return
     pokemon_name_checks(analysis_list)
     await filename_letter_checks(analysis_list)
+    #TODO: Save into gallery cache
 
 
 def same_id_checks(analysis_list: list[Analysis]):
@@ -145,7 +146,7 @@ async def filename_letter_checks(analysis_list: list[Analysis]):
     if len(analysis_list) == 1:
         await ensure_correct_letter(analysis_list[0], past_instances)
     else:
-        ensure_filled_letters(analysis_list, past_instances)
+        await ensure_filled_letters(analysis_list, past_instances)
 
 
 async def search_in_same_month(analysis: Analysis) -> int:
@@ -189,18 +190,18 @@ async def ensure_correct_letter(analysis: Analysis, past_instances: int):
     else:
         correct_letter = string.ascii_lowercase[past_instances - 1]
     if correct_letter != analysis.fusion_filename.letter:
-        if analysis.fusion_filename.letter == "a":
-          return
-        analysis.add_issue(WrongLetter(correct_letter))
+        await ctx().doodledoo.debug.send(f"Potentially wrong letter: ({analysis.message.jump_url})")
+        #analysis.add_issue(WrongLetter(correct_letter))
 
 
-def ensure_filled_letters(analysis_list: list[Analysis], past_instances: int):
+async def ensure_filled_letters(analysis_list: list[Analysis], past_instances: int):
     starting_letter_pos = past_instances
     final_letter_pos = past_instances + len(analysis_list)
     letter_range = get_letter_range(starting_letter_pos, final_letter_pos)
-    new_range = check_letters_are_in_range(analysis_list, letter_range)
+    new_range = await check_letters_are_in_range(analysis_list, letter_range)
     if len(new_range) > 0:
-        analysis_list[0].add_issue(MissingLetters(new_range))
+        await ctx().doodledoo.debug.send(f"Missing letters in {new_range} ({analysis_list[0].message.jump_url})")
+        #analysis_list[0].add_issue(MissingLetters(new_range))
 
 
 def get_letter_range(starting_letter_pos: int, final_letter_pos: int) -> list[str]:
@@ -211,11 +212,12 @@ def get_letter_range(starting_letter_pos: int, final_letter_pos: int) -> list[st
     return letter_range
 
 
-def check_letters_are_in_range(analysis_list: list[Analysis], letter_range: list[str]) -> list[str]:
+async def check_letters_are_in_range(analysis_list: list[Analysis], letter_range: list[str]) -> list[str]:
     for analysis in analysis_list:
         letter = analysis.fusion_filename.letter
         if letter not in letter_range:
-            analysis.add_issue(WrongLetter(f"one of these: {letter_range}"))
+            await ctx().doodledoo.debug.send(f"{letter} not in: {letter_range} ({analysis_list[0].message.jump_url})")
+            #analysis.add_issue(WrongLetter(f"one of these: {letter_range}"))
         else:
             letter_range.remove(letter)
     return letter_range
