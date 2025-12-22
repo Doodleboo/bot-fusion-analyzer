@@ -309,7 +309,7 @@
     {
         "id": "52",
         "name": "meowth",
-        "typos": [],
+        "typos": ["mewoth"],
         "display_name": "Meowth"
     },
     {
@@ -729,7 +729,7 @@
     {
         "id": "122",
         "name": "mrmime",
-        "typos": ["mister mime", "mrmime", "mr mime"],
+        "typos": ["mister mi", "mrmi", "mr mi", "mr. mi"],
         "display_name": "Mr. Mime"
     },
     {
@@ -1203,7 +1203,7 @@
     {
         "id": "201",
         "name": "unown",
-        "typos": ["unknown"],
+        "typos": ["unknow", "unow"],
         "display_name": "Unown"
     },
     {
@@ -1227,7 +1227,7 @@
     {
         "id": "205",
         "name": "forretress",
-        "typos": ["fortress"],
+        "typos": ["fortres", "foretres", "forretres"],
         "display_name": "Forretress"
     },
     {
@@ -1257,7 +1257,7 @@
     {
         "id": "210",
         "name": "granbull",
-        "typos": [],
+        "typos": ["granbul"],
         "display_name": "Granbull"
     },
     {
@@ -1281,7 +1281,7 @@
     {
         "id": "214",
         "name": "heracross",
-        "typos": [],
+        "typos": ["herracros", "heracros"],
         "display_name": "Heracross"
     },
     {
@@ -1311,7 +1311,7 @@
     {
         "id": "219",
         "name": "magcargo",
-        "typos": ["macargo"],
+        "typos": ["macargo", "magargo"],
         "display_name": "Magcargo"
     },
     {
@@ -2577,25 +2577,25 @@
     {
         "id": "430",
         "name": "oricoriobaile",
-        "typos": ["baile", "bailestyle", "oricoriobailestyle"],
+        "typos": ["baile", "baille", "oricorio ba"],
         "display_name": "Oricorio Baile"
     },
     {
         "id": "431",
         "name": "oricoriopompom",
-        "typos": ["pompom", "oricoriopom", "pom", "oricoriopompomstyle", "pompomstyle", "oricoriopomstyle", "pomstyle"],
+        "typos": ["pompom", "oricorio po", "pom-pom", "ponpon", "pon-pon"],
         "display_name": "Oricorio Pom-Pom"
     },
     {
         "id": "432",
         "name": "oricoriopau",
-        "typos": ["pau", "oricoriopaustyle", "paustyle"],
+        "typos": ["pau", "pa'u", "oricorio pa"],
         "display_name": "Oricorio Pa'u"
     },
     {
         "id": "433",
         "name": "oricoriosensu",
-        "typos": ["sensu", "oricoriosensustyle", "sensustyle"],
+        "typos": ["sensu", "oricorio se", "semsu"],
         "display_name": "Oricorio Sensu"
     },
     {
@@ -2859,7 +2859,7 @@
     {
         "id": "477",
         "name": "lurantis",
-        "typos": ["luantis"],
+        "typos": ["luantis", "luran"],
         "display_name": "Lurantis"
     },
     {
@@ -3040,7 +3040,7 @@
     {
         "id":"507",
         "name": "silcoon",
-        "typos": ["silcon"],
+        "typos": ["silcon", "silkoon"],
         "display_name":"Silcoon"
     },
     {
@@ -3112,7 +3112,7 @@
     {
         "id":"519",
         "name": "masquerain",
-        "typos": ["masquerane"],
+        "typos": ["masquer", "maskr"],
         "display_name":"Masquerain"
     },
     {
