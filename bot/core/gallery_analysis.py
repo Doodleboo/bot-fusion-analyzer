@@ -131,7 +131,7 @@ def check_name_in_message(pokemon_id: str, analysis: Analysis):
 def check_typos_in_message(pokemon_id: str, message_content: str) -> bool:
     typos: list[str] = TYPOS_MAP.get(pokemon_id)
     for typo in typos:
-        typo_result = re.search(typo.lower(), message_content)
+        typo_result = re.search(typo, message_content)
         if typo_result is not None:
             return True
     return False

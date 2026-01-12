@@ -8,3 +8,4 @@ tmp/*
 bot/.vscode/settings.json
 /data/spritesheets_autogen/
 /token/
+/data/gallery-cache/

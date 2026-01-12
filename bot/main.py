@@ -4,7 +4,6 @@ import os
 import discord
 from discord import app_commands, Thread
 from discord.message import Message
-from discord.user import User
 
 import command_actions
 from bot.context.message_identifier import (is_zigzag_galpost, is_sprite_gallery, is_mentioning_reply,
@@ -61,12 +60,7 @@ async def on_message(message: Message):
             await handle_direct_ping(message)
 
     except Exception as message_exception:
-        print(" ")
-        print(message)
-        print(" ")
-        await ctx().doodledoo.debug.send(
-            f"ERROR in #{message.channel} ({message.jump_url})")
-        raise RuntimeError from message_exception
+        await handle_error(message_exception, message.channel.name, message.jump_url)
 
 
 @bot.event
@@ -76,15 +70,23 @@ async def on_thread_create(thread: Thread):
             await handle_spriter_application(thread)
         elif is_spritework_post(thread):
             await handle_spritework_post(thread)
+
     except Exception as message_exception:
-        await ctx().doodledoo.debug.send(
-            f"ERROR in #{thread} ({thread.jump_url})")
-        raise RuntimeError from message_exception
+        await handle_error(message_exception, thread.name, thread.jump_url)
 
 
+@bot.event
+async def on_message_delete(message: Message):
+    if is_sprite_gallery(message):
+        pass
+    elif is_assets_gallery(message):
+        pass
 
-def get_user(user_id) -> (User | None):
-    return bot.get_user(user_id)
+
+async def handle_error(message_exception: Exception, channel_name: str, jump_url: str):
+    await ctx().doodledoo.debug.send(
+        f"ERROR in #{channel_name} ({jump_url})")
+    raise RuntimeError from message_exception
 
 
 def get_discord_token():
