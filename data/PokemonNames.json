@@ -351,7 +351,7 @@
     {
         "id": "59",
         "name": "arcanine",
-        "typos": ["arkanine"],
+        "typos": ["arkanine", "arcani"],
         "display_name": "Arcanine"
     },
     {
@@ -765,7 +765,7 @@
     {
         "id": "128",
         "name": "tauros",
-        "typos": [],
+        "typos": ["taur"],
         "display_name": "Tauros"
     },
     {
@@ -1251,7 +1251,7 @@
     {
         "id": "209",
         "name": "snubbull",
-        "typos": ["snubul"],
+        "typos": ["snubul", "snubbul"],
         "display_name": "Snubbull"
     },
     {
@@ -1407,13 +1407,13 @@
     {
         "id": "235",
         "name": "smeargle",
-        "typos": ["smeargel", "smeargal"],
+        "typos": ["smearg"],
         "display_name": "Smeargle"
     },
     {
         "id": "236",
         "name": "tyrogue",
-        "typos": [],
+        "typos": ["tyrog", "tyroug"],
         "display_name": "Tyrogue"
     },
     {
@@ -1467,13 +1467,13 @@
     {
         "id": "245",
         "name": "suicune",
-        "typos": ["suicun"],
+        "typos": ["suicun", "suicin"],
         "display_name": "Suicune"
     },
     {
         "id": "246",
         "name": "larvitar",
-        "typos": ["larvtar"],
+        "typos": ["larvtar", "laritar"],
         "display_name": "Larvitar"
     },
     {
@@ -1551,7 +1551,7 @@
     {
         "id": "259",
         "name": "happiny",
-        "typos": [],
+        "typos": ["hapin", "happin"],
         "display_name": "Happiny"
     },
     {
@@ -2409,7 +2409,7 @@
     {
         "id": "402",
         "name": "drifloon",
-        "typos": ["drifbloon", "drifloom", "driftloon"],
+        "typos": ["drifbloon", "drifloom", "driftloon", "drifoon"],
         "display_name": "Drifloon"
     },
     {
@@ -2511,7 +2511,7 @@
     {
         "id": "419",
         "name": "larvesta",
-        "typos": [],
+        "typos": ["larvest"],
         "display_name": "Larvesta"
     },
     {
@@ -2547,7 +2547,7 @@
     {
         "id": "425",
         "name": "tyrunt",
-        "typos": [],
+        "typos": ["tryunt", "trunt"],
         "display_name": "Tyrunt"
     },
     {
@@ -2607,7 +2607,7 @@
     {
         "id": "435",
         "name": "garbodor",
-        "typos": [],
+        "typos": ["garbador"],
         "display_name": "Garbodor"
     },
     {
