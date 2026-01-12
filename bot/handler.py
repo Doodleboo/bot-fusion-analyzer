@@ -6,15 +6,17 @@ from discord import Message, Thread, HTTPException, PartialEmoji, DMChannel, Tex
 from bot.context.message_identifier import is_assets_gallery, has_correct_assets_gallery_keywords
 from bot.context.message_identifier import is_message_from_ignored_bots, has_ignored_spritework_tags
 from bot.context.setup import ctx
+from bot.context.user_identifier import user_is_potential_spriter
 from bot.core.analysis import Analysis
 from bot.core.analyzer import send_extra_embeds
 from bot.core.analyzer import send_full_analysis, generate_analysis, send_analysis, generate_gallery_analysis_list
 from bot.core.issues import DifferentSprite
 from bot.misc.enums import AnalysisType, Severity
 from bot.misc.utils import fancy_print, attachment_not_an_image
-from bot.spritework.opt_out_options import is_opted_out_user
+from bot.spritework.opt_out_options import is_opted_out_of_auto_analysis
 from bot.spritework.spritework_checker import get_spritework_thread_times
-from bot.spritework.tutorial_mode import send_tutorial_mode_prompt, user_is_potential_spriter
+from bot.spritework.swablu_timestamp import send_swablu_timestamp
+from bot.spritework.tutorial_mode import send_tutorial_mode_prompt
 
 ERROR_EMOJI_NAME = "NANI"
 ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
@@ -125,7 +127,7 @@ async def handle_spritework_post(thread: Thread):
         return
 
     author = spritework_message.author
-    if await is_opted_out_user(author):
+    if await is_opted_out_of_auto_analysis(author):
         return
 
     log_event("SprWork >", spritework_message)
@@ -134,6 +136,10 @@ async def handle_spritework_post(thread: Thread):
     if user_is_potential_spriter(author):
         await asyncio.sleep(1)
         await send_tutorial_mode_prompt(author, thread)
+
+
+    else:
+        await send_swablu_timestamp(author, thread)
 
 
 async def handle_reply(message: Message):

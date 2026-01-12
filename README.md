@@ -9,6 +9,13 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - **Greystorm** for giving permission to use various utilities from spritebot
 
 # Changelog
+## Version 2.6
+- New opt-out message after the Spritework analysis that shows the time a sprite can be posted to the gallery (which is now 18 hours after Spritework in all cases)
+- The amount of transparent colors is now counted and displayed separately (previously they weren't being counted at all)
+- Added lots of new typos so that Fusion Bot recognizes certain Pokémon names in the gallery even if they're misspelled
+- The filename letter checks as part of the gallery analysis introduced in version 2.5 is disabled as the current implementation had some issues. It will be replaced with an alternative in the future.
+- Fix: Avoid analyzing assets gallery posts that get deleted by Yanmega
+
 ## Version 2.5
 - Really beefy **Gallery analysis overhaul** with specific gallery checks. These include:
   * Ensuring that the **correct Pokémon names** appear in the gallery message. Made to prevent misnumbered fusions.

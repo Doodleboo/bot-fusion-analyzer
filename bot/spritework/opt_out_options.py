@@ -87,7 +87,7 @@ async def different_user_response(interaction: Interaction, og_user: Member):
     await interaction.response.send_message(content=response_text, ephemeral=True, delete_after=60)
 
 
-async def is_opted_out_user(user: Member|User) -> bool:
+async def is_opted_out_of_auto_analysis(user: Member | User) -> bool:
     user_list = await grab_user_list()
     return user.id in user_list
 

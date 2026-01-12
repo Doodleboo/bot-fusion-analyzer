@@ -3,7 +3,7 @@ from typing import Any
 
 import discord
 from discord import ButtonStyle, Interaction
-from discord import (Member, User, Thread, TextChannel, DMChannel, SelectOption,
+from discord import (Member, Thread, TextChannel, DMChannel, SelectOption,
                      File, Message, HTTPException, Forbidden, NotFound)
 from discord.ui import View, Button, Select, Item
 
@@ -11,30 +11,10 @@ from bot.context.setup import ctx
 from bot.misc.utils import fancy_print
 from .tutorial_sections import sections
 
-SPRITER_ROLE_ID = 392803830900850688
-APPLICANT_ID    = 1136806607469150380
-MANAGER_ROLE_ID = 900867033175040101
-WATCHOG_ROLE_ID = 1100903960476385350
-MOD_ROLE_ID     = 306953740651462656
-UNOWN_ROLE_ID   = 1210701164426039366
-NO_GALPOST_ID   = 1191178850713993236
-NO_HARVEST_ID   = 1191179006578532372
-NON_TUTORIAL_ROLES = [SPRITER_ROLE_ID, MANAGER_ROLE_ID, WATCHOG_ROLE_ID, MOD_ROLE_ID,
-                      UNOWN_ROLE_ID, NO_GALPOST_ID, NO_HARVEST_ID, APPLICANT_ID]
-
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 IMAGES_PATH = os.path.join(CURRENT_DIR, "..", "..", "resources")
 FINISH_TUTORIAL = "Thanks for using Tutorial Mode!\nIf you'd like to use it again, use the /help command."
 TUTORIAL_LOG_DECORATOR = "TutMode >"
-
-
-def user_is_potential_spriter(user: User|Member) -> bool:
-    if not isinstance(user, Member):
-        return False
-    for role in user.roles:
-        if role.id in NON_TUTORIAL_ROLES:
-            return False
-    return True
 
 
 async def send_tutorial_mode_prompt(user: Member, channel: TextChannel|Thread|DMChannel):
