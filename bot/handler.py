@@ -11,9 +11,9 @@ from bot.core.analysis import Analysis
 from bot.core.analyzer import send_extra_embeds
 from bot.core.analyzer import send_full_analysis, generate_analysis, send_analysis, generate_gallery_analysis_list
 from bot.core.issues import DifferentSprite
-from bot.misc.enums import AnalysisType, Severity
+from bot.misc.enums import AnalysisType, Severity, OptedType
 from bot.misc.utils import fancy_print, attachment_not_an_image
-from bot.spritework.opt_out_options import is_opted_out_of_auto_analysis
+from bot.spritework.opt_out_options import is_opted_out_user
 from bot.spritework.spritework_checker import get_spritework_thread_times
 from bot.spritework.swablu_timestamp import send_swablu_timestamp
 from bot.spritework.tutorial_mode import send_tutorial_mode_prompt
@@ -127,7 +127,7 @@ async def handle_spritework_post(thread: Thread):
         return
 
     author = spritework_message.author
-    if await is_opted_out_of_auto_analysis(author):
+    if await is_opted_out_user(author, OptedType.auto_analysis):
         return
 
     log_event("SprWork >", spritework_message)
@@ -136,9 +136,9 @@ async def handle_spritework_post(thread: Thread):
     if user_is_potential_spriter(author):
         await asyncio.sleep(1)
         await send_tutorial_mode_prompt(author, thread)
+        return
 
-
-    else:
+    if not await is_opted_out_user(author, OptedType.timestamp):
         await send_swablu_timestamp(author, thread)
 
 
