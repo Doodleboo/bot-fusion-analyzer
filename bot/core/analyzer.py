@@ -1,8 +1,8 @@
 from discord import User, TextChannel, Thread, DMChannel
 from discord.message import Message, Attachment
 
-from bot.misc.enums import AnalysisType
-from bot.spritework.opt_out_options import HideAutoAnalysis
+from bot.misc.enums import AnalysisType, OptedType
+from bot.spritework.opt_out_options import HideFeature
 from . import content_analysis, sprite_analysis, gallery_analysis
 from .analysis import Analysis, generate_file_from_image, get_autogen_file
 from ..misc.utils import attachment_not_an_image
@@ -86,7 +86,7 @@ async def send_analysis(analysis: Analysis,
         ping_owner = None
 
     if analysis.type.is_automatic_spritework_analysis():
-        buttons_view = HideAutoAnalysis(analysis.message.author)
+        buttons_view = HideFeature(analysis.message.author, OptedType.auto_analysis)
     else:
         buttons_view = None
 

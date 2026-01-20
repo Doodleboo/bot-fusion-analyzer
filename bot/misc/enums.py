@@ -103,3 +103,11 @@ class IdType(Enum):
 
     def is_unknown(self):
         return self == IdType.unknown
+
+
+class OptedType(Enum):
+    auto_analysis   = auto()
+    timestamp       = auto()
+
+    def is_auto_analysis(self):
+        return self == OptedType.auto_analysis
