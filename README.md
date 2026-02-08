@@ -15,6 +15,7 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - The **amount of transparent colors** is now counted and displayed separately, as previously they weren't being counted at all (thanks NullnNow!)
 - Added lots of new typos so that Fusion Bot recognizes certain Pokémon names in the gallery even if they're misspelled
 - The filename letter checks as part of the gallery analysis introduced in version 2.5 are disabled as the current implementation had some issues. It will be replaced with an alternative in the future.
+- Autogen sheets have been updated and now all current PIF Pokemon (up to Dragalge) fusions will show an autogen
 - Fix: Avoid analyzing assets gallery posts that get deleted by Yanmega
 
 ## Version 2.5
