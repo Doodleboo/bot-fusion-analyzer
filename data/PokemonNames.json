@@ -87,7 +87,7 @@
     {
         "id": "15",
         "name": "beedrill",
-        "typos": ["bedril"],
+        "typos": ["bedril", "beedril", "beedil"],
         "display_name": "Beedrill"
     },
     {
@@ -171,7 +171,7 @@
     {
         "id": "29",
         "name": "nidoran♀",
-        "typos": ["♀", "nidoran f", "(f)", "nidoranf", "(female)", ":female_sign:", "♀\uFE0F", "\uFE0F"],
+        "typos": ["♀", "nidoran f", "\\(f\\)", "nidoranf", "\\(female\\)", ":female_sign:", "♀\uFE0F", "\uFE0F"],
         "display_name": "Nidoran\u2640"
     },
     {
@@ -189,7 +189,7 @@
     {
         "id": "32",
         "name": "nidoran♂",
-        "typos": ["♂", "nidoran m", "(m)", "nidoranm", "(male)", ":male_sign:", "♂\uFE0F", "\uFE0F"],
+        "typos": ["♂", "nidoran m", "\\(m\\)", "nidoranm", "\\(male\\)", ":male_sign:", "♂\uFE0F", "\uFE0F"],
         "display_name": "Nidoran\u2642"
     },
     {
@@ -723,13 +723,13 @@
     {
         "id": "121",
         "name": "starmie",
-        "typos": [],
+        "typos": ["starme", "starmi"],
         "display_name": "Starmie"
     },
     {
         "id": "122",
         "name": "mrmime",
-        "typos": ["mister mi", "mrmi", "mr mi", "mr. mi"],
+        "typos": ["mister mi", "mrmi", "mr mi", "mr. mi", "mr.mi"],
         "display_name": "Mr. Mime"
     },
     {
@@ -1071,7 +1071,7 @@
     {
         "id": "179",
         "name": "mareep",
-        "typos": [],
+        "typos": ["marep","marrep","marreep"],
         "display_name": "Mareep"
     },
     {
@@ -1941,7 +1941,7 @@
     {
         "id": "324",
         "name": "empoleon",
-        "typos": [],
+        "typos": ["empleon", "oleon", "empol"],
         "display_name": "Empoleon"
     },
     {
@@ -2505,7 +2505,7 @@
     {
         "id": "418",
         "name": "fletchinder",
-        "typos": ["flechinder", "fletchender"],
+        "typos": ["flechinder", "fletchender", "flechtinder"],
         "display_name": "Fletchinder"
     },
     {
