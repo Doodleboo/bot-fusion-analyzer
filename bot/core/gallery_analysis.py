@@ -182,6 +182,8 @@ def same_fusion_and_author_instances(message: Message, og_message: Message, id_t
 
 
 async def ensure_correct_letter(analysis: Analysis, past_instances: int):
+    if analysis.fusion_filename.letter == "a":  # "A" isn't a problem if there is no letterless version
+        return
     if past_instances == 0:
         correct_letter = ""
     elif past_instances > 26:
@@ -190,7 +192,7 @@ async def ensure_correct_letter(analysis: Analysis, past_instances: int):
     else:
         correct_letter = string.ascii_lowercase[past_instances - 1]
     if correct_letter != analysis.fusion_filename.letter:
-        await ctx().doodledoo.debug.send(f"Potentially wrong letter: ({analysis.message.jump_url})")
+        await ctx().doodledoo.debug.send(f"Potentially wrong letter **{analysis.fusion_filename.letter}** shold be {correct_letter}: ({analysis.message.jump_url})")
         #analysis.add_issue(WrongLetter(correct_letter))
 
 
