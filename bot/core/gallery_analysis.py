@@ -12,6 +12,7 @@ from bot.core.filename_analysis import FusionFilename
 from bot.core.issues import MissingMessageId, UnknownSprite, DifferentFilenameIds, DifferentSprite, IncorrectGallery, \
     FileName, OutOfDex, PokemonNameNotFound
 from bot.misc import utils
+from bot.misc.exceptions import DifferentFusionsInSameGalleryMessage
 
 NAME_MAP: dict[str, str] = utils.id_to_name_map()
 TYPOS_MAP: dict[str, list[str]] = utils.id_to_typos_map()
@@ -21,7 +22,10 @@ async def main(analysis_list: list[Analysis]):
     """Does some checks from content_analysis with harsher restrictions and some entirely different checks"""
     if (not analysis_list) or (len(analysis_list) == 0):
         return
-    same_id_checks(analysis_list)
+    try:
+        same_id_checks(analysis_list)
+    except DifferentFusionsInSameGalleryMessage:
+        return
     if analysis_list[0].issues.has_issue(UnknownSprite):
         return
     correct_gallery = correct_gallery_checks(analysis_list)
@@ -29,7 +33,6 @@ async def main(analysis_list: list[Analysis]):
         return
     pokemon_name_checks(analysis_list)
     await filename_letter_checks(analysis_list)
-    #TODO: Save into gallery cache
 
 
 def same_id_checks(analysis_list: list[Analysis]):
@@ -75,6 +78,7 @@ def compare_with_first_filename(analysis: Analysis, first_filename: FusionFilena
         return
     if analysis.fusion_filename.dex_ids != first_filename.dex_ids:
         analysis.add_issue(DifferentFilenameIds())
+        raise DifferentFusionsInSameGalleryMessage
 
 
 def correct_gallery_checks(analysis_list: list[Analysis]):

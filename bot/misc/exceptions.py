@@ -3,3 +3,6 @@ class TransparencyException(Exception):
 
 class MissingBotContext(Exception):
     pass
+
+class DifferentFusionsInSameGalleryMessage(Exception):
+    pass
