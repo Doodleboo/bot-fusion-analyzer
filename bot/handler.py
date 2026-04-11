@@ -10,8 +10,8 @@ from bot.context.user_identifier import user_is_potential_spriter
 from bot.core.analysis import Analysis
 from bot.core.analyzer import send_extra_embeds
 from bot.core.analyzer import send_full_analysis, generate_analysis, send_analysis, generate_gallery_analysis_list
-from bot.core.issues import DifferentSprite
 from bot.misc.enums import AnalysisType, Severity, OptedType
+from bot.misc.exceptions import MisnumberedGalleryID
 from bot.misc.utils import fancy_print, attachment_not_an_image
 from bot.spritework.opt_out_options import is_opted_out_user
 from bot.spritework.spritework_checker import get_spritework_thread_times
@@ -43,12 +43,12 @@ async def handle_gallery(message: Message, is_assets: bool = False):
         analysis_type = AnalysisType.assets_gallery
     else:
         analysis_type = AnalysisType.sprite_gallery
-    analysis_list = await generate_gallery_analysis_list(message, analysis_type)
+    try:
+        analysis_list = await generate_gallery_analysis_list(message, analysis_type)
+    except MisnumberedGalleryID as misnumbered_exception:
+        await handle_misnumbered_in_gallery(message, misnumbered_exception)
+        return
     for analysis in analysis_list:
-        if analysis.issues.has_issue(DifferentSprite):
-            await handle_misnumbered_in_gallery(message, analysis)
-            return
-
         if analysis.severity.is_warn_severity():
             try:
                 await message.add_reaction(ERROR_EMOJI)
@@ -158,16 +158,7 @@ async def handle_direct_ping(message: Message):
         await handle_ping_without_attachments(message)
 
 
-async def handle_misnumbered_in_gallery(message: Message, analysis: Analysis):
-    misnumbered_issue = None
-    for issue in analysis.issues.issue_list:
-        if isinstance(issue, DifferentSprite):
-            misnumbered_issue = issue
-            break
-
-    if misnumbered_issue is None:
-        return
-
+async def handle_misnumbered_in_gallery(message: Message, exception: MisnumberedGalleryID):
     copied_message = await ctx().pif.logs.send(f"Hi {message.author.mention}, here's your gallery message, you can "
                                                f"copy the block below and it will have the same text you just sent:"
                                                f"\n```{message.content}```")
@@ -175,8 +166,8 @@ async def handle_misnumbered_in_gallery(message: Message, analysis: Analysis):
                                f"Hi {message.author.mention}, \n\nUnfortunately your latest gallery message had a "
                                f"**misnumbered dex id**, either in the message or filename, "
                                f"because they didn't match eachother:\n\n"
-                               f"* **Filename ID: {misnumbered_issue.filename_fusion_id}**\n"
-                               f"* **Message ID: {misnumbered_issue.content_fusion_id}**\n\n"
+                               f"* **Filename ID: {exception.filename_fusion_id}**\n"
+                               f"* **Message ID: {exception.content_fusion_id}**\n\n"
                                f"You can recover and copy your message text at: {copied_message.jump_url} "
                                f"so that you can fix the issue and post it here again.\n\nThank you!",
                                delete_after=20)

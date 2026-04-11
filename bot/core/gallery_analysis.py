@@ -9,10 +9,10 @@ from bot.context.setup import ctx
 from bot.core.analysis import Analysis
 from bot.core.content_analysis import handle_dex_verification
 from bot.core.filename_analysis import FusionFilename
-from bot.core.issues import MissingMessageId, UnknownSprite, DifferentFilenameIds, DifferentSprite, IncorrectGallery, \
+from bot.core.issues import MissingMessageId, UnknownSprite, DifferentFilenameIds, IncorrectGallery, \
     FileName, OutOfDex, PokemonNameNotFound
 from bot.misc import utils
-from bot.misc.exceptions import DifferentFusionsInSameGalleryMessage
+from bot.misc.exceptions import DifferentFusionsInSameGalleryMessage, MisnumberedGalleryID
 
 NAME_MAP: dict[str, str] = utils.id_to_name_map()
 TYPOS_MAP: dict[str, list[str]] = utils.id_to_typos_map()
@@ -53,8 +53,7 @@ def correct_content_ids(first_analysis: Analysis, first_filename: FusionFilename
     if not content_ids:
         return exact_content_id_found(first_analysis, first_filename.dex_ids)
     if first_filename.dex_ids not in content_ids:
-        first_analysis.add_issue(DifferentSprite(first_filename.dex_ids, content_ids[0]))
-        return False
+        raise MisnumberedGalleryID(first_filename.dex_ids, content_ids[0])
     return True
 
 
