@@ -15,7 +15,7 @@ class Description(str, Enum):
     intentional_transp  = "Intentional transparency"
     half_pixels         = "Half pixels detected"
     colour_amount       = "Colors"
-    transparent_amount  = "Transparent Colors",
+    transparent_amount  = "Semi transparent colors",
     file_name           = "Filename"
     invalid_fusion_id   = "Invalid fusion ID"
     incorrect_gallery   = "Incorrect gallery"

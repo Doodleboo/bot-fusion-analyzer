@@ -63,7 +63,7 @@ class SpriteContext():
 
         raw_data = requests.get(analysis.attachment_url, stream=True, timeout=TIMEOUT).raw
         self.image = image_open(raw_data)
-        self.pixels = get_pixels(self.image)
+        self.pixels = None  # We assign this after turning the image to RGBA
 
         self.color_count: int = 0
         self.transparent_count: int = 0
@@ -103,6 +103,7 @@ class SpriteContext():
         # Avoids having to deal with indexed palette quirks
         if self.image.mode != "RGBA":
             self.image = self.image.convert(mode="RGBA")
+        self.pixels = get_pixels(self.image)    # Doing this after converting from index just in case
 
     def handle_sprite_size(self, analysis: Analysis):
         image_size = self.image.size
@@ -141,8 +142,8 @@ class SpriteContext():
 
     def handle_color_amount(self, analysis: Analysis, all_colors):
         # Count all transparent and opaque pixels.
-        self.color_count = len(set(c[1][0:3] for c in self.useful_colors))
-        self.transparent_count = len(list(c[1] for c in self.useful_colors if c[1][3] < 255 and sum(c[1][0:3]) > 0))
+        self.color_count = len({c[1][0:3] for c in self.useful_colors})
+        self.transparent_count = len([c[1] for c in self.useful_colors if c[1][3] < 255 and sum(c[1][0:3]) > 0])
         self.actual_color_count = len(self.useful_colors)
         self.useless_amount = len(all_colors) - self.actual_color_count
 
