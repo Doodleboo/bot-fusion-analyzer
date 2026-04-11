@@ -1,7 +1,7 @@
 import asyncio
 
 import discord
-from discord import Message, Thread, HTTPException, PartialEmoji, DMChannel, TextChannel
+from discord import Message, Thread, DMChannel, TextChannel
 
 from bot.context.message_identifier import is_assets_gallery, has_correct_assets_gallery_keywords
 from bot.context.message_identifier import is_message_from_ignored_bots, has_ignored_spritework_tags
@@ -10,6 +10,7 @@ from bot.context.user_identifier import user_is_potential_spriter
 from bot.core.analysis import Analysis
 from bot.core.analyzer import send_extra_embeds
 from bot.core.analyzer import send_full_analysis, generate_analysis, send_analysis, generate_gallery_analysis_list
+from bot.misc.emojis import react_with_emoji
 from bot.misc.enums import AnalysisType, Severity, OptedType
 from bot.misc.exceptions import MisnumberedGalleryID
 from bot.misc.utils import fancy_print, attachment_not_an_image
@@ -18,10 +19,7 @@ from bot.spritework.spritework_checker import get_spritework_thread_times
 from bot.spritework.swablu_timestamp import send_swablu_timestamp
 from bot.spritework.tutorial_mode import send_tutorial_mode_prompt
 
-ERROR_EMOJI_NAME = "NANI"
-ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 SPRITE_MANAGER_PING = "<@&900867033175040101>"
-ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 
 
 # Handler methods
@@ -49,12 +47,7 @@ async def handle_gallery(message: Message, is_assets: bool = False):
         await handle_misnumbered_in_gallery(message, misnumbered_exception)
         return
     for analysis in analysis_list:
-        if analysis.severity.is_warn_severity():
-            try:
-                await message.add_reaction(ERROR_EMOJI)
-            except HTTPException:
-                await message.add_reaction("😡")  # Nani failsafe
-
+        await react_with_emoji(analysis, message)
         await send_full_analysis(analysis, ctx().pif.logs, message.author)
 
 
