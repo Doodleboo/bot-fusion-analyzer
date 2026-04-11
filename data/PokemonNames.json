@@ -45,7 +45,7 @@
     {
         "id": "8",
         "name": "wartortle",
-        "typos": [],
+        "typos": ["warto", "watortle", "watotle"],
         "display_name": "Wartortle"
     },
     {
@@ -117,7 +117,7 @@
     {
         "id": "20",
         "name": "raticate",
-        "typos": ["rattycate"],
+        "typos": ["ratticate", "ratycate", "rattycate"],
         "display_name": "Raticate"
     },
     {
@@ -171,7 +171,7 @@
     {
         "id": "29",
         "name": "nidoran♀",
-        "typos": ["♀", "nidoran f", "\\(f\\)", "nidoranf", "\\(female\\)", ":female_sign:", "♀\uFE0F", "\uFE0F"],
+        "typos": ["♀", "nidoran f", "\\(f\\)", "nidoranf", "\\(female\\)", ":female_sign:", "\uFE0F", "nidoran-f"],
         "display_name": "Nidoran\u2640"
     },
     {
@@ -189,7 +189,7 @@
     {
         "id": "32",
         "name": "nidoran♂",
-        "typos": ["♂", "nidoran m", "\\(m\\)", "nidoranm", "\\(male\\)", ":male_sign:", "♂\uFE0F", "\uFE0F"],
+        "typos": ["♂", "nidoran m", "\\(m\\)", "nidoranm", "\\(male\\)", ":male_sign:", "\uFE0F", "nidoran-m"],
         "display_name": "Nidoran\u2642"
     },
     {
@@ -219,7 +219,7 @@
     {
         "id": "37",
         "name": "vulpix",
-        "typos": [],
+        "typos": ["vuplix"],
         "display_name": "Vulpix"
     },
     {
@@ -495,7 +495,7 @@
     {
         "id": "83",
         "name": "farfetchd",
-        "typos": ["farfetchd", "farfetched"],
+        "typos": ["farfet", "farfech"],
         "display_name": "Farfetch'd"
     },
     {
@@ -555,7 +555,7 @@
     {
         "id": "93",
         "name": "haunter",
-        "typos": [],
+        "typos": ["hunter"],
         "display_name": "Haunter"
     },
     {
@@ -639,7 +639,7 @@
     {
         "id": "107",
         "name": "hitmonchan",
-        "typos": ["himonchan"],
+        "typos": ["himonchan", "hitmonch"],
         "display_name": "Hitmonchan"
     },
     {
@@ -813,7 +813,7 @@
     {
         "id": "136",
         "name": "flareon",
-        "typos": [],
+        "typos": ["flareeon"],
         "display_name": "Flareon"
     },
     {
@@ -849,7 +849,7 @@
     {
         "id": "142",
         "name": "aerodactyl",
-        "typos": ["aeradactyl", "aerodactly"],
+        "typos": ["aerad", "aerod", "arodac", "dactyl"],
         "display_name": "Aerodactyl"
     },
     {
@@ -957,7 +957,7 @@
     {
         "id": "160",
         "name": "feraligatr",
-        "typos": ["feraligator"],
+        "typos": ["feraligator", "ferlig", "gatr"],
         "display_name": "Feraligatr"
     },
     {
@@ -1233,7 +1233,7 @@
     {
         "id": "206",
         "name": "dunsparce",
-        "typos": ["dunspase"],
+        "typos": ["dunspase", "dunspa", "sparce", "sparse"],
         "display_name": "Dunsparce"
     },
     {
@@ -1257,7 +1257,7 @@
     {
         "id": "210",
         "name": "granbull",
-        "typos": ["granbul"],
+        "typos": ["granbul", "grandbul"],
         "display_name": "Granbull"
     },
     {
@@ -1293,7 +1293,7 @@
     {
         "id": "216",
         "name": "teddiursa",
-        "typos": ["teddyursa", "tediursa"],
+        "typos": ["teddyursa", "tediursa", "teddi", "iursa"],
         "display_name": "Teddiursa"
     },
     {
@@ -1395,7 +1395,7 @@
     {
         "id": "233",
         "name": "porygon2",
-        "typos": ["porygon 2"],
+        "typos": ["porygon 2", "porygon-2"],
         "display_name": "Porygon2"
     },
     {
@@ -1695,7 +1695,7 @@
     {
         "id": "283",
         "name": "marshtomp",
-        "typos": [],
+        "typos": ["marshstomp", "marstomp"],
         "display_name": "Marshtomp"
     },
     {
@@ -1731,7 +1731,7 @@
     {
         "id": "289",
         "name": "shedinja",
-        "typos": [],
+        "typos": ["shedninja", "shedi", "shedn"],
         "display_name": "Shedinja"
     },
     {
@@ -2559,7 +2559,7 @@
     {
         "id": "427",
         "name": "snorunt",
-        "typos": ["snowrunt"],
+        "typos": ["snowrunt", "snorut"],
         "display_name": "Snorunt"
     },
     {
@@ -2607,7 +2607,7 @@
     {
         "id": "435",
         "name": "garbodor",
-        "typos": ["garbador"],
+        "typos": ["garbador", "garbordor"],
         "display_name": "Garbodor"
     },
     {
@@ -2721,7 +2721,7 @@
     {
         "id": "454",
         "name": "mareanie",
-        "typos": ["marenie"],
+        "typos": ["marenie", "maraenie"],
         "display_name": "Mareanie"
     },
     {
@@ -2817,7 +2817,7 @@
     {
         "id": "470",
         "name": "ultranecrozma",
-        "typos": ["ultra", "necrozmaultra", "ultranecrosma"],
+        "typos": ["ultra", "necrozmaultra", "unecr", "u-necr"],
         "display_name": "Ultra Necrozma"
     },
     {
@@ -2883,7 +2883,7 @@
     {
         "id": "481",
         "name": "chesnaught",
-        "typos": ["chestnut", "chesnaut"],
+        "typos": ["chesn", "chestn"],
         "display_name": "Chesnaught"
     },
     {
@@ -3010,7 +3010,7 @@
     {
         "id":"502",
         "name": "poochyena",
-        "typos": ["poochena", "pochyena", "poohyena"],
+        "typos": ["poochena", "pochyena", "poohyena", "poocheyena"],
         "display_name":"Poochyena"
     },
     {
@@ -3160,13 +3160,13 @@
     {
         "id":"527",
         "name": "meditite",
-        "typos": ["meditie"],
+        "typos": ["meditie", "medite"],
         "display_name":"Meditite"
     },
     {
         "id":"528",
         "name": "medicham",
-        "typos": ["medicharm"],
+        "typos": ["medicharm", "medichan"],
         "display_name":"Medicham"
     },
     {
