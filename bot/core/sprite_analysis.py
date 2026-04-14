@@ -191,7 +191,7 @@ class SpriteContext():
         if transparency_amount == 0:
             return
 
-        if is_intentional_transparency(analysis.message):
+        if is_intentional_transparency(analysis.message, analysis.reply_text):
             analysis.add_issue(IntentionalTransparency())
             return
         analysis.transparency_issue = True

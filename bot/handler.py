@@ -69,7 +69,7 @@ async def handle_zigzag_galpost(message: Message):
     await send_extra_embeds(analysis, channel)
 
 
-async def handle_regular_analysis(message: Message, auto_spritework: bool = False):
+async def handle_regular_analysis(message: Message, auto_spritework: bool = False, reply_text: str|None = None):
     channel = message.channel
     if auto_spritework:
         analysis_type = AnalysisType.auto_spritework
@@ -78,7 +78,7 @@ async def handle_regular_analysis(message: Message, auto_spritework: bool = Fals
     for specific_attachment in message.attachments:
         if attachment_not_an_image(specific_attachment):
             continue
-        analysis = generate_analysis(message, specific_attachment, analysis_type)
+        analysis = generate_analysis(message, specific_attachment, analysis_type, reply_text)
         try:
             await notify_if_ai(analysis, message, analysis_type, channel)
             await send_full_analysis(analysis, channel, message.author)
@@ -140,7 +140,7 @@ async def handle_reply(message: Message):
     if is_message_from_ignored_bots(reply_message):     # Ignore replies to Fusion Bot messages
         return
     log_event("Reply   >", reply_message)
-    await handle_regular_analysis(reply_message)
+    await handle_regular_analysis(message=reply_message, reply_text=message.content)
 
 
 async def handle_direct_ping(message: Message):

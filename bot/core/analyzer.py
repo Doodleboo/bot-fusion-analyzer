@@ -11,9 +11,10 @@ from ..misc.utils import attachment_not_an_image
 def generate_analysis(
         message: Message,
         specific_attachment: Attachment|None = None,
-        analysis_type: AnalysisType|None = None) -> Analysis:
+        analysis_type: AnalysisType|None = None,
+        reply_text: str|None = None) -> Analysis:
 
-    analysis = Analysis(message, specific_attachment, analysis_type)
+    analysis = Analysis(message, specific_attachment, analysis_type, reply_text)
     content_analysis.main(analysis)
     sprite_analysis.main(analysis)
     analysis.generate_embed()
