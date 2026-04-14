@@ -9,9 +9,11 @@ from bot.context.setup import ctx
 from bot.core.analysis import Analysis
 from bot.core.content_analysis import handle_dex_verification
 from bot.core.filename_analysis import FusionFilename
-from bot.core.issues import MissingMessageId, UnknownSprite, DifferentFilenameIds, DifferentSprite, IncorrectGallery, \
-    FileName, WrongLetter, OutOfDex, PokemonNameNotFound, MissingLetters
+from bot.core.issues import MissingMessageId, UnknownSprite, DifferentFilenameIds, IncorrectGallery, \
+    FileName, OutOfDex, PokemonNameNotFound
 from bot.misc import utils
+from bot.misc.emojis import check_for_custom_emoji
+from bot.misc.exceptions import DifferentFusionsInSameGalleryMessage, MisnumberedGalleryID
 
 NAME_MAP: dict[str, str] = utils.id_to_name_map()
 TYPOS_MAP: dict[str, list[str]] = utils.id_to_typos_map()
@@ -21,7 +23,10 @@ async def main(analysis_list: list[Analysis]):
     """Does some checks from content_analysis with harsher restrictions and some entirely different checks"""
     if (not analysis_list) or (len(analysis_list) == 0):
         return
-    same_id_checks(analysis_list)
+    try:
+        same_id_checks(analysis_list)
+    except DifferentFusionsInSameGalleryMessage:
+        return
     if analysis_list[0].issues.has_issue(UnknownSprite):
         return
     correct_gallery = correct_gallery_checks(analysis_list)
@@ -29,6 +34,7 @@ async def main(analysis_list: list[Analysis]):
         return
     pokemon_name_checks(analysis_list)
     await filename_letter_checks(analysis_list)
+    await check_for_custom_emoji(analysis_list[0])
 
 
 def same_id_checks(analysis_list: list[Analysis]):
@@ -38,15 +44,27 @@ def same_id_checks(analysis_list: list[Analysis]):
     if first_filename.id_type.is_unknown():
         unknown_sprite(first_analysis)
         return
-    content_ids = utils.extract_fusion_ids_from_content(first_analysis.message, first_filename.id_type)
-    if not content_ids:
-        first_analysis.add_issue(MissingMessageId())
-        return
-    if first_filename.dex_ids not in content_ids:
-        first_analysis.add_issue(DifferentSprite(first_filename.dex_ids, content_ids[0]))
+    if not correct_content_ids(first_analysis, first_filename):
         return
     for analysis in analysis_list:
         compare_with_first_filename(analysis, first_filename)
+
+
+def correct_content_ids(first_analysis: Analysis, first_filename: FusionFilename) -> bool:
+    content_ids = utils.extract_fusion_ids_from_content(first_analysis.message, first_filename.id_type)
+    if not content_ids:
+        return exact_content_id_found(first_analysis, first_filename.dex_ids)
+    if first_filename.dex_ids not in content_ids:
+        raise MisnumberedGalleryID(first_filename.dex_ids, content_ids[0])
+    return True
+
+
+def exact_content_id_found(analysis: Analysis, filename_id: str) -> bool:
+    exact_content_id_result = re.search(filename_id, analysis.message.content)
+    if exact_content_id_result is not None:
+        return True
+    analysis.add_issue(MissingMessageId())
+    return False
 
 
 def unknown_sprite(analysis: Analysis):
@@ -61,6 +79,7 @@ def compare_with_first_filename(analysis: Analysis, first_filename: FusionFilena
         return
     if analysis.fusion_filename.dex_ids != first_filename.dex_ids:
         analysis.add_issue(DifferentFilenameIds())
+        raise DifferentFusionsInSameGalleryMessage
 
 
 def correct_gallery_checks(analysis_list: list[Analysis]):
@@ -132,7 +151,7 @@ async def filename_letter_checks(analysis_list: list[Analysis]):
     if len(analysis_list) == 1:
         await ensure_correct_letter(analysis_list[0], past_instances)
     else:
-        ensure_filled_letters(analysis_list, past_instances)
+        await ensure_filled_letters(analysis_list, past_instances)
 
 
 async def search_in_same_month(analysis: Analysis) -> int:
@@ -142,7 +161,7 @@ async def search_in_same_month(analysis: Analysis) -> int:
         gallery_channel = ctx().pif.assets
 
     match_count = 0
-    async for message in gallery_channel.history(after=last_day_of_previous_month()):
+    async for message in gallery_channel.history(after=last_day_of_previous_month(), oldest_first=True):
         match_count += same_fusion_and_author_instances(message, analysis.message, analysis.fusion_filename.dex_ids)
     return match_count
 
@@ -168,6 +187,8 @@ def same_fusion_and_author_instances(message: Message, og_message: Message, id_t
 
 
 async def ensure_correct_letter(analysis: Analysis, past_instances: int):
+    if analysis.fusion_filename.letter == "a":  # "A" isn't a problem if there is no letterless version
+        return
     if past_instances == 0:
         correct_letter = ""
     elif past_instances > 26:
@@ -176,16 +197,18 @@ async def ensure_correct_letter(analysis: Analysis, past_instances: int):
     else:
         correct_letter = string.ascii_lowercase[past_instances - 1]
     if correct_letter != analysis.fusion_filename.letter:
-        analysis.add_issue(WrongLetter(correct_letter))
+        await ctx().doodledoo.debug.send(f"Potentially wrong letter **{analysis.fusion_filename.letter}** shold be {correct_letter}: ({analysis.message.jump_url})")
+        #analysis.add_issue(WrongLetter(correct_letter))
 
 
-def ensure_filled_letters(analysis_list: list[Analysis], past_instances: int):
+async def ensure_filled_letters(analysis_list: list[Analysis], past_instances: int):
     starting_letter_pos = past_instances
     final_letter_pos = past_instances + len(analysis_list)
     letter_range = get_letter_range(starting_letter_pos, final_letter_pos)
-    new_range = check_letters_are_in_range(analysis_list, letter_range)
+    new_range = await check_letters_are_in_range(analysis_list, letter_range)
     if len(new_range) > 0:
-        analysis_list[0].add_issue(MissingLetters(new_range))
+        await ctx().doodledoo.debug.send(f"Missing letters in {new_range} ({analysis_list[0].message.jump_url})")
+        #analysis_list[0].add_issue(MissingLetters(new_range))
 
 
 def get_letter_range(starting_letter_pos: int, final_letter_pos: int) -> list[str]:
@@ -196,11 +219,12 @@ def get_letter_range(starting_letter_pos: int, final_letter_pos: int) -> list[st
     return letter_range
 
 
-def check_letters_are_in_range(analysis_list: list[Analysis], letter_range: list[str]) -> list[str]:
+async def check_letters_are_in_range(analysis_list: list[Analysis], letter_range: list[str]) -> list[str]:
     for analysis in analysis_list:
         letter = analysis.fusion_filename.letter
         if letter not in letter_range:
-            analysis.add_issue(WrongLetter(f"one of these: {letter_range}"))
+            await ctx().doodledoo.debug.send(f"{letter} not in: {letter_range} ({analysis_list[0].message.jump_url})")
+            #analysis.add_issue(WrongLetter(f"one of these: {letter_range}"))
         else:
             letter_range.remove(letter)
     return letter_range

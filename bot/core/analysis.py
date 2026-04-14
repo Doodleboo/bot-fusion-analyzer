@@ -8,8 +8,8 @@ from discord.embeds import Embed
 from discord.file import File
 from discord.message import Attachment, Message
 
-from bot.core.filename_analysis import get_filename_from_zigzag_image_url, get_fusion_filename, FusionFilename
 import bot.misc.utils as utils
+from bot.core.filename_analysis import get_filename_from_zigzag_image_url, get_fusion_filename, FusionFilename
 from bot.misc.enums import DiscordColour, Severity, AnalysisType, IdType
 from .issues import Issues, PokemonNames, Issue
 
@@ -31,6 +31,7 @@ class Analysis:
     embed: Embed
     fusion_id: str = "DEFAULT_VALUE"
     fusion_filename: FusionFilename|None
+    reply_text: str|None = None
 
     autogen_available: bool = False
     attachment_url: str|None = None
@@ -48,16 +49,20 @@ class Analysis:
 
     ai_suspicion: int = 0
 
+    special_gallery_emoji: int = 0
+
     def __init__(self,
-                 message:Message,
-                 specific_attachment:Attachment|None,
-                 analysis_type:AnalysisType|None) -> None:
+                 message: Message,
+                 specific_attachment: Attachment|None,
+                 analysis_type: AnalysisType|None,
+                 reply_text: str|None = None) -> None:
         self.message = message
         self.specific_attachment = specific_attachment
         self.type = analysis_type
         self.issues = Issues()
         self.severity = Severity.accepted
         self.fusion_filename = self.generate_fusion_filename()
+        self.reply_text = reply_text
         if self.fusion_filename and self.fusion_filename.dex_ids:
             self.fusion_id = self.fusion_filename.dex_ids
         if self.has_attachment() or self.has_zigzag_embed():

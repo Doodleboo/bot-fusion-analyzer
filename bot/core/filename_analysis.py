@@ -1,7 +1,7 @@
 import re
 
-from bot.misc.enums import IdType
 import bot.misc.utils as utils
+from bot.misc.enums import IdType
 
 LETTER_AND_PNG_PATTERN = rf'{utils.LETTER}\.png$'
 

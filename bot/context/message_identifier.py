@@ -15,6 +15,8 @@ TAG_NON_IF_ID = 1058148169986342963
 TAG_OTHER_ID = 1051367034673434634
 IGNORED_SPRITEWORK_TAGS = [TAG_CUSTOMIZATION_ID, TAG_NON_IF_ID, TAG_OTHER_ID]
 
+REGEXP_INTENTIONAL_TRANSPARENCY = r'(?i)\b(intentional|intended)\s+transparency\b'
+
 
 def is_sprite_gallery(message: Message) -> bool:
     return message.channel.id == id_channel_gallery_pif
@@ -74,9 +76,19 @@ def has_ignored_spritework_tags(thread: Thread) -> bool:
     return False
 
 
-def is_intentional_transparency(message: Message) -> bool:
+def is_intentional_transparency(message: Message, reply_text: str|None = None) -> bool:
+    text_to_be_searched = ""
+    if message.content is not None:
+        text_to_be_searched += message.content
+    if reply_text is not None:
+        text_to_be_searched += reply_text   # We also search for it in the message that pinged the bot
+    result = re.search(REGEXP_INTENTIONAL_TRANSPARENCY, text_to_be_searched)
+    return result is not None
+
+
+def has_correct_assets_gallery_keywords(message: Message) -> bool:
     content = message.content
     if not content:
         return False
-    result = re.search(r'(?i)\b(intentional|intended)\s+transparency\b', content)
+    result = re.search(r'(custom base|egg)', content.lower())
     return result is not None

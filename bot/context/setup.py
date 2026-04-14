@@ -1,4 +1,5 @@
 from discord import Client
+
 from bot.misc.exceptions import MissingBotContext
 from .bot_context import BotContext
 from .models import GlobalContext

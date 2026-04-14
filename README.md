@@ -7,8 +7,17 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - **Aegide** as the original creator of the Fusion Bot
 - **Doodledoo** is the creator of this fork and added features
 - **Greystorm** for giving permission to use various utilities from spritebot
+- **NullnNow** contributed with the transparent color count feature
 
 # Changelog
+## Version 2.6
+- The **amount of transparent colors** is now counted and displayed separately, as previously they weren't being counted at all (thanks NullnNow!)
+- Fusion Bot will not only be reacting **emojis** to gallery posts with issues, it will react to every post. There's a list of positive emojis from which it will pull from, and some easter eggs that show up with fusions featuring specific Pokemon.
+- Added lots of new typos so that Fusion Bot recognizes certain Pokémon names in the gallery even if they're misspelled
+- The filename letter checks as part of the gallery analysis introduced in version 2.5 are disabled as the current implementation had some issues. It will be replaced with an alternative in the future.
+- Autogen sheets have been updated and now all current PIF Pokemon (up to Dragalge) fusions will show an autogen
+- Fix: Avoid analyzing assets gallery posts that get deleted by Yanmega
+
 ## Version 2.5
 - Really beefy **Gallery analysis overhaul** with specific gallery checks. These include:
   * Ensuring that the **correct Pokémon names** appear in the gallery message. Made to prevent misnumbered fusions.

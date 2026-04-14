@@ -1,25 +1,24 @@
 import asyncio
 
 import discord
-from discord import Message, Thread, HTTPException, PartialEmoji, DMChannel, TextChannel
+from discord import Message, Thread, DMChannel, TextChannel
 
-from bot.context.message_identifier import is_assets_gallery
+from bot.context.message_identifier import is_assets_gallery, has_correct_assets_gallery_keywords
 from bot.context.message_identifier import is_message_from_ignored_bots, has_ignored_spritework_tags
 from bot.context.setup import ctx
+from bot.context.user_identifier import user_is_potential_spriter
 from bot.core.analysis import Analysis
 from bot.core.analyzer import send_extra_embeds
 from bot.core.analyzer import send_full_analysis, generate_analysis, send_analysis, generate_gallery_analysis_list
-from bot.core.issues import DifferentSprite
-from bot.misc.enums import AnalysisType, Severity
+from bot.misc.emojis import react_with_emoji
+from bot.misc.enums import AnalysisType, Severity, OptedType
+from bot.misc.exceptions import MisnumberedGalleryID
 from bot.misc.utils import fancy_print, attachment_not_an_image
 from bot.spritework.opt_out_options import is_opted_out_user
 from bot.spritework.spritework_checker import get_spritework_thread_times
-from bot.spritework.tutorial_mode import send_tutorial_mode_prompt, user_is_potential_spriter
+from bot.spritework.tutorial_mode import send_tutorial_mode_prompt
 
-ERROR_EMOJI_NAME = "NANI"
-ERROR_EMOJI_ID = f"<:{ERROR_EMOJI_NAME}:770390673664114689>"
 SPRITE_MANAGER_PING = "<@&900867033175040101>"
-ERROR_EMOJI = PartialEmoji(name=ERROR_EMOJI_NAME).from_str(ERROR_EMOJI_ID)
 
 
 # Handler methods
@@ -31,6 +30,8 @@ async def handle_sprite_gallery(message: Message):
 
 async def handle_assets_gallery(message: Message):
     log_event("Assets  >", message)
+    if not has_correct_assets_gallery_keywords(message):
+        return
     await handle_gallery(message, is_assets=True)
 
 
@@ -39,19 +40,14 @@ async def handle_gallery(message: Message, is_assets: bool = False):
         analysis_type = AnalysisType.assets_gallery
     else:
         analysis_type = AnalysisType.sprite_gallery
-    analysis_list = await generate_gallery_analysis_list(message, analysis_type)
+    try:
+        analysis_list = await generate_gallery_analysis_list(message, analysis_type)
+    except MisnumberedGalleryID as misnumbered_exception:
+        await handle_misnumbered_in_gallery(message, misnumbered_exception)
+        return
     for analysis in analysis_list:
-        if analysis.issues.has_issue(DifferentSprite):
-            await handle_misnumbered_in_gallery(message, analysis)
-            return
-
-        if analysis.severity.is_warn_severity():
-            try:
-                await message.add_reaction(ERROR_EMOJI)
-            except HTTPException:
-                await message.add_reaction("😡")  # Nani failsafe
-
         await send_full_analysis(analysis, ctx().pif.logs, message.author)
+    await react_with_emoji(analysis_list, message)
 
 
 async def handle_zigzag_galpost(message: Message):
@@ -72,7 +68,7 @@ async def handle_zigzag_galpost(message: Message):
     await send_extra_embeds(analysis, channel)
 
 
-async def handle_regular_analysis(message: Message, auto_spritework: bool = False):
+async def handle_regular_analysis(message: Message, auto_spritework: bool = False, reply_text: str|None = None):
     channel = message.channel
     if auto_spritework:
         analysis_type = AnalysisType.auto_spritework
@@ -81,7 +77,7 @@ async def handle_regular_analysis(message: Message, auto_spritework: bool = Fals
     for specific_attachment in message.attachments:
         if attachment_not_an_image(specific_attachment):
             continue
-        analysis = generate_analysis(message, specific_attachment, analysis_type)
+        analysis = generate_analysis(message, specific_attachment, analysis_type, reply_text)
         try:
             await notify_if_ai(analysis, message, analysis_type, channel)
             await send_full_analysis(analysis, channel, message.author)
@@ -123,7 +119,7 @@ async def handle_spritework_post(thread: Thread):
         return
 
     author = spritework_message.author
-    if await is_opted_out_user(author):
+    if await is_opted_out_user(author, OptedType.auto_analysis):
         return
 
     log_event("SprWork >", spritework_message)
@@ -132,6 +128,10 @@ async def handle_spritework_post(thread: Thread):
     if user_is_potential_spriter(author):
         await asyncio.sleep(1)
         await send_tutorial_mode_prompt(author, thread)
+        #return
+
+    #if not await is_opted_out_user(author, OptedType.timestamp):
+        #await send_swablu_timestamp(author, thread)
 
 
 async def handle_reply(message: Message):
@@ -139,7 +139,7 @@ async def handle_reply(message: Message):
     if is_message_from_ignored_bots(reply_message):     # Ignore replies to Fusion Bot messages
         return
     log_event("Reply   >", reply_message)
-    await handle_regular_analysis(reply_message)
+    await handle_regular_analysis(message=reply_message, reply_text=message.content)
 
 
 async def handle_direct_ping(message: Message):
@@ -150,16 +150,7 @@ async def handle_direct_ping(message: Message):
         await handle_ping_without_attachments(message)
 
 
-async def handle_misnumbered_in_gallery(message: Message, analysis: Analysis):
-    misnumbered_issue = None
-    for issue in analysis.issues.issue_list:
-        if isinstance(issue, DifferentSprite):
-            misnumbered_issue = issue
-            break
-
-    if misnumbered_issue is None:
-        return
-
+async def handle_misnumbered_in_gallery(message: Message, exception: MisnumberedGalleryID):
     copied_message = await ctx().pif.logs.send(f"Hi {message.author.mention}, here's your gallery message, you can "
                                                f"copy the block below and it will have the same text you just sent:"
                                                f"\n```{message.content}```")
@@ -167,8 +158,8 @@ async def handle_misnumbered_in_gallery(message: Message, analysis: Analysis):
                                f"Hi {message.author.mention}, \n\nUnfortunately your latest gallery message had a "
                                f"**misnumbered dex id**, either in the message or filename, "
                                f"because they didn't match eachother:\n\n"
-                               f"* **Filename ID: {misnumbered_issue.filename_fusion_id}**\n"
-                               f"* **Message ID: {misnumbered_issue.content_fusion_id}**\n\n"
+                               f"* **Filename ID: {exception.filename_fusion_id}**\n"
+                               f"* **Message ID: {exception.content_fusion_id}**\n\n"
                                f"You can recover and copy your message text at: {copied_message.jump_url} "
                                f"so that you can fix the issue and post it here again.\n\nThank you!",
                                delete_after=20)
