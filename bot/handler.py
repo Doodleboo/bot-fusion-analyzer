@@ -47,8 +47,8 @@ async def handle_gallery(message: Message, is_assets: bool = False):
         await handle_misnumbered_in_gallery(message, misnumbered_exception)
         return
     for analysis in analysis_list:
-        await react_with_emoji(analysis, message)
         await send_full_analysis(analysis, ctx().pif.logs, message.author)
+    await react_with_emoji(analysis_list, message)
 
 
 async def handle_zigzag_galpost(message: Message):

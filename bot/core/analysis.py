@@ -48,6 +48,8 @@ class Analysis:
 
     ai_suspicion: int = 0
 
+    special_gallery_emoji: int = 0
+
     def __init__(self,
                  message:Message,
                  specific_attachment:Attachment|None,
