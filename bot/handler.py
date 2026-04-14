@@ -16,7 +16,6 @@ from bot.misc.exceptions import MisnumberedGalleryID
 from bot.misc.utils import fancy_print, attachment_not_an_image
 from bot.spritework.opt_out_options import is_opted_out_user
 from bot.spritework.spritework_checker import get_spritework_thread_times
-from bot.spritework.swablu_timestamp import send_swablu_timestamp
 from bot.spritework.tutorial_mode import send_tutorial_mode_prompt
 
 SPRITE_MANAGER_PING = "<@&900867033175040101>"
@@ -129,10 +128,10 @@ async def handle_spritework_post(thread: Thread):
     if user_is_potential_spriter(author):
         await asyncio.sleep(1)
         await send_tutorial_mode_prompt(author, thread)
-        return
+        #return
 
-    if not await is_opted_out_user(author, OptedType.timestamp):
-        await send_swablu_timestamp(author, thread)
+    #if not await is_opted_out_user(author, OptedType.timestamp):
+        #await send_swablu_timestamp(author, thread)
 
 
 async def handle_reply(message: Message):
