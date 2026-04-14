@@ -12,6 +12,7 @@ from bot.core.filename_analysis import FusionFilename
 from bot.core.issues import MissingMessageId, UnknownSprite, DifferentFilenameIds, IncorrectGallery, \
     FileName, OutOfDex, PokemonNameNotFound
 from bot.misc import utils
+from bot.misc.emojis import check_for_custom_emoji
 from bot.misc.exceptions import DifferentFusionsInSameGalleryMessage, MisnumberedGalleryID
 
 NAME_MAP: dict[str, str] = utils.id_to_name_map()
@@ -33,6 +34,7 @@ async def main(analysis_list: list[Analysis]):
         return
     pokemon_name_checks(analysis_list)
     await filename_letter_checks(analysis_list)
+    await check_for_custom_emoji(analysis_list[0])
 
 
 def same_id_checks(analysis_list: list[Analysis]):

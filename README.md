@@ -13,6 +13,7 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 ## Version 2.6
 - New opt-out message after the Spritework analysis that shows the **time a sprite can be posted to the gallery** (which is now 18 hours after Spritework in all cases)
 - The **amount of transparent colors** is now counted and displayed separately, as previously they weren't being counted at all (thanks NullnNow!)
+- Fusion Bot will not only be reacting **emojis** to gallery posts with issues, it will react to every post. There's a list of positive emojis from which it will pull from, and some easter eggs that show up with fusions featuring specific Pokemon.
 - Added lots of new typos so that Fusion Bot recognizes certain Pokémon names in the gallery even if they're misspelled
 - The filename letter checks as part of the gallery analysis introduced in version 2.5 are disabled as the current implementation had some issues. It will be replaced with an alternative in the future.
 - Autogen sheets have been updated and now all current PIF Pokemon (up to Dragalge) fusions will show an autogen
