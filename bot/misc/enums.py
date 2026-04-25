@@ -7,6 +7,7 @@ import discord
 class Description(str, Enum):
     missing_file        = "Missing sprite"
     missing_filename    = "Missing filename"
+    more_than_one       = "Multiple images in the same gallery message"
     missing_message_id  = "Missing fusion ID in gallery message"
     different_filenames = "Different fusions in the same gallery message"
     different_fusion_id = "Different IDs"

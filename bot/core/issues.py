@@ -56,6 +56,11 @@ class MissingMessageId(Issue):
     severity = Severity.refused
 
 
+class MoreThanOneImage(Issue):
+    description = Description.more_than_one
+    severity = Severity.controversial
+
+
 class DifferentFilenameIds(Issue):
     description = Description.different_filenames
     severity = Severity.refused

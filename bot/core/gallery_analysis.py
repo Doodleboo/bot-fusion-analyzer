@@ -10,7 +10,7 @@ from bot.core.analysis import Analysis
 from bot.core.content_analysis import handle_dex_verification
 from bot.core.filename_analysis import FusionFilename
 from bot.core.issues import MissingMessageId, UnknownSprite, DifferentFilenameIds, IncorrectGallery, \
-    FileName, OutOfDex, PokemonNameNotFound
+    FileName, OutOfDex, PokemonNameNotFound, MoreThanOneImage
 from bot.misc import utils
 from bot.misc.emojis import check_for_custom_emoji
 from bot.misc.exceptions import DifferentFusionsInSameGalleryMessage, MisnumberedGalleryID
@@ -23,6 +23,7 @@ async def main(analysis_list: list[Analysis]):
     """Does some checks from content_analysis with harsher restrictions and some entirely different checks"""
     if (not analysis_list) or (len(analysis_list) == 0):
         return
+    check_for_multiple_images(analysis_list)
     try:
         same_id_checks(analysis_list)
     except DifferentFusionsInSameGalleryMessage:
@@ -35,6 +36,13 @@ async def main(analysis_list: list[Analysis]):
     pokemon_name_checks(analysis_list)
     await filename_letter_checks(analysis_list)
     await check_for_custom_emoji(analysis_list[0])
+
+
+def check_for_multiple_images(analysis_list: list[Analysis]):
+    if len(analysis_list) == 1:
+        return
+    for analysis in analysis_list[1:]:
+        analysis.add_issue(MoreThanOneImage())
 
 
 def same_id_checks(analysis_list: list[Analysis]):

@@ -10,6 +10,9 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - **NullnNow** contributed with the transparent color count feature
 
 # Changelog
+## Version 2.7
+- A warning for multiple images in the same gallery post, as the bot we use to harvest them for the game can miss sprites in that scenario.
+
 ## Version 2.6
 - New opt-out message after the Spritework analysis that shows the **time a sprite can be posted to the gallery** (which is now 18 hours after Spritework in all cases)
 - The **amount of transparent colors** is now counted and displayed separately, as previously they weren't being counted at all (thanks NullnNow!)
