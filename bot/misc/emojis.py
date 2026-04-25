@@ -40,6 +40,8 @@ RAREST_EMOJI = ":payatest:1315843862555660328"
 
 
 async def react_with_emoji(analysis_list: list[Analysis], message: Message):
+    if not analysis_list:
+        return
     custom_emoji = grab_custom_emoji(analysis_list)
     try:
         await message.add_reaction(custom_emoji)
