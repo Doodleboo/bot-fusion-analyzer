@@ -10,7 +10,7 @@ from bot.context.user_identifier import user_is_potential_spriter
 from bot.core.analysis import Analysis
 from bot.core.analyzer import send_extra_embeds
 from bot.core.analyzer import send_full_analysis, generate_analysis, send_analysis, generate_gallery_analysis_list
-from bot.misc.emojis import react_with_emoji
+from bot.gallery.emojis import react_with_emoji
 from bot.misc.enums import AnalysisType, Severity, OptedType
 from bot.misc.exceptions import MisnumberedGalleryID
 from bot.misc.utils import fancy_print, attachment_not_an_image

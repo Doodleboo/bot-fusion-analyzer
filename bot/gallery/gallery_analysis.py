@@ -11,8 +11,8 @@ from bot.core.content_analysis import handle_dex_verification
 from bot.core.filename_analysis import FusionFilename
 from bot.core.issues import MissingMessageId, UnknownSprite, DifferentFilenameIds, IncorrectGallery, \
     FileName, OutOfDex, PokemonNameNotFound, MoreThanOneImage
+from bot.gallery.emojis import check_for_custom_emoji
 from bot.misc import utils
-from bot.misc.emojis import check_for_custom_emoji
 from bot.misc.exceptions import DifferentFusionsInSameGalleryMessage, MisnumberedGalleryID
 
 NAME_MAP: dict[str, str] = utils.id_to_name_map()

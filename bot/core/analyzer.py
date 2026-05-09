@@ -3,8 +3,9 @@ from discord.message import Message, Attachment
 
 from bot.misc.enums import AnalysisType, OptedType
 from bot.spritework.opt_out_options import HideFeature
-from . import content_analysis, sprite_analysis, gallery_analysis
+from . import content_analysis, sprite_analysis
 from .analysis import Analysis, generate_file_from_image, get_autogen_file
+from ..gallery import gallery_analysis
 from ..misc.utils import attachment_not_an_image
 
 
