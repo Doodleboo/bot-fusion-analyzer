@@ -4,12 +4,12 @@ import os
 import discord
 from discord import app_commands, Thread
 from discord.message import Message
-from discord.user import User
 
 import command_actions
 from bot.context.message_identifier import (is_zigzag_galpost, is_sprite_gallery, is_mentioning_reply,
                                             is_spriter_application, is_message_from_ignored_bots,
                                             is_spritework_post, is_mentioning_bot, is_assets_gallery)
+from bot.context.persistent_item_setup import add_persistent_items
 from bot.context.setup import set_bot_up, ctx
 from bot.handler import (handle_zigzag_galpost, handle_sprite_gallery, handle_assets_gallery,
                          handle_spriter_application, handle_reply, handle_spritework_post, handle_direct_ping)
@@ -40,6 +40,7 @@ async def similar_command(interaction: discord.Interaction, sprite: discord.Atta
 async def on_ready():
     await tree.sync()
     await set_bot_up(bot)
+    add_persistent_items(bot)
     await ctx().doodledoo.logs.send(content="Bot online")
 
 
@@ -82,16 +83,10 @@ async def on_thread_create(thread: Thread):
         raise RuntimeError from message_exception
 
 
-
-def get_user(user_id) -> (User | None):
-    return bot.get_user(user_id)
-
-
 def get_discord_token():
     token_dir = os.path.join(CURRENT_DIR, "..", "token", "discord.txt")
     token = open(token_dir).read().rstrip()
     return token
-
 
 
 if __name__ == "__main__":

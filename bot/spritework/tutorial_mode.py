@@ -1,11 +1,11 @@
 import os
+import re
 from typing import Any
 
-import discord
 from discord import ButtonStyle, Interaction
 from discord import (Member, Thread, TextChannel, DMChannel, SelectOption,
-                     File, Message, HTTPException, Forbidden, NotFound)
-from discord.ui import View, Button, Select, Item
+                     File)
+from discord.ui import View, Button, Select, Item, DynamicItem
 
 from bot.context.setup import ctx
 from bot.misc.utils import fancy_print
@@ -23,117 +23,130 @@ async def send_tutorial_mode_prompt(user: Member, channel: TextChannel|Thread|DM
                    f"Also, make sure that if you edit your sprite, post updates in this same thread, don't "
                    f"create a new one please! Even if the analysis says 'controversial' or 'invalid', you can "
                    f"just edit it to make it valid.")
-    prompt_view = PromptButtonsView(user)
-    view_message = await channel.send(content=prompt_text, view=prompt_view)
-    prompt_view.message = view_message
+    prompt_view = PromptButtonsView(user.id)
+    await channel.send(content=prompt_text, view=prompt_view)
 
 
 # Views
 
 class PromptButtonsView(View):
-    message: Message
-
-    def __init__(self, caller: Member):
-        self.original_caller = caller
-        super().__init__(timeout=3600)   # Prompt gets disabled after an hour
-
-    @discord.ui.button(label="Tutorial Mode", style=ButtonStyle.primary, emoji="✏")
-    async def engage_tutorial_mode(self, interaction: Interaction, _button: Button):
-        if interaction.user.id == self.original_caller.id:
-            fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name, interaction.channel.name,
-                        "Tutorial Mode engaged")
-            tutorial_mode = TutorialMode(self.original_caller)
-            await interaction.response.edit_message(
-                content="**Tutorial Mode**\nSelect a tutorial section from the dropdown below.",
-                view=tutorial_mode)
-            tutorial_mode.message = await interaction.original_response()
-            self.stop()
-        else:
-            await different_user_response(interaction, self.original_caller)
-
-    @discord.ui.button(label="Discard", style=ButtonStyle.secondary)
-    async def discard_tutorial_prompt(self, interaction: Interaction, _button: Button):
-        if interaction.user.id == self.original_caller.id:
-            self.stop()
-            await interaction.message.delete()
-        else:
-            await different_user_response(interaction, self.original_caller)
+    def __init__(self, user_id: int):
+        super().__init__(timeout=None)
+        self.add_item(StartTutorial(user_id))
+        self.add_item(DismissTutorialPrompt(user_id))
 
     async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any], /) -> None:
         await view_error(interaction, error)
-
-    async def on_timeout(self) -> None:
-        for button in self.children:
-            button.disabled = True
-        og_message = self.message
-        if og_message:
-            try:
-                extra_msg = "\nButtons disabled. If you still want to use Tutorial Mode, you can do so with /help"
-                await og_message.edit(content=og_message.content + extra_msg, view=self)
-            except (HTTPException, Forbidden, NotFound, TypeError) as error:
-                error_log = f"Exception {error} while trying to timeout Tutorial prompt"
-                if self.message.thread:
-                    error_log = error_log + f" in {self.message.thread.name}"
-                elif self.message.channel:
-                    error_log = error_log + f" in {self.message.channel.name}"
-                print(error_log)
-        self.stop()
 
 
 class TutorialMode(View):
-    message: Message
-
-    def __init__(self, caller: Member):
-        self.original_caller = caller
-        super().__init__(timeout=36000)  # Tutorial auto-finishes after 10 hours
-        self.add_item(TutorialSelect(self.original_caller))
-
-    @discord.ui.button(label="Exit Tutorial Mode", style=ButtonStyle.secondary)
-    async def exit_tutorial_mode(self, interaction: Interaction, _button: Button):
-        if interaction.user.id == self.original_caller.id:
-            fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name,
-                        interaction.channel.name, "Tutorial Mode finished")
-            await interaction.response.edit_message(content=FINISH_TUTORIAL, view=None, attachments=[])
-            self.stop()
-        else:
-            await different_user_response(interaction, self.original_caller)
+    def __init__(self, user_id: int):
+        super().__init__(timeout=None)
+        self.add_item(TutorialSelect(user_id))
+        self.add_item(ExitTutorial(user_id))
 
     async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any], /) -> None:
         await view_error(interaction, error)
 
-    async def on_timeout(self) -> None:
-        if self.message:
-            try:
-                await self.message.edit(content=FINISH_TUTORIAL, view=None, attachments=[])
-            except (HTTPException, Forbidden, NotFound, TypeError) as error:
-                error_log = f"Exception {error} while trying to timeout Tutorial Mode"
-                if self.message.thread:
-                    error_log = error_log +  f" in {self.message.thread.name}"
-                elif self.message.channel:
-                    error_log = error_log +  f" in {self.message.channel.name}"
-                print(error_log)
-
-        self.stop()
 
 
-class TutorialSelect(Select):
-    def __init__(self, caller: Member):
-        self.original_caller = caller
+# View items
+
+class StartTutorial(DynamicItem[Button], template=r'startTutorial:(?P<id>[0-9]+)'):
+    def __init__(self, user_id: int) -> None:
+        self.user_id: int = user_id
+        super().__init__(
+            Button(label="Tutorial Mode", style=ButtonStyle.primary, emoji="✏", custom_id=f"startTutorial:{user_id}")
+        )
+
+    @classmethod
+    async def from_custom_id(cls, interaction: Interaction, item: Button, match: re.Match[str], /):
+        user_id = int(match['id'])
+        return cls(user_id)
+
+    async def callback(self, interaction: Interaction):
+        if interaction.user.id != self.user_id:
+            await different_user_response(interaction)
+            return
+
+        fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name, interaction.channel.name,
+                    "Tutorial Mode engaged")
+        tutorial_mode = TutorialMode(self.user_id)
+        await interaction.response.edit_message(
+            content="**Tutorial Mode**\nSelect a tutorial section from the dropdown below.",
+            view=tutorial_mode)
+        self.view.stop()
+
+
+class DismissTutorialPrompt(DynamicItem[Button], template=r'dismissTutorialPrompt:(?P<id>[0-9]+)'):
+    def __init__(self, user_id: int) -> None:
+        self.user_id: int = user_id
+        super().__init__(
+            Button(label="Dismiss", style=ButtonStyle.secondary, custom_id=f"dismissTutorialPrompt:{user_id}")
+        )
+
+    @classmethod
+    async def from_custom_id(cls, interaction: Interaction, item: Button, match: re.Match[str], /):
+        user_id = int(match['id'])
+        return cls(user_id)
+
+    async def callback(self, interaction: Interaction):
+        if interaction.user.id != self.user_id:
+            await different_user_response(interaction)
+            return
+
+        self.view.stop()
+        await interaction.message.delete()
+
+
+class ExitTutorial(DynamicItem[Button], template=r'exitTutorial:(?P<id>[0-9]+)'):
+    def __init__(self, user_id: int) -> None:
+        self.user_id: int = user_id
+        super().__init__(
+            Button(label="Exit Tutorial Mode", style=ButtonStyle.secondary, custom_id=f"exitTutorial:{user_id}")
+        )
+
+    @classmethod
+    async def from_custom_id(cls, interaction: Interaction, item: Button, match: re.Match[str], /):
+        user_id = int(match['id'])
+        return cls(user_id)
+
+    async def callback(self, interaction: Interaction):
+        if interaction.user.id != self.user_id:
+            await different_user_response(interaction)
+            return
+
+        fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name,
+                    interaction.channel.name, "Tutorial Mode finished")
+        await interaction.response.edit_message(content=FINISH_TUTORIAL, view=None, attachments=[])
+        self.view.stop()
+
+
+class TutorialSelect(DynamicItem[Select], template=r'tutorialSelect:(?P<id>[0-9]+)'):
+    def __init__(self, user_id: int) -> None:
+        self.user_id: int = user_id
         options = []
         for section_name in sections:
             section = sections[section_name]
             option = SelectOption(label=section.title, description=section.description, value=section_name)
             options.append(option)
-        super().__init__(placeholder="Choose a tutorial section", options=options)
+        super().__init__(
+            Select(placeholder="Choose a tutorial section", options=options, custom_id=f"tutorialSelect:{user_id}")
+        )
+
+    @classmethod
+    async def from_custom_id(cls, interaction: Interaction, item: Select, match: re.Match[str], /):
+        user_id = int(match['id'])
+        return cls(user_id)
 
     async def callback(self, interaction: Interaction):
-        if interaction.user.id != self.original_caller.id:
-            await different_user_response(interaction, self.original_caller)
+        if interaction.user.id != self.user_id:
+            await different_user_response(interaction)
             return
 
-        section = sections[self.values[0]]
+        section = sections[self.item.values[0]]
         if not section:
-            print(f"ERROR: No section found for element: {self.values[0]}")
+            print(f"ERROR: No section found for element: {self.item.values[0]}")
         fancy_print(TUTORIAL_LOG_DECORATOR, interaction.user.name, interaction.channel.name,
                     f"Section: {section.title}")
         full_section = f"**Tutorial Mode: {section.title}**\n\n{section.content}"
@@ -148,8 +161,12 @@ class TutorialSelect(Select):
 
 # View-related functions
 
-async def different_user_response(interaction: Interaction, og_user: Member):
-    response_text = (f"Hi {interaction.user.mention}! That's meant for {og_user.name}, but if you want to use "
+async def different_user_response(interaction: Interaction, og_user: Member = None):
+    if og_user:
+        og_user_name = og_user.name
+    else:
+        og_user_name = 'another user'
+    response_text = (f"Hi {interaction.user.mention}! That's meant for {og_user_name}, but if you want to use "
                      f"the Tutorial Mode yourself, you can use /help in a channel such as "
                      f"<#1031005766359982190> to do so.")
     await interaction.response.send_message(content=response_text, ephemeral=True, delete_after=60)

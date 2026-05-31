@@ -33,8 +33,10 @@ def ctx() -> GlobalContext:
     else:
         raise MissingBotContext
 
+
 def get_bot_id():
     return bot_id
+
 
 def get_bot_client() -> Client | None:
     return bot_client
