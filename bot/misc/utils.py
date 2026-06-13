@@ -10,8 +10,8 @@ from discord.user import User, ClientUser
 
 from .enums import IdType
 
-MAX_DEX_ID = 572    # Dragalge
-AUTOGEN_MAX_ID = 572    # Autogen sheets got updated
+MAX_DEX_ID = 576    # Gastrodon west
+AUTOGEN_MAX_ID = 572    # Dragalge
 NECROZMA_DEX_ID = 450
 
 DEX_ID = r'[1-9]\d{0,2}'

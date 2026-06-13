@@ -3432,6 +3432,30 @@
         "name": "dragalge",
         "typos": ["dragage"],
         "display_name":"Dragalge"
+    },
+    {
+        "id":"573",
+        "name": "shelloseast",
+        "typos": ["shellos e", "shelos e", "shelloss e", "shellos.e", "shellos..e"],
+        "display_name":"Shellos East"
+    },
+    {
+        "id":"574",
+        "name": "gastrodoneast",
+        "typos": ["gastrodon ea", "gastodon ea", "gastrodos ea", "gastrodon.ea", "gastrodon..ea"],
+        "display_name":"Gastrodon East"
+    },
+    {
+        "id":"575",
+        "name": "shelloswest",
+        "typos": ["shellos w", "shelos w", "shelloss w", "shellos.w", "shellos..w"],
+        "display_name":"Shellos West"
+    },
+    {
+        "id":"576",
+        "name": "gastrodonwest",
+        "typos": ["gastrodon w", "gastodon w", "gastrodos w", "gastrodon.w", "gastrodon..w"],
+        "display_name":"Gastrodon West"
     }
 
     ]
