@@ -22,6 +22,7 @@ from bot.spritework.swablu_timestamp import send_swablu_timestamp
 from bot.spritework.tutorial_mode import send_tutorial_mode_prompt
 
 SPRITE_MANAGER_PING = "<@&900867033175040101>"
+BASE_HANDLER_PING = "<@&1503605171849269268>"
 
 
 # Handler methods
@@ -87,6 +88,7 @@ async def handle_regular_analysis(message: Message, auto_spritework: bool = Fals
         analysis = generate_analysis(message, specific_attachment, analysis_type, reply_text)
         try:
             await notify_if_ai(analysis, message, analysis_type, channel)
+            await notify_base_handlers(analysis, message, analysis_type)
             await send_full_analysis(analysis, channel)
         except discord.Forbidden:
             await ctx().doodledoo.debug.send(f"Missing permissions in {channel.name}: {channel.jump_url}")
@@ -255,6 +257,13 @@ async def notify_if_ai(analysis: Analysis, message: Message, analysis_type: Anal
                                    "the users who submit them, without the use of AI at any stage.\n"
                                    "Welcome to the community!")
         await asyncio.sleep(5)
+
+
+async def notify_base_handlers(analysis: Analysis, message: Message, analysis_type: AnalysisType):
+    custom_base_in_spritework = (analysis.fusion_filename and analysis.fusion_filename.id_type.is_custom_base()
+                                 and analysis_type.is_automatic_spritework_analysis())
+    if custom_base_in_spritework:
+        await ctx().pif.ditto.send(f"{BASE_HANDLER_PING} New custom base in Spritework: {message.jump_url}")
 
 
 
