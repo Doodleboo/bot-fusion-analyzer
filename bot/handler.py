@@ -128,16 +128,14 @@ async def handle_spritework_post(thread: Thread):
         return
 
     author = spritework_message.author
-    if await is_opted_out_user(author, OptedType.auto_analysis):
-        return
+    if not await is_opted_out_user(author, OptedType.auto_analysis):
+        log_event("SprWork >", spritework_message)
+        await handle_regular_analysis(message=spritework_message, auto_spritework=True)
 
-    log_event("SprWork >", spritework_message)
-    await handle_regular_analysis(message=spritework_message, auto_spritework=True)
-
-    if user_is_potential_spriter(author):
-        await asyncio.sleep(1)
-        await send_tutorial_mode_prompt(author, thread)
-        return
+        if user_is_potential_spriter(author):
+            await asyncio.sleep(1)
+            await send_tutorial_mode_prompt(author, thread)
+            return
 
     if not await is_opted_out_user(author, OptedType.timestamp):
         await send_swablu_timestamp(author, thread)
