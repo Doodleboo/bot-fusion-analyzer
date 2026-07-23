@@ -10,6 +10,7 @@ class ServerContext():
     debug: Channel
     zigzagoon: Channel
     bot_chat: Channel
+    ditto: Channel
     def __init__(self,
                  server: Guild,
                  sprite: Channel,
@@ -17,7 +18,8 @@ class ServerContext():
                  logs: Channel,
                  debug: Channel,
                  zigzagoon: Channel,
-                 bot_chat: Channel
+                 bot_chat: Channel,
+                 ditto: Channel
                  ) -> None:
         self.server = server
         self.gallery = sprite
@@ -26,6 +28,7 @@ class ServerContext():
         self.debug = debug
         self.zigzagoon = zigzagoon
         self.bot_chat = bot_chat
+        self.ditto = ditto
 
 
 class GlobalContext():

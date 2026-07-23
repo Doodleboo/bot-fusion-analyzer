@@ -7,6 +7,7 @@ from discord.colour import Colour
 from discord.embeds import Embed
 from discord.file import File
 from discord.message import Attachment, Message
+from discord.ui import View
 
 import bot.misc.utils as utils
 from bot.core.filename_analysis import get_filename_from_zigzag_image_url, get_fusion_filename, FusionFilename
@@ -50,6 +51,9 @@ class Analysis:
     ai_suspicion: int = 0
 
     special_gallery_emoji: int = 0
+    can_be_retried: bool = False
+    is_retried_analysis: bool =  False
+    view: View = None
 
     def __init__(self,
                  message: Message,
@@ -97,7 +101,10 @@ class Analysis:
             self.embed.title = f"__{self.severity.value}:__"
 
     def apply_colour(self):
-        self.embed.colour = DICT_SEVERITY_COLOUR.get(self.severity, DiscordColour.gray).value
+        if self.is_retried_analysis and not self.severity.is_warn_severity():
+            self.embed.colour = DiscordColour.blue.value
+        else:
+            self.embed.colour = DICT_SEVERITY_COLOUR.get(self.severity, DiscordColour.gray).value
 
     def apply_description(self):
         self.embed.description = f"{str(self.issues)}\n[Link to message]({self.message.jump_url})"

@@ -957,7 +957,7 @@
     {
         "id": "160",
         "name": "feraligatr",
-        "typos": ["feraligator", "ferlig", "gatr"],
+        "typos": ["feralig", "ferlig", "gatr"],
         "display_name": "Feraligatr"
     },
     {
@@ -2115,7 +2115,7 @@
     {
         "id": "353",
         "name": "drifblim",
-        "typos": ["drifblimp", "driphlim"],
+        "typos": ["drifblimp", "driphlim", "driflim", "driblim"],
         "display_name": "Drifblim"
     },
     {
@@ -2169,7 +2169,7 @@
     {
         "id": "362",
         "name": "cofagrigus",
-        "typos": ["cofagrigous", "cofagregus"],
+        "typos": ["cofagr", "cofrag", "grigus"],
         "display_name": "Cofagrigus"
     },
     {
@@ -2457,7 +2457,7 @@
     {
         "id": "410",
         "name": "krokorok",
-        "typos": [],
+        "typos": ["krookorok"],
         "display_name": "Krokorok"
     },
     {
@@ -2781,13 +2781,13 @@
     {
         "id": "464",
         "name": "lycanrocmidday",
-        "typos": ["lycanrock midday", "lycanroc miday", "lycandock miday", "midday"],
+        "typos": ["lycanrock midday", "lycanroc miday", "lycandock miday", "midday", "lycanroc day"],
         "display_name": "Lycanroc Midday"
     },
     {
         "id": "465",
         "name": "lycanrocmidnight",
-        "typos": ["lycanrock midnight", "midnight"],
+        "typos": ["lycanrock midnight", "midnight", "lycanroc night"],
         "display_name": "Lycanroc Midnight"
     },
     {
@@ -3292,7 +3292,7 @@
     {
         "id":"549",
         "name": "crawdaunt",
-        "typos": ["crawdaugt", "crawdaught", "cradaunt"],
+        "typos": ["crawd", "cradaunt", "clawd"],
         "display_name":"Crawdaunt"
     },
     {
@@ -3412,7 +3412,7 @@
     {
         "id":"569",
         "name": "eelektrik",
-        "typos": ["eelektric", "elektrik", "eelectric", "eelectrik"],
+        "typos": ["eelektric", "elektrik", "eelectric", "eelectrik", "eeletrik"],
         "display_name":"Eelektrik"
     },
     {
@@ -3432,6 +3432,30 @@
         "name": "dragalge",
         "typos": ["dragage"],
         "display_name":"Dragalge"
+    },
+    {
+        "id":"573",
+        "name": "shelloseast",
+        "typos": ["shellos e", "shelos e", "shelloss e", "shellos.e", "shellos..e"],
+        "display_name":"Shellos East"
+    },
+    {
+        "id":"574",
+        "name": "gastrodoneast",
+        "typos": ["gastrodon ea", "gastodon ea", "gastrodos ea", "gastrodon.ea", "gastrodon..ea"],
+        "display_name":"Gastrodon East"
+    },
+    {
+        "id":"575",
+        "name": "shelloswest",
+        "typos": ["shellos w", "shelos w", "shelloss w", "shellos.w", "shellos..w"],
+        "display_name":"Shellos West"
+    },
+    {
+        "id":"576",
+        "name": "gastrodonwest",
+        "typos": ["gastrodon w", "gastodon w", "gastrodos w", "gastrodon.w", "gastrodon..w"],
+        "display_name":"Gastrodon West"
     }
 
     ]

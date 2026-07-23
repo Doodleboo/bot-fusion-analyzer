@@ -55,8 +55,6 @@ class HideFeature(View):
     async def on_timeout(self) -> None:
         if not self.message:
             return
-        if not self.message.embeds:
-            return
         try:
             await self.message.edit(view=None)
         except (HTTPException, Forbidden, NotFound, TypeError) as error:

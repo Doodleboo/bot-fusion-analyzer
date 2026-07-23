@@ -28,6 +28,10 @@ class Issues:
         return any(isinstance(issue, issue_type) for issue in self.issue_list)
 
 
+class RetriedAnalysis(Issue):
+    description = Description.retried_analysis
+    severity = Severity.accepted
+
 
 class DifferentSprite(Issue):
     description = Description.different_fusion_id
@@ -54,6 +58,11 @@ class MissingSprite(Issue):
 class MissingMessageId(Issue):
     description = Description.missing_message_id
     severity = Severity.refused
+
+
+class MoreThanOneImage(Issue):
+    description = Description.more_than_one
+    severity = Severity.controversial
 
 
 class DifferentFilenameIds(Issue):

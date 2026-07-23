@@ -22,6 +22,7 @@ if bot_environment == "local":
     id_channel_zigzagoon    = id_channel_debug_doodledoo
     id_spritework           = 1374857028509503538
     id_bot_chat             = id_channel_logs_doodledoo
+    id_base_handler         = id_channel_debug_doodledoo
 elif bot_environment == "pif":
     id_server_pif           = 302153478556352513
     id_channel_gallery_pif  = 543958354377179176
@@ -32,6 +33,7 @@ elif bot_environment == "pif":
     id_channel_zigzagoon    = 1234176742957121607
     id_spritework           = 1050404143807873157
     id_bot_chat             = 700790080175996938
+    id_base_handler         = 1503605940677640272
 else:
     id_server_pif           = 756264475102937199
     id_channel_gallery_pif  = 1185991301645209610
@@ -42,6 +44,7 @@ else:
     id_channel_zigzagoon    = 1332162874931413104 # zigzag-chatter
     id_spritework           = 1185685268133593118
     id_bot_chat             = 1367184071389614091
+    id_base_handler         = 1367184071389614091
 
 
 class BotContext:
@@ -57,7 +60,8 @@ class BotContext:
             logs      = channel_log_doodledoo,
             debug     = channel_debug_doodledoo,
             zigzagoon = channel_log_doodledoo,
-            bot_chat  = channel_log_doodledoo
+            bot_chat  = channel_log_doodledoo,
+            ditto     = channel_log_doodledoo
         )
 
         server_pif        = get_server_from_id(client, id_server_pif)
@@ -67,6 +71,7 @@ class BotContext:
         channel_debug_pif = get_channel_from_id(server_pif, id_channel_debug_pif)
         channel_zigzagoon = get_channel_from_id(server_pif, id_channel_zigzagoon)
         channel_bot_chat  = get_channel_from_id(server_pif, id_bot_chat)
+        channel_ditto     = get_channel_from_id(server_pif, id_base_handler)
 
         pif_context = ServerContext(
             server    = server_pif,
@@ -75,7 +80,8 @@ class BotContext:
             logs      = channel_log_pif,
             debug     = channel_debug_pif,
             zigzagoon = channel_zigzagoon,
-            bot_chat  = channel_bot_chat
+            bot_chat  = channel_bot_chat,
+            ditto     = channel_ditto
         )
 
         self.context = GlobalContext(

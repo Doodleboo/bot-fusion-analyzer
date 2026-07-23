@@ -10,7 +10,14 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - **NullnNow** contributed with the transparent color count feature
 
 # Changelog
+## Version 2.7
+- **Retry analysis:** Did you misspell a Pokemon name, or forget to put the IDs? Just edit your gallery message and press that retry button.
+- Zigzag gallery posts will now also get some emoji love
+- Spriters who have opted out of the Spritework automatic analysis can now still choose to have the 18 hours timestamp show up
+- A warning for multiple images in the same gallery post, as the bot we use to harvest them for the game can miss sprites in that scenario.
+
 ## Version 2.6
+- New opt-out message after the Spritework analysis that shows the **time a sprite can be posted to the gallery** (which is now 18 hours after Spritework in all cases)
 - The **amount of transparent colors** is now counted and displayed separately, as previously they weren't being counted at all (thanks NullnNow!)
 - Fusion Bot will not only be reacting **emojis** to gallery posts with issues, it will react to every post. There's a list of positive emojis from which it will pull from, and some easter eggs that show up with fusions featuring specific Pokemon.
 - Added lots of new typos so that Fusion Bot recognizes certain Pokémon names in the gallery even if they're misspelled
