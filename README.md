@@ -11,6 +11,8 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 
 # Changelog
 ## Version 2.7
+- **Retry analysis:** Did you misspell a Pokemon name, or forget to put the IDs? Just edit your gallery message and press that retry button.
+- Zigzag gallery posts will now also get some emoji love
 - A warning for multiple images in the same gallery post, as the bot we use to harvest them for the game can miss sprites in that scenario.
 
 ## Version 2.6

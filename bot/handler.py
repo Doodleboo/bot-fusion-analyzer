@@ -71,6 +71,8 @@ async def handle_zigzag_galpost(message: Message):
     else:
         channel = ctx().pif.logs
     await send_full_analysis(analysis, channel)
+    if analysis.severity != Severity.refused:
+        await react_with_emoji([analysis], message)
 
 
 async def handle_regular_analysis(message: Message, auto_spritework: bool = False, reply_text: str|None = None):
