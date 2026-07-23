@@ -21,7 +21,7 @@ def user_is_potential_spriter(user: User|Member) -> bool:
     return True
 
 
-def user_is_spriter(user: User|Member) -> bool:
+def user_is_sprite_manager(user: User | Member) -> bool:
     if not isinstance(user, Member):
         return False
-    return SPRITER_ROLE_ID in user.roles
+    return MANAGER_ROLE_ID in user.roles

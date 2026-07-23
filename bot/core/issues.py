@@ -28,6 +28,10 @@ class Issues:
         return any(isinstance(issue, issue_type) for issue in self.issue_list)
 
 
+class RetriedAnalysis(Issue):
+    description = Description.retried_analysis
+    severity = Severity.accepted
+
 
 class DifferentSprite(Issue):
     description = Description.different_fusion_id

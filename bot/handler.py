@@ -1,15 +1,17 @@
 import asyncio
+import re
+from typing import Any
 
 import discord
-from discord import Message, Thread, DMChannel, TextChannel
+from discord import ButtonStyle, Interaction, Message, Thread, DMChannel, TextChannel
+from discord.ui import View, Button, DynamicItem, Item
 
-from bot.context.message_identifier import is_assets_gallery, has_correct_assets_gallery_keywords
-from bot.context.message_identifier import is_message_from_ignored_bots, has_ignored_spritework_tags
+from bot.context.message_identifier import (is_assets_gallery as assets_check, has_correct_assets_gallery_keywords,
+                                            is_message_from_ignored_bots, has_ignored_spritework_tags)
 from bot.context.setup import ctx
-from bot.context.user_identifier import user_is_potential_spriter
+from bot.context.user_identifier import user_is_potential_spriter, user_is_sprite_manager
 from bot.core.analysis import Analysis
-from bot.core.analyzer import send_extra_embeds
-from bot.core.analyzer import send_full_analysis, generate_analysis, send_analysis, generate_gallery_analysis_list
+from bot.core.analyzer import send_full_analysis, generate_analysis, generate_gallery_analysis_list
 from bot.gallery.emojis import react_with_emoji
 from bot.misc.enums import AnalysisType, Severity, OptedType
 from bot.misc.exceptions import MisnumberedGalleryID
@@ -26,28 +28,31 @@ SPRITE_MANAGER_PING = "<@&900867033175040101>"
 
 async def handle_sprite_gallery(message: Message):
     log_event("Gallery >", message)
-    await handle_gallery(message, is_assets=False)
+    await handle_gallery(message, AnalysisType.sprite_gallery)
 
 
 async def handle_assets_gallery(message: Message):
     log_event("Assets  >", message)
     if not has_correct_assets_gallery_keywords(message):
         return
-    await handle_gallery(message, is_assets=True)
+    await handle_gallery(message, AnalysisType.assets_gallery)
 
 
-async def handle_gallery(message: Message, is_assets: bool = False):
-    if is_assets:
-        analysis_type = AnalysisType.assets_gallery
-    else:
-        analysis_type = AnalysisType.sprite_gallery
+async def handle_retried_analysis(message: Message, analysis_type: AnalysisType):
+    log_event("Retry   >", message)
+    await handle_gallery(message, analysis_type, retried_analysis=True)
+
+
+async def handle_gallery(message: Message, analysis_type: AnalysisType, retried_analysis: bool = False):
     try:
-        analysis_list = await generate_gallery_analysis_list(message, analysis_type)
+        analysis_list = await generate_gallery_analysis_list(message, analysis_type, retried_analysis)
     except MisnumberedGalleryID as misnumbered_exception:
         await handle_misnumbered_in_gallery(message, misnumbered_exception)
         return
     for analysis in analysis_list:
-        await send_full_analysis(analysis, ctx().pif.logs, message.author)
+        if analysis.can_be_retried:
+            analysis.view = RetryView(message.author.id, analysis_type, message.id)
+        await send_full_analysis(analysis, ctx().pif.logs)
     await react_with_emoji(analysis_list, message)
 
 
@@ -55,7 +60,7 @@ async def handle_zigzag_galpost(message: Message):
     embed = message.embeds[0]
     fancy_print("Zigzag  >", embed.author.name, message.channel.name, embed.title)
 
-    if is_assets_gallery(message):
+    if assets_check(message):
         analysis_type = AnalysisType.zigzag_base
     else:
         analysis_type = AnalysisType.zigzag_fusion
@@ -65,8 +70,7 @@ async def handle_zigzag_galpost(message: Message):
         channel = ctx().pif.zigzagoon
     else:
         channel = ctx().pif.logs
-    await send_analysis(analysis, channel)
-    await send_extra_embeds(analysis, channel)
+    await send_full_analysis(analysis, channel)
 
 
 async def handle_regular_analysis(message: Message, auto_spritework: bool = False, reply_text: str|None = None):
@@ -81,7 +85,7 @@ async def handle_regular_analysis(message: Message, auto_spritework: bool = Fals
         analysis = generate_analysis(message, specific_attachment, analysis_type, reply_text)
         try:
             await notify_if_ai(analysis, message, analysis_type, channel)
-            await send_full_analysis(analysis, channel, message.author)
+            await send_full_analysis(analysis, channel)
         except discord.Forbidden:
             await ctx().doodledoo.debug.send(f"Missing permissions in {channel.name}: {channel.jump_url}")
 
@@ -249,3 +253,78 @@ async def notify_if_ai(analysis: Analysis, message: Message, analysis_type: Anal
                                    "the users who submit them, without the use of AI at any stage.\n"
                                    "Welcome to the community!")
         await asyncio.sleep(5)
+
+
+
+### RETRY BUTTONS CODE (it needs to be here to avoid circular imports)
+
+class RetryView(View):
+    def __init__(self, user_id: int, analysis_type: AnalysisType, message_id: int):
+        super().__init__(timeout=None)
+        self.add_item(RetryButton(user_id, analysis_type.value, message_id))
+        self.add_item(DismissRetry(user_id))
+
+    async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any], /) -> None:
+        await ctx().doodledoo.debug.send(f"RETRY ERROR in {interaction.channel} ({interaction.channel.jump_url})\n")
+        raise RuntimeError from error
+
+
+class RetryButton(DynamicItem[Button],
+                  template=r'retry:(?P<userId>[0-9]+):(?P<gallery>[0-9]):(?P<messageId>[0-9]+)'):
+    def __init__(self, user_id: int, gallery: int, message_id: int) -> None:
+        self.user_id: int = user_id
+        self.gallery = gallery
+        self.is_assets_gallery = (gallery == AnalysisType.assets_gallery.value)
+        self.message_id = message_id
+        super().__init__(
+            Button(label="Retry analysis (use after you've edited the message)", style=ButtonStyle.primary,
+                   emoji="♻", custom_id=f"retry:{user_id}:{gallery}:{message_id}")
+        )
+
+    @classmethod
+    async def from_custom_id(cls, interaction: Interaction, item: Button, match: re.Match[str], /):
+        user_id = int(match['userId'])
+        gallery = int(match['gallery'])
+        message_id = int(match['messageId'])
+        return cls(user_id, gallery, message_id)
+
+    async def interaction_check(self, interaction: Interaction) -> bool:
+        return is_analyzed_user_or_sprite_manager(self.user_id, interaction)
+
+    async def callback(self, interaction: Interaction):
+        gallery_message = await grab_gallery_message(self.is_assets_gallery, self.message_id)
+        await handle_retried_analysis(gallery_message, AnalysisType(self.gallery))
+        self.view.stop()
+        await interaction.message.edit(content="**Analysis retried successfully below**", view=None)
+
+
+class DismissRetry(DynamicItem[Button], template=r'dismissRetry:(?P<id>[0-9]+)'):
+    def __init__(self, user_id: int) -> None:
+        self.user_id: int = user_id
+        super().__init__(
+            Button(label="Dismiss", style=ButtonStyle.secondary, custom_id=f"dismissRetry:{user_id}")
+        )
+
+    async def interaction_check(self, interaction: Interaction) -> bool:
+        return is_analyzed_user_or_sprite_manager(self.user_id, interaction)
+
+    @classmethod
+    async def from_custom_id(cls, interaction: Interaction, item: Button, match: re.Match[str], /):
+        user_id = int(match['id'])
+        return cls(user_id)
+
+    async def callback(self, interaction: Interaction):
+        self.view.stop()
+        await interaction.message.edit(view=None)
+
+
+def is_analyzed_user_or_sprite_manager(og_user_id: int, interaction: Interaction) -> bool:
+    return (interaction.user.id == og_user_id) or (user_is_sprite_manager(interaction.user))
+
+
+async def grab_gallery_message(is_assets_gallery: bool, message_id: int) -> Message:
+    if is_assets_gallery:
+        channel = ctx().pif.assets
+    else:
+        channel = ctx().pif.gallery
+    return await channel.fetch_message(message_id)

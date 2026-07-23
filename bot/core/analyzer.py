@@ -1,10 +1,11 @@
-from discord import User, TextChannel, Thread, DMChannel
+from discord import TextChannel, Thread, DMChannel
 from discord.message import Message, Attachment
 
 from bot.misc.enums import AnalysisType, OptedType
 from bot.spritework.opt_out_options import HideFeature
 from . import content_analysis, sprite_analysis
 from .analysis import Analysis, generate_file_from_image, get_autogen_file
+from .issues import RetriedAnalysis
 from ..gallery import gallery_analysis
 from ..misc.utils import attachment_not_an_image
 
@@ -24,7 +25,8 @@ def generate_analysis(
 
 async def generate_gallery_analysis_list(
         message: Message,
-        analysis_type: AnalysisType|None = None) -> list[Analysis]:
+        analysis_type: AnalysisType|None = None,
+        retried_analysis: bool = False) -> list[Analysis]:
 
     if message.attachments is None:
         return no_attachment_analysis(message, analysis_type)
@@ -34,11 +36,16 @@ async def generate_gallery_analysis_list(
         if attachment_not_an_image(attachment):
             continue
         analysis = Analysis(message, attachment, analysis_type)
+        if retried_analysis:
+            analysis.is_retried_analysis = True
+            analysis.add_issue(RetriedAnalysis())
         analysis_list.append(analysis)
 
     await gallery_analysis.main(analysis_list)
 
     for analysis in analysis_list:
+        if analysis.severity.is_warn_severity():
+            analysis.can_be_retried = True  # It can be retried if it has content/message issues
         sprite_analysis.main(analysis)
         analysis.generate_embed()
 
@@ -56,12 +63,8 @@ def no_attachment_analysis(
 # Methods to send messages in #fusion-bot
 
 async def send_full_analysis(analysis: Analysis,
-                             channel: TextChannel|Thread|DMChannel,
-                             author: User):
-    if analysis.severity.is_warn_severity() and analysis.type.is_gallery():
-        await send_analysis(analysis, channel, author)
-    else:
-        await send_analysis(analysis, channel)
+                             channel: TextChannel|Thread|DMChannel):
+    await send_analysis(analysis, channel)
     await send_extra_embeds(analysis, channel)
 
 
@@ -80,15 +83,16 @@ async def send_extra_embeds(analysis: Analysis,
 
 
 async def send_analysis(analysis: Analysis,
-                        channel: TextChannel|Thread|DMChannel,
-                        author: User|None = None):
-    if author:
-        ping_owner = author.mention
+                        channel: TextChannel|Thread|DMChannel):
+    if analysis.severity.is_warn_severity() and analysis.type.is_gallery():
+        ping_owner = analysis.message.author.mention
     else:
         ping_owner = None
 
     if analysis.type.is_automatic_spritework_analysis():
         buttons_view = HideFeature(analysis.message.author, OptedType.auto_analysis)
+    elif analysis.type.is_gallery() and analysis.can_be_retried:
+        buttons_view = analysis.view
     else:
         buttons_view = None
 

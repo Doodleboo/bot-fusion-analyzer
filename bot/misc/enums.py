@@ -5,6 +5,7 @@ import discord
 
 # NOTE: This should probably be a StrEnum instead.
 class Description(str, Enum):
+    retried_analysis    = "Retried analysis"
     missing_file        = "Missing sprite"
     missing_filename    = "Missing filename"
     more_than_one       = "Multiple images in the same gallery message"
@@ -54,6 +55,7 @@ class DiscordColour(Enum):
     red     = discord.Colour(0xe74c3c)
     gray    = discord.Colour(0xcdcdcd)
     pink    = discord.Colour(0xff00ff)
+    blue    = discord.Colour(0x3498DB)
 
 
 class AnalysisType(Enum):

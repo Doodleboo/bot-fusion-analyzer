@@ -6,6 +6,7 @@ from bot.context.setup import ctx
 from bot.core.analysis import Analysis
 
 ERROR_EMOJI = ":NANI:770390673664114689"
+ERROR_FALLBACK_EMOJI = "😡"
 GOOD_EMOJIS = [":HeartMail:901794946967801896", ":ohyes:686653537911832661", "❤️", ":Venopog:1011728739073261638",
                ":allthethings:308453755672592384", ":oddlove:1095144043194892298", ":spheal_pog:1445961061378560040",
                ":slowdab:1054688142646583326", ":smilemeowth:763742948860887050", ":LETSTATICGO:1165798800653303869"]
@@ -40,9 +41,35 @@ SPECIAL_EMOJIS = {
     544: "🌙",
     545: "🌞",
     556: "🍌",
-    559: ":spheal_pog:1445961061378560040"
+    559: ":spheal_pog:1445961061378560040",
+    574: "🐌",
+    576: "🐌"
 }
 RAREST_EMOJI = ":payatest:1315843862555660328"
+
+
+async def replace_emoji(analysis_list: list[Analysis], message: Message):
+    if retried_analysis_has_errors(analysis_list):
+        return
+    await remove_error_emoji(message)
+    await react_with_emoji(analysis_list, message)
+
+
+def retried_analysis_has_errors(analysis_list: list[Analysis]) -> bool:
+    for analysis in analysis_list:
+        if analysis.severity.is_warn_severity():
+            return True
+    return False
+
+
+async def remove_error_emoji(message: Message):
+    for reaction in message.reactions:
+        if reaction.emoji == ERROR_EMOJI:
+            await message.clear_reaction(ERROR_EMOJI)
+            return
+        if reaction.emoji == ERROR_FALLBACK_EMOJI:
+            await message.clear_reaction(ERROR_FALLBACK_EMOJI)
+            return
 
 
 async def react_with_emoji(analysis_list: list[Analysis], message: Message):
@@ -86,5 +113,5 @@ def grab_custom_emoji(analysis_list: list[Analysis]) -> str:
 def grab_fallback_emoji(analysis_list: list[Analysis]) -> str:
     for analysis in analysis_list:
         if analysis.severity.is_warn_severity():
-            return "😡"
+            return ERROR_FALLBACK_EMOJI
     return "❤️"
