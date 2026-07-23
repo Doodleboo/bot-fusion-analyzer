@@ -12,7 +12,7 @@ from bot.context.setup import ctx
 from bot.context.user_identifier import user_is_potential_spriter, user_is_sprite_manager
 from bot.core.analysis import Analysis
 from bot.core.analyzer import send_full_analysis, generate_analysis, generate_gallery_analysis_list
-from bot.gallery.emojis import react_with_emoji
+from bot.gallery.emojis import react_with_emoji, replace_emoji
 from bot.misc.enums import AnalysisType, Severity, OptedType
 from bot.misc.exceptions import MisnumberedGalleryID
 from bot.misc.utils import fancy_print, attachment_not_an_image
@@ -54,7 +54,10 @@ async def handle_gallery(message: Message, analysis_type: AnalysisType, retried_
         if analysis.can_be_retried:
             analysis.view = RetryView(message.author.id, analysis_type, message.id)
         await send_full_analysis(analysis, ctx().pif.logs)
-    await react_with_emoji(analysis_list, message)
+    if retried_analysis:
+        await replace_emoji(analysis_list, message)
+    else:
+        await react_with_emoji(analysis_list, message)
 
 
 async def handle_zigzag_galpost(message: Message):
