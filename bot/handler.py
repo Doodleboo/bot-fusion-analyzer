@@ -289,7 +289,7 @@ class RetryButton(DynamicItem[Button],
         self.is_assets_gallery = (gallery == AnalysisType.assets_gallery.value)
         self.message_id = message_id
         super().__init__(
-            Button(label="Retry analysis (use after you've edited the message)", style=ButtonStyle.primary,
+            Button(label="Retry analysis (use after you've edited the message)", style=ButtonStyle.primary, # type: ignore
                    emoji="♻", custom_id=f"retry:{user_id}:{gallery}:{message_id}")
         )
 
@@ -304,9 +304,9 @@ class RetryButton(DynamicItem[Button],
         return is_analyzed_user_or_sprite_manager(self.user_id, interaction)
 
     async def callback(self, interaction: Interaction):
+        await interaction.response.defer()  # type: ignore
         gallery_message = await grab_gallery_message(self.is_assets_gallery, self.message_id)
         await handle_retried_analysis(gallery_message, AnalysisType(self.gallery))
-        self.view.stop()
         await interaction.message.edit(content="**Analysis retried successfully below**", view=None)
 
 
@@ -314,7 +314,7 @@ class DismissRetry(DynamicItem[Button], template=r'dismissRetry:(?P<id>[0-9]+)')
     def __init__(self, user_id: int) -> None:
         self.user_id: int = user_id
         super().__init__(
-            Button(label="Dismiss", style=ButtonStyle.secondary, custom_id=f"dismissRetry:{user_id}")
+            Button(label="Dismiss", style=ButtonStyle.secondary, custom_id=f"dismissRetry:{user_id}")   # type: ignore
         )
 
     async def interaction_check(self, interaction: Interaction) -> bool:
@@ -326,8 +326,7 @@ class DismissRetry(DynamicItem[Button], template=r'dismissRetry:(?P<id>[0-9]+)')
         return cls(user_id)
 
     async def callback(self, interaction: Interaction):
-        self.view.stop()
-        await interaction.message.edit(view=None)
+        await interaction.response.edit_message(view=None)  # type: ignore
 
 
 def is_analyzed_user_or_sprite_manager(og_user_id: int, interaction: Interaction) -> bool:
