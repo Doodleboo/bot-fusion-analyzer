@@ -5,7 +5,8 @@ from discord import Message, HTTPException
 from bot.context.setup import ctx
 from bot.core.analysis import Analysis
 
-ERROR_EMOJI = ":NANI:770390673664114689"
+ERROR_EMOJI_ID = 770390673664114689
+ERROR_EMOJI = f":NANI:{ERROR_EMOJI_ID}"
 ERROR_FALLBACK_EMOJI = "😡"
 GOOD_EMOJIS = [":HeartMail:901794946967801896", ":ohyes:686653537911832661", "❤️", ":Venopog:1011728739073261638",
                ":allthethings:308453755672592384", ":oddlove:1095144043194892298", ":spheal_pog:1445961061378560040",
@@ -64,7 +65,7 @@ def retried_analysis_has_errors(analysis_list: list[Analysis]) -> bool:
 
 async def remove_error_emoji(message: Message):
     for reaction in message.reactions:
-        if reaction.emoji == ERROR_EMOJI:
+        if reaction.emoji.id == ERROR_EMOJI_ID:
             await message.clear_reaction(ERROR_EMOJI)
             return
         if reaction.emoji == ERROR_FALLBACK_EMOJI:
