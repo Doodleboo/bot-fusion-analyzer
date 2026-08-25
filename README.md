@@ -71,3 +71,13 @@ Discord bot, provides feedback on custom sprites for the game [Pokémon Infinite
 - **Assets gallery support** for custom bases, which will also display their pokemon name in the analysis.
 - **High similarity warnings** and different similarity and color count restrictions, depending on if it's a fusion or custom base.
 - Fix: the bot won't flip out when a single message has multiple different fusion with their IDs in the message
+
+# Privacy Policy
+
+Here is a complete list of information that Fusion Bot stores based on user engagement with it:
+- By triggering the Fusion Bot analysis or commands, a small log is printed to console indicating the specific action that was used, for debugging purposes, and a small excerpt of the message content.
+- By explictly opting in or out of specific opt-in or opt-out features, the user ID, also called snowflafe, is stored on a file. This user ID is public and only stored to identify which users have opted out of specific features, or conversely, have opted into them.
+
+Fusion Bot does *not* store any of the following information:
+- User information other than public user IDs
+- Spriter-made images, or any images that are analyzed through the bot
